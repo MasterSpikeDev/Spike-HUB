@@ -4,8 +4,8 @@ window.POSTS = [
     {
         title: { pt: "Sheikah Legacy - Mapa de Zelda", en: "Sheikah Legacy - Zelda Map" },
         desc: {
-            pt: "Bem-vindo ao Sheikah Legacy! 🌟Mergulhe em uma aventura épica no mundo de Hyrule, meticulosamente recriada no Minecraft Bedrock. Em ''Sheikah Legacy'', você terá acesso a uma variedade de poderes por meio do Sheikah Slate, um sistema de escalada inovador, parapente, masmorras desafiadoras e chefes formidáveis.",
-            en: "Welcome to Sheikah Legacy! 🌟Dive into an epic adventure set in the world of Hyrule, meticulously recreated in Minecraft Bedrock. In ''Sheikah Legacy'', you'll gain access to a variety of powers through the Sheikah Slate, an innovative climbing system, paragliding, challenging dungeons, and formidable bosses."
+            pt: "Bem-vindo ao Sheikah Legacy! Mergulhe em uma aventura épica no mundo de Hyrule",
+            en: "Welcome to Sheikah Legacy! Dive into an epic adventure set in the world of Hyrule"
         },
         img: "assets/portfolio/post1.jpg",
         links: [
@@ -16,10 +16,23 @@ window.POSTS = [
         ]
     },
     {
+        title: { pt: "Freelancer: Vibrant Adventures", en: "Freelance: Vibrant Adventures" },
+        desc: {
+            pt: "Explore um mundo repleto de cores e vida.",
+            en: "Explore a World Bursting with Color and Life"
+        },
+        img: "assets/portfolio/post4.png",
+        links: [
+            { label: { pt: "Eternal Creations", en: "Eternal Creations" }, href: "https://eternalcreations.games/games/vibrant-adventures" }
+
+        ],
+        videos: []
+    },
+    {
         title: { pt: "Freelancer: BiomeCraft", en: "Freelance: BiomeCraft" },
         desc: {
-            pt: "Expanda seu mundo com os quatro biomas de tirar o fôlego do BiomeCraft e dois clássicos reinventados. Sequoias imponentes, florestas tropicais carregadas de névoa, pradarias douradas e savanas áridas pelo sol transbordam de blocos personalizados e cenários inéditos.",
-            en: "Expand your world with BiomeCraft’s four breathtaking biomes and two re-imagined classics. Towering redwoods, mist-laden rainforests, golden prairies, and sun-parched veldts each overflow with bespoke blocks and fresh scenery."
+            pt: "Expanda seu mundo com os quatro biomas de tirar o fôlego do BiomeCraft e dois clássicos reinventados.",
+            en: "Expand your world with BiomeCraft’s four breathtaking biomes and two re-imagined classics. "
         },
         img: "assets/portfolio/post2.jpg",
         links: [
@@ -38,6 +51,32 @@ window.POSTS = [
         img: "assets/portfolio/post3.jpg",
         links: [
             { label: { pt: "Eternal Creations", en: "Eternal Creations" }, href: "https://eternalcreations.games/games/better-structures" }
+
+        ],
+        videos: []
+    },
+    {
+        title: { pt: "Freelancer: More Enchants", en: "Freelance: More Enchants" },
+        desc: {
+            pt: "Encantamentos, encantamentos, encantamentos!",
+            en: "Enchantments, enchantments, enchantmens!"
+        },
+        img: "assets/portfolio/post5.png",
+        links: [
+            { label: { pt: "Eternal Creations", en: "Eternal Creations" }, href: "https://eternalcreations.games/games/more-enchants" }
+
+        ],
+        videos: []
+    },
+    {
+        title: { pt: "Freelancer: More Utilities", en: "Freelance: More Utilities" },
+        desc: {
+            pt: "Melhore sua experiência de sobrevivência.",
+            en: "Upgrade your Survival Experience."
+        },
+        img: "assets/portfolio/post6.png",
+        links: [
+            { label: { pt: "Eternal Creations", en: "Eternal Creations" }, href: "https://eternalcreations.games/games/more-utilities" }
 
         ],
         videos: []
