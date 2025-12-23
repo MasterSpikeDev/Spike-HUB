@@ -1,379 +1,805 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Ghost — Oficial</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spike Hub</title>
+  <meta name="description" content="Bio global com dois estados: principal e sobre mim." />
+  <style>
+    :root {
+      --bg: #0b0b0c;
+      --card: #141416;
+      --text: #e5e7eb;
+      --muted: #9aa0a6;
+      --border: #26272b;
+      --accent: #60a5fa;
+      --bg-main-image: url('assets/background/bg-main.jpg');
+      --bg-about-image: url('assets/background/bg-about.jpg');
+      --bg-portfolio-image: url('assets/background/bg-portfolio.jpg');
+      --bg-opacity: 1;
+      --bg-blur: 2px;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #fafafa;
+        --card: #fff;
+        --text: #111827;
+        --muted: #536471;
+        --border: #e5e7eb;
+        --accent: #2563eb
+      }
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%
+    }
+
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100dvh;
+      overflow-x: hidden
+    }
+
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      filter: blur(var(--bg-blur));
+      transition: opacity .5s ease;
+      z-index: 0
+    }
+
+    #bg-main {
+      background-image: var(--bg-main-image)
+    }
+
+    #bg-about {
+      background-image: var(--bg-about-image)
+    }
+
+    #bg-portfolio {
+      background-image: var(--bg-portfolio-image)
+    }
+
+    body[data-view="main"] #bg-main {
+      opacity: var(--bg-opacity)
+    }
+
+    body[data-view="about"] #bg-about {
+      opacity: var(--bg-opacity)
+    }
+
+    body[data-view="portfolio"] #bg-portfolio {
+      opacity: var(--bg-opacity)
+    }
+
+    .shell {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px;
+      position: relative;
+      z-index: 1
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: flex-end
+    }
+
+    .lang {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px 10px;
+      background: var(--card);
+      /* antes era transparent */
+      color: var(--text);
+    }
+
+    .lang select {
+      appearance: none;
+      background: transparent;
+      border: none;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+
+
+    .card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, 0)), var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .15);
+      transition: transform .4s ease, opacity .4s ease;
+      position: relative;
+      z-index: 1
+    }
+
+    .main-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 160px 1fr;
+      align-items: center
+    }
+
+    @media (max-width:780px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+        text-align: center
+      }
+    }
+
+    .avatar {
+      width: 160px;
+      height: 160px;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #222;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, .25);
+      margin: auto;
+      transition: transform .4s ease
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block
+    }
+
+    .nickname {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: .2px
+    }
+
+    .realname {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: .2px;
+      display: none
+    }
+
+    .headline {
+      color: var(--muted);
+      margin-top: 6px;
+      display: none
+    }
+
+    .about-text {
+      line-height: 1.7;
+      font-size: 1.05rem;
+      margin-top: 10px;
+      display: none
+    }
+
+    .links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-top: 14px
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0));
+      transition: transform .2s ease;
+      cursor: pointer
+    }
+
+    .btn:hover {
+      transform: translateY(-1px)
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .2s ease
+    }
+
+    .pill:hover {
+      outline: 2px solid color-mix(in oklab, var(--accent) 60%, white 0%);
+      outline-offset: 2px;
+      transform: translateY(-1px)
+    }
+
+    footer {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: .9rem;
+      text-align: center
+    }
+
+    /* ===== Seções ===== */
+    #section-portfolio {
+      display: none
+    }
+
+    body[data-view="portfolio"] #section-main {
+      display: none
+    }
+
+    body[data-view="portfolio"] #section-portfolio {
+      display: block
+    }
+
+    body[data-view="about"] .nickname {
+      display: none
+    }
+
+    body[data-view="about"] .realname {
+      display: block
+    }
+
+    body[data-view="about"] .headline {
+      display: block
+    }
+
+    body[data-view="about"] .about-text {
+      display: block
+    }
+
+    body[data-view="about"] .links {
+      display: none
+    }
+
+    body[data-view="about"] .avatar {
+      transform: scale(1.02)
+    }
+
+    .portfolio-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap
+    }
+
+    .portfolio-title {
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: .2px
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 12px
+    }
+
+    .p-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, 0))
+    }
+
+    /* Imagem inteira visível, proporção consistente */
+    .p-media {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16/9;
+      object-fit: contain;
+      display: block;
+      background: #111
+    }
+
+    .p-body {
+      padding: 12px
+    }
+
+    .p-title {
+      font-weight: 800;
+      margin: 0 0 6px;
+      font-size: 1.05rem
+    }
+
+    .p-desc {
+      color: var(--muted);
+      font-size: .95rem;
+      line-height: 1.5
+    }
+
+    .p-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 700
+    }
+
+    /* ===== Modal de Contato ===== */
+    .modal-backdrop[hidden] {
+      display: none !important
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, .5);
+      backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal {
+      position: relative;
+      width: min(520px, 100%);
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+      padding: 18px 18px 14px;
+      animation: pop .15s ease-out;
+    }
+
+    @keyframes pop {
+      from {
+        transform: scale(.98);
+        opacity: .7
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    .modal h3 {
+      margin: 4px 8px 8px;
+      font-size: 1.2rem;
+      font-weight: 900
+    }
+
+    .contact-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 6px
+    }
+
+    .contact-list a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, 0));
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 34px;
+      height: 34px;
+      line-height: 32px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 700;
+    }
+  </style>
 </head>
 
-<body>
+<body data-view="main">
+  <!-- BACKGROUNDS -->
+  <div id="bg-main" class="bg-layer" aria-hidden="true"></div>
+  <div id="bg-about" class="bg-layer" aria-hidden="true"></div>
+  <div id="bg-portfolio" class="bg-layer" aria-hidden="true"></div>
 
-    <!-- HEADER -->
-    <header>
-        <div class="logo">
-            <i class="fas fa-ghost"></i>
-            <h1>Project Ghost</h1>
-        </div>
-        <nav>
-            <a href="#inicio">Início</a>
-            <a href="#" id="nav-ler">Ler</a>
-            <a href="#" id="nav-personagens">Personagens</a>
-            <a href="#" id="nav-extras">Artes</a>
-            <a href="#curiosidades">Curiosidades</a>
-        </nav>
-    </header>
+  <div class="shell">
+    <div class="topbar">
+      <label class="lang">
+        <select id="lang">
+          <option value="auto">🌐 Auto</option>
+          <option value="en">🇺🇸 English</option>
+          <option value="pt">🇧🇷 Português</option>
+        </select>
+      </label>
+    </div>
 
-    <!-- HERO -->
-    <section id="inicio" class="hero" style="background: 
-    radial-gradient(circle at 20% 50%, rgba(185, 0, 0, 0.093) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(170, 59, 0, 0.098) 0%, transparent 50%),
-    linear-gradient(rgba(5, 5, 10, 0.9), rgba(10, 10, 20, 0.9)), 
-    url('assets/images/website/background_main2.png'); 
-    background-size: cover; 
-    background-position: center; 
-    background-attachment: fixed;">
-        <div class="hero-content">
-            <img src="assets/images/website/logo.png" alt="Project Ghost" class="hero-logo">
-            <p>
-                Entre vivos e mortos, existe um abismo. E alguém finalmente o atravessou.
-            </p>
+    <!-- HOME / ABOUT -->
+    <section class="card" id="section-main">
+      <div class="main-grid">
+        <div class="avatar">
+          <img id="avatar" src="assets/images/me-main.jpeg" alt="Minha foto" />
         </div>
+
+        <div>
+          <div class="nickname" id="nick">MasterSpike</div>
+          <div class="realname" id="real-name">Samuel Victor</div>
+          <div class="headline" id="headline">GameDev / Programador / Desenvolvedor</div>
+          <div class="about-text" id="about-text"></div>
+
+          <div style="margin-top:14px; display:flex; flex-wrap:wrap; gap:10px;">
+            <button id="toggle-about" class="pill">🧑‍💼 Sobre mim</button>
+            <button id="toggle-portfolio" class="pill">🗂️ Portfólio</button>
+
+            <!-- Project Ghost, botao 
+            <a href="pages/project-ghost/index.html" class="pill">Em breve... (project ghost)</a>
+            -->
+
+            <a href="pages/project-ghost/index.html" class="pill" target="_blank" rel="noopener noreferrer">
+              Em breve... (Project Ghost)
+            </a>
+
+          </div>
+
+          <div class="links" id="links">
+            <button class="btn" id="open-contact">✉️ <b id="contact-btn-label">Contato</b></button>
+            <a class="btn" href="https://www.instagram.com/samuelvictordev" target="_blank" rel="noopener">📸
+              <b>Instagram</b></a>
+            <a class="btn" href="https://github.com/MasterSpikeDev" target="_blank" rel="noopener">💻 <b>GitHub</b></a>
+            <a class="btn" href="https://www.linkedin.com/in/samuel-victor-b08725289" target="_blank" rel="noopener">🔗
+              <b>LinkedIn</b></a>
+            <a class="btn" href="https://open.spotify.com/user/mkz6ndemx7l8xetpqhldt7dkq?si=786c58533c7d4d6e"
+              target="_blank" rel="noopener">🎵 <b>Spotify</b></a>
+
+            <a class="btn" href="https://steamcommunity.com/profiles/76561199493045133/" target="_blank"
+              rel="noopener">🎮 <b>Steam</b></a>
+
+            <a class="btn" href="https://www.tiktok.com/@masterspikee" target="_blank" rel="noopener">🕺
+              <b>Tiktok</b></a>
+
+            <a class="btn" href="https://x.com/MasterSpikeDev" target="_blank" rel="noopener">✖️ <b>Twitter</b></a>
+
+            <a class="btn" href="https://www.twitch.tv/masterspikedev" target="_blank" rel="noopener">🦑
+              <b>Twitch</b></a>
+
+            <a class="btn" href="https://www.youtube.com/channel/UC-pbazBHe4BuedCVRWJ1mUg" target="_blank"
+              rel="noopener">📽️ <b>Youtube 1</b></a>
+
+            <a class="btn" href="https://www.youtube.com/channel/UCkAnFzkV7_-R1Hi-dCjxGOA" target="_blank"
+              rel="noopener">🎥 <b>Youtube 2</b></a>
+
+
+          </div>
+        </div>
+      </div>
+
+      <footer>© <span id="year"></span> <span id="foot-nick">@seu_nick</span></footer>
     </section>
 
-    <!-- BOTÕES PRINCIPAIS -->
-    <div class="buttons-grid">
-        <div class="big-button" id="btn-ler">
-            <div class="button-bg" style="background-image: url('assets/images/website/background-button_1.png');">
-            </div>
-            <div class="button-overlay">
-                <i class="fas fa-book button-icon"></i>
-                <div class="button-title">Ler</div>
-                <div class="button-desc">Acesse todos os capítulos da história</div>
-            </div>
+    <!-- PORTFÓLIO -->
+    <section class="card" id="section-portfolio">
+      <div class="portfolio-header">
+        <div class="portfolio-title" id="portfolio-title">Portfólio</div>
+        <div style="display:flex; gap:8px;">
+          <button id="back-home" class="pill">← Voltar</button>
         </div>
+      </div>
 
-        <div class="big-button" id="btn-personagens">
-            <div class="button-bg" style="background-image: url('assets/images/website/background-button_2.png');">
-            </div>
-            <div class="button-overlay">
-                <i class="fas fa-users button-icon"></i>
-                <div class="button-title">Personagens</div>
-                <div class="button-desc">Conheça os personagens da história</div>
-            </div>
-        </div>
+      <div id="portfolio-cards" class="cards"></div>
 
-        <div class="big-button" id="btn-artes">
-            <div class="button-bg" style="background-image: url('assets/images/website/background-button_4.png');">
-            </div>
-            <div class="button-overlay">
-                <i class="fas fa-palette button-icon"></i>
-                <div class="button-title">Artes</div>
-                <div class="button-desc">Galeria de artes e ilustrações</div>
-            </div>
-        </div>
-
-        <div class="big-button" id="btn-musicas">
-            <div class="button-bg" style="background-image: url('assets/images/website/background-button_3.png');">
-            </div>
-            <div class="button-overlay">
-                <i class="fas fa-music button-icon"></i>
-                <div class="button-title">Músicas</div>
-                <div class="button-desc">Trilha sonora e playlists</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SEÇÃO CURIOSIDADES E EXTRAS -->
-    <section id="curiosidades" class="curiosities-section">
-        <div class="section-header">
-            <h2><i class="fas fa-seedling"></i>Extras</h2>
-            <p class="section-subtitle">Explore esboços, primeiras versões, bastidores e muito mais sobre o projeto.</p>
-        </div>
-
-        <div class="curiosities-container">
-
-
-            <!--Evolução do Projeto -->
-            <div class="curiosity-card full-width">
-                <div class="curiosity-text">
-                    <div class="curiosity-header">
-                        <h3><i class="fas fa-chart-line"></i> Evolução do Projeto</h3>
-                        <span class="curiosity-date">Dez 2025 - Atual</span>
-                    </div>
-                    <div class="evolution-timeline">
-                        <div class="timeline-item">
-                            <div class="timeline-date">Dez 2025</div>
-                            <div class="timeline-content">
-                                <h4>Site finalizado e postado para o público</h4>
-                                <p>Conclusão do WebSite para o público, e liberado o prólogo para leitura</p>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-date">Nov 2025</div>
-                            <div class="timeline-content">
-                                <h4>Prólogo Completo</h4>
-                                <p>Prólogo finalizado, revisado e arquivado no banco de dados do site</p>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-date">Set 2025</div>
-                            <div class="timeline-content">
-                                <h4>Timeline planejada</h4>
-                                <p>Toda a história do Volume 1 de Project Ghost, planejada, e espaços reservados na aba
-                                    de leitura do site</p>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-date">Ago 2025</div>
-                            <div class="timeline-content">
-                                <h4>Criado as primeiras artes e conceitos dos personagens principais</h4>
-                                <p>Decidido poderes, desing, trajes de batalha, etc.</p>
-                            </div>
-                        </div>
-
-                        <div class="timeline-item">
-                            <div class="timeline-date">Jun 2025</div>
-                            <div class="timeline-content">
-                                <h4>Inicio do desenvolvimento de Project Ghost</h4>
-                                <p>Primeiros conceitos da história e do reboot do projeto anterior, The Ghouls Prophecy</p>
-                            </div>
-                        </div>
-                        
-                    </div>
-                </div>
-            </div>
-
-            <!-- Curiosidade 2: Inspirações -->
-            <div class="curiosity-card reverse">
-                <div class="curiosity-text">
-                    <div class="curiosity-header">
-                        <h3><i class="fas fa-lightbulb"></i> Inspirações e Referências</h3>
-                        <span class="curiosity-date">Dez 2025</span>
-                    </div>
-                    <p>O Project Ghost foi inspirado em várias obras de anime, mangá e até jogos. As influências mais
-                        notáveis incluem:</p>
-                    <ul>
-                        <li><strong>Persona (franquia)</strong> - Vida dupla, escolar e de combatente, protagonista e suas relações com o mundo e as pessoas</li>
-                        <li><strong>Chrono Trigger</strong> - Mecanicas de batalha, design de personagens</li>
-                        <li><strong>JoJo's Bizarre Adventure</strong> - Mecanicas de poderes e combate, história, forte inspiração na Part 5 - Golden Wind</li>
-                        <li><strong>The Legend Of Zelda: Majoras Mask</strong> - Tempo limitado, guerreiro que precisa agir a tempo</li>
-                    </ul>
-                    <p>A trilha sonora conceitual também foi fortemente influenciada por bandas j-rock.</p>
-                    <div class="curiosity-tags">
-                        <span class="tag">Inspirações</span>
-                        <span class="tag">Referências</span>
-                        <span class="tag">Influências</span>
-                    </div>
-                </div>
-                <div class="curiosity-img">
-                    <img src="assets/images/extras/2.png" alt="Inspirações do Project Ghost">
-                    <div class="img-label">Inspirações</div>
-                </div>
-            </div>
-
-
-            <!-- Curiosidade 3: Elementos Ocultos -->
-            <div class="curiosity-card reverse">
-                <div class="curiosity-text">
-                    <div class="curiosity-header">
-                        <h3><i class="fas fa-eye-slash"></i>Curiosidades dos nomes</h3>
-                        <span class="curiosity-date">Dez 2025</span>
-                    </div>
-                    <p>O Project Ghost está repleto de referências sutis e easter eggs que os leitores mais atentos
-                        podem encontrar:</p>
-                    <ul>
-                        <li>O nome dos personagens não é aleatório e todos carregam um significado especifico:</li>
-                        <li><strong>Haruki Yakamatsu: </strong>春 (Haru) → Primavera / 木 (Ki) → Árvore / Madeira</li>
-                        <li>Haruki (春樹) em japonês significa "árvore de primavera", simbolizando renovação, crescimento e vitalidade</li>
-
-                    </ul>
-                    <div class="curiosity-tags">
-                        <span class="tag">Easter Eggs</span>
-                        <span class="tag">Detalhes</span>
-                        <span class="tag">Referências</span>
-                    </div>
-                </div>
-                <div class="curiosity-img">
-                    <img src="assets/images/extras/3.png" alt="Easter eggs escondidos">
-                    <div class="img-label">Curiosidades</div>
-                </div>
-            </div>
-
-
-
-
-            <!-- Curiosidade 1: Primeiras Versões -->
-            <div class="curiosity-card">
-                <div class="curiosity-img">
-                    <img src="assets/images/extras/1.png" alt="Primeiros esboços do Project Ghost">
-                    <div class="img-label">Primeiras Versões</div>
-                </div>
-                <div class="curiosity-text">
-                    <div class="curiosity-header">
-                        <h3><i class="fas fa-pencil-ruler"></i> Primeiras Versões</h3>
-                        <span class="curiosity-date">2021</span>
-                    </div>
-                    <p>Os primeiros rascunhos do Project Ghost eram bem diferentes da versão final. Originalmente, a
-                        história era bem genérica, e com uma escrita mais infantil, diversos poderes tinham efeitos
-                        diferentes, e a historia mudou draticamente</p>
-                    <p>Haruki era inicialmente um escolhido pelo sobrenatural por destino, e travaria uma batalha contra
-                        Fumiko no inicio da história. Existia um sistema de hierarquia baseado em cartas de baralho na
-                        máfia inimiga.</p>
-                    <div class="curiosity-tags">
-                        <span class="tag">Esboços</span>
-                        <span class="tag">Desenvolvimento</span>
-                        <span class="tag">Conceito</span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="curiosities-cta">
-            <p>Quer sugerir um tópico ou fazer uma pergunta sobre o projeto?</p>
-            <a href="#" class="cta-button"><i class="fas fa-envelope"></i> Entre em Contato</a>
-        </div>
+      <footer style="margin-top:12px;">© <span id="year2"></span> <span id="foot-nick2">@seu_nick</span></footer>
     </section>
+  </div>
 
-    <!-- MODAIS (mantidos do original) -->
-    <div id="modal-ler" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Selecionar Capítulo</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body" id="modal-ler-body">
-                <!-- Conteúdo será preenchido via JavaScript -->
-            </div>
-        </div>
+  <!-- Popup de Contato -->
+  <div id="contact-modal" class="modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+      <button class="modal-close" id="close-contact" aria-label="Fechar">×</button>
+      <h3 id="contact-title">Contato</h3>
+      <div class="contact-list">
+        <!-- Discord: copia o nickname ao clicar -->
+        <a id="copy-email" href="#" data-handle="spikestudios8@gmail.com">🟣 <span>Email:
+            spikestudios8@gmail.com</span></a>
+        <a id="copy-email2" href="#" data-handle="svf18062006@gmail.com">🟣 <span>Email:
+            svf18062006@gmail.com</span></a>
+        <a id="copy-discord" href="#" data-handle="masterspike">🟣 <span>Discord: @masterspike</span></a>
+      </div>
     </div>
+  </div>
 
+  <!-- 1) Carrega os posts (sem defer, garante que rode antes do JS principal) -->
+  <script src="./posts.js"></script>
 
+  <!-- 2) JS principal -->
+  <script>
+    'use strict';
 
-    <div id="modal-personagens" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Personagens</h2>
-                <button class="close-modal">&times;</button>
+    /* =========================
+       POSTS externos (globais)
+    ========================== */
+    const getPosts = () => (Array.isArray(window.POSTS) ? window.POSTS : null);
+
+    /* =========================
+       I18N (PT/EN) e TEXTOS
+    ========================== */
+    const STR = {
+      pt: {
+        toAbout: "🧑‍💼 Sobre mim", toMain: "← Voltar", toPortfolio: "🗂️ Portfólio",
+        portfolioTitle: "Portfólio", back: "← Voltar",
+        nick: "Master Spike", realName: "Samuel Victor",
+        headline: "GameDev / Programador / Desenvolvedor",
+        contactBtn: "Contato", contactTitle: "Contato", close: "Fechar",
+        aboutText: [
+          "Sou Samuel Victor. Apaixonado por Jogos, e game dev, atualmente cursando Analise e Desenvolvimento de Sistemas.",
+          "A música é trilha sonora do meu dia, especialmente rock alternativo e jazz. Estudei música por dois anos e toco alguns instrumentos, então sou do tipo que repara nos detalhes que quase ninguém nota.",
+          "Atualmente trabalho criando conteúdo para o 'Minecraft Marketplace' para a empresa 'Eternal Creations', e tenho como meta continuar expandindo minha presença criativa, colaborando em projetos que unam tecnologia, design, e diversão.",
+          "Estudando para criação de sistemas, apps web, e futuramente jogos.",
+          "Um dos meus hobbies é escrever histórias, atualmente com projeto sem fins lucrativos, Project Ghost.",
+
+        ]
+      },
+      en: {
+        toAbout: "🧑‍💼 About Me", toMain: "← Back", toPortfolio: "🗂️ Portfolio",
+        portfolioTitle: "Portfolio", back: "← Back",
+        nick: "Master Spike", realName: "Samuel Victor",
+        headline: "GameDev / Programmer / Developer",
+        contactBtn: "Contact", contactTitle: "Contact", close: "Close",
+        aboutText: [
+          "I'm Samuel Victor. Passionate about games and game development, currently studying Systems Analysis and Development.",
+          "Music is the soundtrack of my day, especially alternative rock and jazz. I studied music for two years and play a few instruments, so I'm the kind of person who notices details that almost no one else does.",
+          "I currently work creating content for the 'Minecraft Marketplace' for the company 'Eternal Creations', and my goal is to continue expanding my creative presence, collaborating on projects that combine technology, design, and fun.",
+          "Studying systems development, web apps, and in the future, games.",
+          "One of my hobbies is writing stories, currently working on a non-profit project called Project Ghost."
+        ]
+
+      }
+    };
+
+    /* =========================
+       IMAGENS
+    ========================== */
+    const IMGS = { main: "assets/images/me-main.jpeg", about: "assets/images/me-about.jpeg" };
+
+    /* =========================
+       HELPERS / ESTADO
+    ========================== */
+    const $ = (q, r = document) => r.querySelector(q);
+    const $$ = (q, r = document) => [...r.querySelectorAll(q)];
+
+    function detectLang() {
+      const pref = localStorage.getItem('lang-pref');
+      if (pref && pref !== 'auto') return pref;
+      const nav = (navigator.language || 'en').toLowerCase();
+      return nav.startsWith('pt') ? 'pt' : 'en';
+    }
+
+    function setLang(lang) {
+      const s = STR[lang] || STR.pt;
+      const view = document.body.getAttribute('data-view');
+      $('#toggle-about').textContent = (view === 'about') ? s.toMain : s.toAbout;
+      $('#toggle-portfolio').textContent = (view === 'portfolio') ? s.toMain : s.toPortfolio;
+      $('#back-home').textContent = s.back;
+
+      $('#nick').textContent = s.nick;
+      $('#real-name').textContent = s.realName;
+      $('#headline').textContent = s.headline;
+
+      const about = $('#about-text');
+      about.innerHTML = (Array.isArray(s.aboutText) ? s.aboutText : [s.aboutText]).map(p => `<p>${p}</p>`).join("");
+
+      $('#portfolio-title').textContent = s.portfolioTitle;
+      $('#foot-nick').textContent = s.nick;
+      $('#foot-nick2').textContent = s.nick;
+
+      $('#contact-btn-label').textContent = s.contactBtn;
+      $('#contact-title').textContent = s.contactTitle;
+      $('#close-contact')?.setAttribute('aria-label', s.close);
+    }
+
+    function renderPosts(lang) {
+      const wrap = $('#portfolio-cards');
+      wrap.innerHTML = "";
+
+      const POSTS = getPosts();
+      if (!POSTS) {
+        wrap.innerHTML = `<div class="p-desc" style="opacity:.8">${lang === 'pt' ? 'Carregando posts…' : 'Loading posts…'}</div>`;
+        // quando posts.js avisar que carregou, renderiza
+        const handler = () => { window.removeEventListener('posts-ready', handler); renderPosts(lang); };
+        window.addEventListener('posts-ready', handler);
+        return;
+      }
+      if (POSTS.length === 0) {
+        wrap.innerHTML = `<div class="p-desc" style="opacity:.8">${lang === 'pt' ? 'Nenhum post encontrado.' : 'No posts found.'}</div>`;
+        return;
+      }
+
+      POSTS.forEach(p => {
+        const card = document.createElement('article');
+        card.className = 'p-card';
+        card.innerHTML = `
+          <img class="p-media" src="${p.img}" alt="${(p.title?.[lang] || 'Post')}" loading="lazy">
+          <div class="p-body">
+            <h4 class="p-title">${p.title?.[lang] || ''}</h4>
+            <div class="p-desc">${p.desc?.[lang] || ''}</div>
+            <div class="p-links">
+              ${(p.links || []).map(l => `<a class="chip" target="_blank" rel="noopener" href="${l.href}">🔗 ${l.label?.[lang] || 'Link'}</a>`).join('')}
+              ${(p.videos || []).map(v => `<a class="chip" target="_blank" rel="noopener" href="${v.href}">🎬 ${v.label?.[lang] || 'Vídeo'}</a>`).join('')}
             </div>
-            <div class="modal-body">
-                <div class="search-bar">
-                    <input type="text" id="character-search" placeholder="Pesquisar personagens...">
-                </div>
-                <div class="character-grid" id="character-grid">
-                    <!-- Conteúdo será preenchido via JavaScript -->
-                </div>
-            </div>
-        </div>
-    </div>
+          </div>`;
+        wrap.appendChild(card);
+      });
+    }
 
-    <div id="modal-artes" class="modal">
-        <div class="modal-content modal-full">
-            <div class="modal-header">
-                <h2>Galeria de Artes</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="gallery-grid" id="gallery-grid">
-                    <!-- Conteúdo será preenchido via JavaScript -->
-                </div>
-            </div>
-        </div>
-    </div>
+    function go(view) {
+      document.body.setAttribute('data-view', view);
+      const langPref = localStorage.getItem('lang-pref') || 'auto';
+      const lang = (langPref === 'auto') ? detectLang() : langPref;
 
-    <div id="modal-musicas" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Trilha Sonora</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="music-grid" id="music-grid">
-                    <!-- Conteúdo será preenchido via JavaScript -->
-                </div>
-            </div>
-        </div>
-    </div>
+      $('#avatar').src = (view === 'about') ? IMGS.about : IMGS.main;
 
-    <div id="modal-image" class="modal">
-        <div class="modal-content" style="background: transparent; border: none; box-shadow: none; max-width: 90%;">
-            <div class="modal-header" style="background: transparent; justify-content: flex-end; border: none;">
-                <button class="close-modal"
-                    style="background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
-            </div>
-            <div class="modal-body" style="padding: 0; display: flex; justify-content: center; align-items: center;">
-                <img id="expanded-image" src="" style="max-width: 100%; max-height: 80vh; border-radius: 10px;">
-            </div>
-        </div>
-    </div>
+      setLang(lang);
+      if (view === 'portfolio') renderPosts(lang);
 
-    <!-- MODAL FICHA DE PERSONAGEM -->
-    <div id="modal-character" class="modal">
-        <div class="modal-content modal-full">
-            <div class="modal-header">
-                <h2 id="character-modal-title">Ficha do Personagem</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="character-sheet" id="character-sheet">
-                    <!-- Conteúdo será preenchido via JavaScript -->
-                </div>
-            </div>
-        </div>
-    </div>
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-    <!-- MODAL DE CONTATO -->
-    <div id="modal-contato" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Contato</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body" style="text-align: center;">
-                <p>Copie minha tag do Discord:</p>
+    /* =========================
+       INIT / EVENTOS
+    ========================== */
+    const year = new Date().getFullYear();
+    $('#year').textContent = year;
+    $('#year2').textContent = year;
 
-                <div style="display:flex; justify-content:center; gap:10px; margin-top:15px;">
-                    <input id="discord-tag" type="text" value="masterspike" readonly
-                        style="padding:10px; border-radius:5px; width:180px; text-align:center; font-size:16px;">
+    const initialLang = detectLang();
+    $('#lang').value = localStorage.getItem('lang-pref') || 'auto';
+    setLang(initialLang);
 
-                    <button id="copiar-discord"
-                        style="padding:10px 15px; background:#5865F2; color:white; border:none; border-radius:5px; cursor:pointer;">
-                        Copiar
-                    </button>
-                </div>
+    $('#lang').addEventListener('change', (e) => {
+      const v = e.target.value;
+      localStorage.setItem('lang-pref', v);
+      const lang = (v === 'auto') ? detectLang() : v;
+      setLang(lang);
+      if (document.body.getAttribute('data-view') === 'portfolio') renderPosts(lang);
+    });
 
-                <p id="copy-msg" style="opacity:0; transition:0.3s; margin-top:10px; font-size:14px; color:green;">
-                    Copiado!
-                </p>
-            </div>
-        </div>
-    </div>
+    $('#toggle-about').addEventListener('click', () => {
+      const view = document.body.getAttribute('data-view');
+      go(view === 'about' ? 'main' : 'about');
+    });
 
+    $('#toggle-portfolio').addEventListener('click', () => {
+      const view = document.body.getAttribute('data-view');
+      go(view === 'portfolio' ? 'main' : 'portfolio');
+    });
 
-    <!-- FOOTER -->
-    <footer>
-        <div class="social-links">
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-discord"></i></a>
-            <a href="#"><i class="fab fa-youtube"></i></a>
-        </div>
-        <p>© 2025 Project Ghost — Todos os direitos reservados.</p>
-    </footer>
+    $('#back-home').addEventListener('click', () => go('main'));
 
-    <script src="js/data.js"></script>
-    <script src="js/app.js"></script>
+    /* ===== Ações do Popup de Contato ===== */
+    const contactModal = $('#contact-modal');
+    const openContactBtn = $('#open-contact');
+    const closeContactBtn = $('#close-contact');
 
-    <script>
-        // Script para fechar modais
-        document.addEventListener('DOMContentLoaded', function () {
-            // ... todo o código aqui ...
-        });
-    </script>
+    function openContact() {
+      contactModal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      closeContactBtn.focus();
+    }
+    function closeContact() {
+      contactModal.hidden = true;
+      document.body.style.overflow = '';
+      openContactBtn.focus();
+    }
 
+    openContactBtn.addEventListener('click', openContact);
+    closeContactBtn.addEventListener('click', closeContact);
+    contactModal.addEventListener('click', (e) => { if (e.target === contactModal) closeContact(); });
+    document.addEventListener('keydown', (e) => { if (!contactModal.hidden && e.key === 'Escape') closeContact(); });
+
+    /* ===== Discord: copiar nickname ===== */
+    const discordCopy = document.getElementById('copy-discord');
+    if (discordCopy) {
+      const getLang = () => {
+        const pref = localStorage.getItem('lang-pref') || 'auto';
+        return (pref === 'auto') ? detectLang() : pref;
+      };
+      const handle = (discordCopy.dataset.handle || 'masterspike').replace(/^@/, '');
+      discordCopy.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const span = discordCopy.querySelector('span');
+        const original = span.textContent;
+        try {
+          await navigator.clipboard.writeText(handle);
+          span.textContent = (getLang() === 'pt') ? 'Copiado!' : 'Copied!';
+        } catch {
+          window.prompt(getLang() === 'pt' ? 'Copie o usuário:' : 'Copy the handle:', handle);
+        } finally {
+          setTimeout(() => { span.textContent = original; }, 1400);
+        }
+      });
+    }
+
+    const emailCopy = document.getElementById('copy-email');
+    if (emailCopy) {
+      const getLang = () => {
+        const pref = localStorage.getItem('lang-pref') || 'auto';
+        return (pref === 'auto') ? detectLang() : pref;
+      };
+      const handle = (emailCopy.dataset.handle || 'masterspike').replace(/^@/, '');
+      emailCopy.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const span = emailCopy.querySelector('span');
+        const original = span.textContent;
+        try {
+          await navigator.clipboard.writeText(handle);
+          span.textContent = (getLang() === 'pt') ? 'Copiado!' : 'Copied!';
+        } catch {
+          window.prompt(getLang() === 'pt' ? 'Copie o usuário:' : 'Copy the handle:', handle);
+        } finally {
+          setTimeout(() => { span.textContent = original; }, 1400);
+        }
+      });
+    }
+
+    const emailCopy2 = document.getElementById('copy-email2');
+    if (emailCopy2) {
+      const getLang = () => {
+        const pref = localStorage.getItem('lang-pref') || 'auto';
+        return (pref === 'auto') ? detectLang() : pref;
+      };
+      const handle = (emailCopy2.dataset.handle || 'masterspike').replace(/^@/, '');
+      emailCopy2.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const span = emailCopy2.querySelector('span');
+        const original = span.textContent;
+        try {
+          await navigator.clipboard.writeText(handle);
+          span.textContent = (getLang() === 'pt') ? 'Copiado!' : 'Copied!';
+        } catch {
+          window.prompt(getLang() === 'pt' ? 'Copie o usuário:' : 'Copy the handle:', handle);
+        } finally {
+          setTimeout(() => { span.textContent = original; }, 1400);
+        }
+      });
+    }
+
+    // Começa na HOME
+    go('main');
+  </script>
 </body>
 
 </html>
