@@ -16,7 +16,7 @@ window.POSTS = [
         ]
     },
     {
-        title: { pt: "Freelancer: Vibrant Adventures", en: "Freelance: Vibrant Adventures" },
+        title: { pt: "Vibrant Adventures", en: "Vibrant Adventures" },
         desc: {
             pt: "Explore um mundo repleto de cores e vida.",
             en: "Explore a World Bursting with Color and Life"
@@ -29,7 +29,7 @@ window.POSTS = [
         videos: []
     },
     {
-        title: { pt: "Freelancer: BiomeCraft", en: "Freelance: BiomeCraft" },
+        title: { pt: "BiomeCraft", en: "BiomeCraft" },
         desc: {
             pt: "Expanda seu mundo com os quatro biomas de tirar o fôlego do BiomeCraft e dois clássicos reinventados.",
             en: "Expand your world with BiomeCraft’s four breathtaking biomes and two re-imagined classics. "
@@ -43,10 +43,10 @@ window.POSTS = [
         videos: []
     },
     {
-        title: { pt: "Freelancer: Better Structures", en: "Freelance: Better Structures" },
+        title: { pt: "Better Structures", en: "Better Structures" },
         desc: {
-            pt: "Em Progresso...",
-            en: "In Progress"
+            pt: "Hora da exploração!",
+            en: "Exploration time!"
         },
         img: "assets/portfolio/post3.jpg",
         links: [
@@ -56,7 +56,7 @@ window.POSTS = [
         videos: []
     },
     {
-        title: { pt: "Freelancer: More Enchants", en: "Freelance: More Enchants" },
+        title: { pt: "More Enchants", en: "More Enchants" },
         desc: {
             pt: "Encantamentos, encantamentos, encantamentos!",
             en: "Enchantments, enchantments, enchantmens!"
@@ -69,7 +69,7 @@ window.POSTS = [
         videos: []
     },
     {
-        title: { pt: "Freelancer: More Utilities", en: "Freelance: More Utilities" },
+        title: { pt: "More Utilities", en: "More Utilities" },
         desc: {
             pt: "Melhore sua experiência de sobrevivência.",
             en: "Upgrade your Survival Experience."
