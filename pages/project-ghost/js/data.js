@@ -128,7 +128,7 @@ const artworks = [
         image: "assets/images/arts/concept-arts/haruki/1.png",
         description: "Arte conceitual gerada por IA, do traje anti-chama de Haruki Takamatsu / Ember Blade, parte 1",
         year: "2025",
-        artist: "Concept Art"
+        artist: "Concept Art - IA"
     },
     {
         id: 2,
@@ -136,7 +136,7 @@ const artworks = [
         image: "assets/images/arts/concept-arts/haruki/2.png",
         description: "Arte conceitual gerada por IA, do traje anti-chama de Haruki Takamatsu, agora com sua iconica touca e mascará / Ember Blade, parte 1",
         year: "2025",
-        artist: "Concept Art"
+        artist: "Concept Art - IA"
     },
     {
         id: 3,
@@ -144,7 +144,7 @@ const artworks = [
         image: "assets/images/arts/concept-arts/fumiko/1.png",
         description: "Arte conceitual gerada por IA, de Fumiko Emi",
         year: "2025",
-        artist: "Concept Art"
+        artist: "Concept Art - IA"
     },
     {
         id: 9,
@@ -160,7 +160,7 @@ const artworks = [
         image: "assets/images/arts/concept-arts/fumiko/2.png",
         description: "Arte conceitual gerada por IA, de Fumiko Emi",
         year: "2025",
-        artist: "Concept Art"
+        artist: "Concept Art - IA"
     },
     {
         id: 5,
@@ -193,6 +193,14 @@ const artworks = [
         description: "Arte feita em sua primeira versão da história (The Ghoul`s Prophecy), na arte temos Fumiko Emi roubando as iconicas batatinhas fritas de Nero.",
         year: "2022",
         artist: "Fan Art - Ludivine / Yellow Mariana"
+    },
+    {
+        id: 9,
+        title: "Dupla principal",
+        image: "assets/images/arts/artes/1.png",
+        description: "Haruki Takamatsu e Fumiko Emi, arte completa",
+        year: "2025",
+        artist: "Official Art - IA"
     }
 ];
 // Dados dos capítulos (mantidos iguais)
