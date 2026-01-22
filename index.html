@@ -1293,7 +1293,6 @@
     const FONT_CONFIG =
     {
   "fontFamily": "'MinhaFonteCustom', sans-serif",
-  "fontImport": "@font-face { font-family: 'MinhaFonteCustom'; src: url('https://raw.githubusercontent.com/MasterSpikeDev/Spike-HUB/main/assets/fonts/custom_font.ttf') format('truetype'); }"
 }
 
     // Função para carregar configuração de fontes
@@ -1312,27 +1311,30 @@
       applyFontConfig();
     }
 
-    // Função para aplicar a configuração de fontes
     function applyFontConfig() {
-      // 1. Aplica a importação da fonte
-      const fontStyle = document.getElementById('dynamic-font-style');
-      if (FONT_CONFIG.fontImport) {
-        fontStyle.textContent = FONT_CONFIG.fontImport;
-      }
+  // estilo dinâmico (caso você injete @font-face via JS)
+  let fontStyle = document.getElementById('dynamic-font-style');
+  if (!fontStyle) {
+    fontStyle = document.createElement('style');
+    fontStyle.id = 'dynamic-font-style';
+    document.head.appendChild(fontStyle);
+  }
 
-      // 2. Atualiza a variável CSS
-      document.documentElement.style.setProperty('--font-family', FONT_CONFIG.fontFamily);
+  fontStyle.textContent = FONT_CONFIG.fontImport || '';
 
-      // 3. Carrega CSS customizado se existir
-      const customCssLink = document.getElementById('custom-font-css');
-      if (FONT_CONFIG.customCss) {
-        customCssLink.href = FONT_CONFIG.customCss;
-      } else {
-        customCssLink.remove();
-      }
+  // variável CSS global
+  document.documentElement.style.setProperty(
+    '--font-family',
+    FONT_CONFIG.fontFamily || 'sans-serif'
+  );
 
-      console.log('Fonte aplicada:', FONT_CONFIG.fontFamily);
-    }
+  // NÃO remove o CSS local
+  const customCssLink = document.getElementById('custom-font-css');
+  if (customCssLink && FONT_CONFIG.customCss) {
+    customCssLink.href = FONT_CONFIG.customCss;
+  }
+}
+
 
     // ============================================
     // CÓDIGO EXISTENTE

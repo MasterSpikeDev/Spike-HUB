@@ -1,12 +1,7 @@
-/* Adicione aqui qualquer CSS customizado para a fonte */
-body {
-  letter-spacing: 0.02em;
-}
-
-.nickname, .realname {
-  letter-spacing: 0.05em;
-}
-
-.btn, .pill {
-  letter-spacing: 0.03em;
+@font-face {
+  font-family: 'MinhaFonteCustom';
+  src: url('./custom_font.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
