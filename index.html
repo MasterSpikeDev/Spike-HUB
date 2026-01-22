@@ -13,7 +13,8 @@
 
   <style>
     :root {
-      --sound-bar-height: 64px; /* ajuste se sua barra for maior */
+      --sound-bar-height: 64px;
+      /* ajuste se sua barra for maior */
       --bg: #0b0b0c;
       --card: #141416;
       --text: #e5e7eb;
@@ -191,18 +192,18 @@
     }
 
     /* CONTROLE DE VOLUME - NOVO */
-.volume-container {
-  position: fixed;
-  right: 20px;
-  bottom: calc(var(--sound-bar-height) + 20px);
+    .volume-container {
+      position: sticky;
+      bottom: 16px;
 
-  z-index: 1000;
+      display: flex;
+      justify-content: flex-end;
 
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-}
+      margin-top: 24px;
+      z-index: 5;
+      /* abaixo de modais, acima do fundo */
+    }
+
 
 
     .volume-control {
@@ -459,14 +460,20 @@
         text-align: center;
       }
 
-      .volume-control {
-        transform: translateX(0);
-      }
 
       .volume-slider-container {
         width: 100px;
         opacity: 1;
       }
+
+      .volume-container {
+        justify-content: center;
+      }
+
+      .volume-control {
+        transform: none !important;
+      }
+
     }
 
     /* Avatar com efeito flutuante */
@@ -1147,16 +1154,7 @@
     <button class="audio-permission-btn" id="enableAudioBtn">Ativar Áudio</button>
   </div>
 
-  <!-- Controle de Volume -->
-  <div class="volume-container">
-    <div class="volume-control" id="volumeControl">
-      <button class="volume-btn" id="volumeBtn">🔊</button>
-      <div class="volume-slider-container">
-        <input type="range" min="0" max="1" step="0.01" value="0.5" class="volume-slider" id="volumeSlider">
-      </div>
-      <div class="volume-percentage" id="volumePercentage">50%</div>
-    </div>
-  </div>
+
 
   <!-- BACKGROUNDS - CONFIGURÁVEIS -->
   <div id="bg-main" class="bg-layer" aria-hidden="true"></div>
@@ -1286,6 +1284,18 @@
     </div>
   </div>
 
+
+  <!-- Controle de Volume -->
+  <div class="volume-container">
+    <div class="volume-control" id="volumeControl">
+      <button class="volume-btn" id="volumeBtn">🔊</button>
+      <div class="volume-slider-container">
+        <input type="range" min="0" max="1" step="0.01" value="0.5" class="volume-slider" id="volumeSlider">
+      </div>
+      <div class="volume-percentage" id="volumePercentage">50%</div>
+    </div>
+  </div>
+
   <script src="./posts.js"></script>
 
   <script>
@@ -1296,8 +1306,8 @@
     // ============================================
     const FONT_CONFIG =
     {
-  "fontFamily": "'MinhaFonteCustom', sans-serif",
-}
+      "fontFamily": "'MinhaFonteCustom', sans-serif",
+    }
 
     // Função para carregar configuração de fontes
     async function loadFontConfig() {
@@ -1316,28 +1326,28 @@
     }
 
     function applyFontConfig() {
-  // estilo dinâmico (caso você injete @font-face via JS)
-  let fontStyle = document.getElementById('dynamic-font-style');
-  if (!fontStyle) {
-    fontStyle = document.createElement('style');
-    fontStyle.id = 'dynamic-font-style';
-    document.head.appendChild(fontStyle);
-  }
+      // estilo dinâmico (caso você injete @font-face via JS)
+      let fontStyle = document.getElementById('dynamic-font-style');
+      if (!fontStyle) {
+        fontStyle = document.createElement('style');
+        fontStyle.id = 'dynamic-font-style';
+        document.head.appendChild(fontStyle);
+      }
 
-  fontStyle.textContent = FONT_CONFIG.fontImport || '';
+      fontStyle.textContent = FONT_CONFIG.fontImport || '';
 
-  // variável CSS global
-  document.documentElement.style.setProperty(
-    '--font-family',
-    FONT_CONFIG.fontFamily || 'sans-serif'
-  );
+      // variável CSS global
+      document.documentElement.style.setProperty(
+        '--font-family',
+        FONT_CONFIG.fontFamily || 'sans-serif'
+      );
 
-  // NÃO remove o CSS local
-  const customCssLink = document.getElementById('custom-font-css');
-  if (customCssLink && FONT_CONFIG.customCss) {
-    customCssLink.href = FONT_CONFIG.customCss;
-  }
-}
+      // NÃO remove o CSS local
+      const customCssLink = document.getElementById('custom-font-css');
+      if (customCssLink && FONT_CONFIG.customCss) {
+        customCssLink.href = FONT_CONFIG.customCss;
+      }
+    }
 
 
     // ============================================
