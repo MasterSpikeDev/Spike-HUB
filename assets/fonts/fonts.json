@@ -1,0 +1,4 @@
+{
+  "fontFamily": "'MinhaFonteCustom', sans-serif",
+  "fontImport": "@font-face { font-family: 'MinhaFonteCustom'; src: url('./Butterpop.ttf') format('ttf'); }"
+}

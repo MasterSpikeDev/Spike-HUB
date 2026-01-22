@@ -1,0 +1,12 @@
+/* Adicione aqui qualquer CSS customizado para a fonte */
+body {
+  letter-spacing: 0.02em;
+}
+
+.nickname, .realname {
+  letter-spacing: 0.05em;
+}
+
+.btn, .pill {
+  letter-spacing: 0.03em;
+}
