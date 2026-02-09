@@ -16,6 +16,19 @@ window.POSTS = [
         ]
     },
     {
+        title: { pt: "Explorer Texture Pack V2", en: "Explorer Texture Pack V2" },
+        desc: {
+            pt: "Tudo que você sempre sonhou em um unico pacote de recursos!",
+            en: "Everything you've ever dreamed of in a single resource package!"
+        },
+        img: "assets/portfolio/post7.png",
+        links: [
+            { label: { pt: "MCPEDL", en: "MCPEDL" }, href: "https://mcpedl.com/explorer-texture-pack/" }
+
+        ],
+        videos: []
+    },
+    {
         title: { pt: "Vibrant Adventures", en: "Vibrant Adventures" },
         desc: {
             pt: "Explore um mundo repleto de cores e vida.",
