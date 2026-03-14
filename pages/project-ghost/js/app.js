@@ -9,6 +9,14 @@ const modalCharacter = document.getElementById('modal-character');
 let selectedVolume = null;
 let selectedChapter = null;
 let selectedFile = null;
+let selectedArtworkType = 'all';
+
+const artTypeLabels = {
+    all: 'Todas',
+    'concept art': 'Concept Art',
+    'fan art': 'Fan Art',
+    'arte oficial': 'Arte Oficial'
+};
 
 // Renderizar capítulos para volume (mantido igual)
 function renderChaptersForVolume(volumeNumber) {
@@ -75,6 +83,7 @@ function init() {
     // Configurar event listeners
     setupEventListeners();
     renderCharacters();
+    renderArtworkTypeFilters();
     renderArtworks();
     renderMusic();
     renderChapters();
@@ -293,29 +302,67 @@ function renderCharacters() {
     });
 }
 
+// Utilitários de tipo de arte
+function normalizeArtType(type) {
+    return (type || '').toString().trim().toLowerCase();
+}
+
+function getArtTypeLabel(type) {
+    return artTypeLabels[type] || type;
+}
+
+function getFilteredArtworksByType(items, type) {
+    if (type === 'all') return items;
+    return items.filter((art) => normalizeArtType(art.artType) === type);
+}
+
+function renderArtworkTypeFilters() {
+    const filtersContainer = document.getElementById('art-filters');
+    if (!filtersContainer) return;
+
+    const filterTypes = ['all', 'concept art', 'fan art', 'arte oficial'];
+    filtersContainer.innerHTML = filterTypes.map((type) => `
+        <button type="button" class="art-filter-btn ${selectedArtworkType === type ? 'active' : ''}" data-art-type="${type}">
+            ${getArtTypeLabel(type)}
+        </button>
+    `).join('');
+
+    filtersContainer.querySelectorAll('.art-filter-btn').forEach((button) => {
+        button.addEventListener('click', () => {
+            selectedArtworkType = button.dataset.artType;
+            renderArtworkTypeFilters();
+            renderArtworks();
+        });
+    });
+}
+
 // Renderizar artes - ATUALIZADO
 function renderArtworks() {
     const galleryGrid = document.getElementById('gallery-grid');
-    
-    // Verifica se o elemento existe
+
     if (!galleryGrid) {
         console.error('Elemento #gallery-grid não encontrado!');
         return;
     }
-    
+
     galleryGrid.innerHTML = '';
-    
-    // Verifica se há artes para renderizar
+
     if (!artworks || artworks.length === 0) {
         galleryGrid.innerHTML = '<p class="no-artworks" style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">Nenhuma arte disponível no momento.</p>';
         return;
     }
-    
-    artworks.forEach(art => {
+
+    const filteredArtworks = getFilteredArtworksByType(artworks, selectedArtworkType);
+
+    if (filteredArtworks.length === 0) {
+        galleryGrid.innerHTML = '<p class="no-artworks" style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">Nenhuma arte encontrada para esse tipo.</p>';
+        return;
+    }
+
+    filteredArtworks.forEach(art => {
         const item = document.createElement('div');
         item.className = 'gallery-item';
-        
-        // Cria o item com imagem otimizada
+
         item.innerHTML = `
             <div class="gallery-img" 
                  style="background-image: url('${art.image}')"
@@ -326,19 +373,18 @@ function renderArtworks() {
                 <div class="gallery-title" title="${art.title}">${art.title}</div>
                 <div class="gallery-year">${art.year}</div>
                 <div class="gallery-artist" style="font-size: 0.8rem; color: #aaa; margin-top: 5px;">${art.artist}</div>
+                <div class="gallery-art-type">${getArtTypeLabel(normalizeArtType(art.artType))}</div>
             </div>
         `;
-        
-        // Adiciona atributos para o modal
+
         item.dataset.image = art.image;
         item.dataset.title = art.title;
         item.dataset.description = art.description;
         item.dataset.year = art.year;
         item.dataset.artist = art.artist;
-        
+
         galleryGrid.appendChild(item);
-        
-        // Pré-carrega a imagem para evitar flickering
+
         const img = new Image();
         img.src = art.image;
         img.onload = function() {
@@ -355,28 +401,25 @@ function renderArtworks() {
                 imgDiv.style.backgroundSize = 'cover';
             }
         };
-        
-        // Adiciona evento de clique para abrir modal
+
         item.addEventListener('click', function() {
             const imageUrl = this.dataset.image;
             const title = this.dataset.title;
             const description = this.dataset.description;
             const year = this.dataset.year;
             const artist = this.dataset.artist;
-            
+
             if (typeof openImageModal === 'function') {
                 openImageModal(imageUrl, title, description, year, artist);
             } else {
                 console.warn('Função openImageModal não encontrada!');
-                // Fallback: abrir imagem em nova aba
                 window.open(imageUrl, '_blank');
             }
         });
     });
-    
-    console.log(`✅ ${artworks.length} artes renderizadas na galeria.`);
-}
 
+    console.log(`✅ ${filteredArtworks.length} artes renderizadas na galeria.`);
+}
 
 // Renderizar músicas (mantido igual)
 function renderMusic() {
@@ -467,79 +510,196 @@ function updateReadButton() {
 }
 
 
+function normalizeTag(tag) {
+    return (tag || '').toString().trim().toLowerCase();
+}
+
+function getCharacterGalleryItems(character) {
+    const characterTag = normalizeTag(character.tag);
+    if (!characterTag) return [];
+
+    return artworks.filter((art) => {
+        if (!Array.isArray(art.tags)) return false;
+        return art.tags.map(normalizeTag).includes(characterTag);
+    });
+}
+
+function renderCharacterGallery(items) {
+    if (!items.length) {
+        return `
+            <div class="character-gallery-empty">
+                <i class="fas fa-image"></i>
+                <p>Nenhuma arte associada a este personagem ainda.</p>
+            </div>
+        `;
+    }
+
+    const filterTypes = ['all', 'concept art', 'fan art', 'arte oficial'];
+
+    return `
+        <div class="character-art-filters">
+            ${filterTypes.map((type) => `
+                <button class="character-art-filter-btn ${type === 'all' ? 'active' : ''}" type="button" data-art-type="${type}">
+                    ${getArtTypeLabel(type)}
+                </button>
+            `).join('')}
+        </div>
+
+        <div class="character-gallery-grid">
+            ${items.map((art) => `
+                <button class="character-gallery-item" type="button"
+                    data-image="${art.image}"
+                    data-title="${art.title}"
+                    data-description="${art.description}"
+                    data-year="${art.year}"
+                    data-artist="${art.artist}"
+                    data-art-type="${normalizeArtType(art.artType)}">
+                    <div class="character-gallery-thumb" style="background-image: url('${art.image}')"></div>
+                    <div class="character-gallery-meta">
+                        <div class="character-gallery-title">${art.title}</div>
+                        <div class="character-gallery-subtitle">${art.year} • ${art.artist}</div>
+                        <div class="character-gallery-type">${getArtTypeLabel(normalizeArtType(art.artType))}</div>
+                    </div>
+                </button>
+            `).join('')}
+        </div>
+    `;
+}
+
+function setupCharacterSheetTabs(sheet) {
+    const tabButtons = sheet.querySelectorAll('.character-tab-btn');
+    const panes = sheet.querySelectorAll('.character-tab-pane');
+
+    tabButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const targetPane = btn.getAttribute('data-tab-target');
+
+            tabButtons.forEach((item) => item.classList.remove('active'));
+            panes.forEach((pane) => pane.classList.remove('active'));
+
+            btn.classList.add('active');
+            const pane = sheet.querySelector(`.character-tab-pane[data-tab-pane="${targetPane}"]`);
+            if (pane) pane.classList.add('active');
+        });
+    });
+
+    const characterGalleryItems = sheet.querySelectorAll('.character-gallery-item');
+    const characterGalleryEmpty = sheet.querySelector('.character-gallery-empty');
+
+    function applyCharacterGalleryFilter(type) {
+        let visibleCount = 0;
+
+        characterGalleryItems.forEach((item) => {
+            const itemType = item.dataset.artType;
+            const shouldShow = type === 'all' || itemType === type;
+            item.style.display = shouldShow ? 'block' : 'none';
+            if (shouldShow) visibleCount += 1;
+        });
+
+        if (characterGalleryEmpty) {
+            characterGalleryEmpty.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+    }
+
+    sheet.querySelectorAll('.character-art-filter-btn').forEach((button) => {
+        button.addEventListener('click', () => {
+            const type = button.dataset.artType;
+
+            sheet.querySelectorAll('.character-art-filter-btn').forEach((btn) => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            applyCharacterGalleryFilter(type);
+        });
+    });
+
+    sheet.querySelectorAll('.character-gallery-item').forEach((item) => {
+        item.addEventListener('click', () => {
+            openImageModal(
+                item.dataset.image,
+                item.dataset.title,
+                item.dataset.description,
+                item.dataset.year,
+                item.dataset.artist
+            );
+        });
+    });
+
+    applyCharacterGalleryFilter('all');
+}
+
 function openCharacterSheet(characterId) {
     const character = characters[characterId];
-    
+
     if (character) {
         document.getElementById('character-modal-title').textContent = character.name;
-        
+
         const sheet = document.getElementById('character-sheet');
-        
-        // Determinar classe de status
+
         let statusClass = 'status-unknown';
         if (character.status && character.status.toLowerCase().includes('vivo')) {
             statusClass = 'status-alive';
         } else if (character.status && character.status.toLowerCase().includes('morto')) {
             statusClass = 'status-deceased';
         }
-        
-        // Gerar gráfico de estrela se existirem stats
+
         let starChartHTML = '';
         if (character.stats) {
             starChartHTML = generateStarChart(character.stats, character.name);
         }
-        
+
+        const characterGalleryItems = getCharacterGalleryItems(character);
+
         sheet.innerHTML = `
             <div class="character-sheet-header">
                 <h2>${character.name}</h2>
                 <div class="character-role">${character.role || 'Personagem Principal'}</div>
             </div>
-            
+
             <div class="character-photo-section">
                 <div class="photo-frame">
                     <img src="${character.portrait}" alt="${character.name}">
                 </div>
                 <div class="photo-label">IDENTIFICAÇÃO OFICIAL</div>
-                
+
                 ${starChartHTML}
-                
+
                 <div class="character-basic-info">
                     <div class="info-grid">
                         <div class="info-item">
                             <div class="info-label">Nome Completo</div>
                             <div class="info-value">${character.fullName || character.name}</div>
                         </div>
-                        
+
                         <div class="info-item">
                             <div class="info-label">Idade</div>
                             <div class="info-value">${character.age}</div>
                         </div>
-                        
+
                         <div class="info-item">
                             <div class="info-label">Data de Nascimento</div>
                             <div class="info-value">${character.birthday || 'Desconhecida'}</div>
                         </div>
-                        
+
                         <div class="info-item">
                             <div class="info-label">Gênero</div>
                             <div class="info-value">${character.gender}</div>
                         </div>
-                        
+
                         <div class="info-item">
                             <div class="info-label">Altura</div>
                             <div class="info-value">${character.height}</div>
                         </div>
-                        
+
                         <div class="info-item">
                             <div class="info-label">Peso</div>
                             <div class="info-value">${character.weight}</div>
                         </div>
-                        
+
                         <div class="info-item">
                             <div class="info-label">Tipo Sanguíneo</div>
                             <div class="info-value">${character.bloodType || 'Desconhecido'}</div>
                         </div>
-                        
+
                         <div class="info-item">
                             <div class="info-label">Status</div>
                             <div class="info-value">
@@ -560,84 +720,101 @@ function openCharacterSheet(characterId) {
                     </div>
                 </div>
             </div>
-            
-            <div class="character-details">
-                <div class="detail-section">
-                    <h3><i class="fas fa-user"></i> Descrição Física</h3>
-                    <p>${character.physicalDescription || character.description}</p>
+
+            <div class="character-content-section">
+                <div class="character-tabs">
+                    <button class="character-tab-btn active" type="button" data-tab-target="details">Ficha</button>
+                    <button class="character-tab-btn" type="button" data-tab-target="gallery">Galeria</button>
                 </div>
-                
-                <div class="detail-section">
-                    <h3><i class="fas fa-brain"></i> Personalidade</h3>
-                    <p>${character.personality}</p>
-                </div>
-                
-                <div class="detail-section">
-                    <h3><i class="fas fa-history"></i> Histórico</h3>
-                    <p>${character.background}</p>
-                </div>
-                
-                ${character.affiliation ? `
-                <div class="detail-section">
-                    <h3><i class="fas fa-users"></i> Afiliação</h3>
-                    <p>${character.affiliation}</p>
-                </div>
-                ` : ''}
-                
-                ${character.occupation ? `
-                <div class="detail-section">
-                    <h3><i class="fas fa-briefcase"></i> Ocupação</h3>
-                    <p>${character.occupation}</p>
-                </div>
-                ` : ''}
-                
-                <div class="detail-section">
-                    <h3><i class="fas fa-fire"></i> Habilidades & Poderes</h3>
-                    <div class="abilities-list">
-                        ${character.abilities ? character.abilities.map(ability => `
-                            <span class="ability-tag">${ability}</span>
-                        `).join('') : '<p>Nenhuma habilidade registrada</p>'}
-                    </div>
-                </div>
-                
-                ${character.relationships && character.relationships.length > 0 ? `
-                <div class="detail-section">
-                    <h3><i class="fas fa-heart"></i> Relações</h3>
-                    <div class="relationships-grid">
-                        ${character.relationships.map(rel => `
-                            <div class="relationship-item">
-                                <div class="relationship-name">${rel.name}</div>
-                                <div class="relationship-type">${rel.relation}</div>
+
+                <div class="character-tab-pane active" data-tab-pane="details">
+                    <div class="character-details">
+                        <div class="detail-section">
+                            <h3><i class="fas fa-user"></i> Descrição Física</h3>
+                            <p>${character.physicalDescription || character.description}</p>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3><i class="fas fa-brain"></i> Personalidade</h3>
+                            <p>${character.personality}</p>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3><i class="fas fa-history"></i> Histórico</h3>
+                            <p>${character.background}</p>
+                        </div>
+
+                        ${character.affiliation ? `
+                        <div class="detail-section">
+                            <h3><i class="fas fa-users"></i> Afiliação</h3>
+                            <p>${character.affiliation}</p>
+                        </div>
+                        ` : ''}
+
+                        ${character.occupation ? `
+                        <div class="detail-section">
+                            <h3><i class="fas fa-briefcase"></i> Ocupação</h3>
+                            <p>${character.occupation}</p>
+                        </div>
+                        ` : ''}
+
+                        <div class="detail-section">
+                            <h3><i class="fas fa-fire"></i> Habilidades & Poderes</h3>
+                            <div class="abilities-list">
+                                ${character.abilities ? character.abilities.map(ability => `
+                                    <span class="ability-tag">${ability}</span>
+                                `).join('') : '<p>Nenhuma habilidade registrada</p>'}
                             </div>
-                        `).join('')}
+                        </div>
+
+                        ${character.relationships && character.relationships.length > 0 ? `
+                        <div class="detail-section">
+                            <h3><i class="fas fa-heart"></i> Relações</h3>
+                            <div class="relationships-grid">
+                                ${character.relationships.map(rel => `
+                                    <div class="relationship-item">
+                                        <div class="relationship-name">${rel.name}</div>
+                                        <div class="relationship-type">${rel.relation}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        ${character.trivia && character.trivia.length > 0 ? `
+                        <div class="detail-section">
+                            <h3><i class="fas fa-lightbulb"></i> Curiosidades</h3>
+                            <ul class="trivia-list">
+                                ${character.trivia.map(item => `
+                                    <li>${item}</li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        ` : ''}
+
+                        ${character.quote ? `
+                        <div class="detail-section" style="grid-column: 1 / -1; background: rgba(255, 107, 53, 0.1); border-color: #ff6b35;">
+                            <h3><i class="fas fa-quote-left"></i> Citação Marcante</h3>
+                            <p style="font-style: italic; font-size: 1.2rem; color: #ff6b35;">"${character.quote}"</p>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
-                ` : ''}
-                
-                ${character.trivia && character.trivia.length > 0 ? `
-                <div class="detail-section">
-                    <h3><i class="fas fa-lightbulb"></i> Curiosidades</h3>
-                    <ul class="trivia-list">
-                        ${character.trivia.map(item => `
-                            <li>${item}</li>
-                        `).join('')}
-                    </ul>
+
+                <div class="character-tab-pane" data-tab-pane="gallery">
+                    <div class="character-gallery-header">
+                        <h3><i class="fas fa-images"></i> Galeria de ${character.name}</h3>
+                        <p>Artes associadas automaticamente pela tag: <strong>${character.tag || '-'}</strong></p>
+                    </div>
+                    ${renderCharacterGallery(characterGalleryItems)}
                 </div>
-                ` : ''}
-                
-                ${character.quote ? `
-                <div class="detail-section" style="grid-column: 1 / -1; background: rgba(255, 107, 53, 0.1); border-color: #ff6b35;">
-                    <h3><i class="fas fa-quote-left"></i> Citação Marcante</h3>
-                    <p style="font-style: italic; font-size: 1.2rem; color: #ff6b35;">"${character.quote}"</p>
-                </div>
-                ` : ''}
             </div>
         `;
-        
+
         closeModal(document.getElementById('modal-personagens'));
         openModal(document.getElementById('modal-character'));
-        
-        // Adicionar animação de entrada
+        setupCharacterSheetTabs(sheet);
+
         setTimeout(() => {
             sheet.style.opacity = '1';
             sheet.style.transform = 'translateY(0)';
