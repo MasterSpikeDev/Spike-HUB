@@ -11,6 +11,7 @@ let selectedChapter = null;
 let selectedFile = null;
 let selectedArtworkType = 'all';
 let selectedArtworkSearch = '';
+let fireAudioCtx = null;
 
 const artTypeLabels = {
     all: 'Todas',
@@ -59,7 +60,8 @@ function renderChaptersForVolume(volumeNumber) {
 function openModal(modal) {
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
-    
+    playFireSound('open');
+
     // Adicionar classe active para animação
     setTimeout(() => {
         modal.classList.add('active');
@@ -69,12 +71,161 @@ function openModal(modal) {
 // Função para fechar modal CORRIGIDA
 function closeModal(modal) {
     modal.classList.remove('active');
-    
+    playFireSound('close');
+
     // Esperar a animação terminar antes de esconder
     setTimeout(() => {
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
     }, 300);
+}
+
+function initFireFX() {
+    createFloatingSparks();
+    initParticleCanvas();
+    setupFireAudioInteractions();
+}
+
+function createFloatingSparks() {
+    const sparksCount = 32;
+
+    for (let i = 0; i < sparksCount; i += 1) {
+        const spark = document.createElement('span');
+        spark.className = 'fire-spark';
+        spark.style.left = `${Math.random() * 100}vw`;
+        spark.style.animationDuration = `${6 + Math.random() * 8}s`;
+        spark.style.animationDelay = `${Math.random() * -12}s`;
+        spark.style.setProperty('--drift-x', `${-80 + Math.random() * 160}px`);
+        spark.style.opacity = `${0.35 + Math.random() * 0.65}`;
+        document.body.appendChild(spark);
+    }
+}
+
+function initParticleCanvas() {
+    const canvas = document.getElementById('fire-particles');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const particles = [];
+
+    const resize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    };
+
+    const spawnParticle = () => {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: canvas.height + Math.random() * 40,
+            size: 1 + Math.random() * 3,
+            vy: 0.5 + Math.random() * 1.8,
+            vx: -0.35 + Math.random() * 0.7,
+            life: 70 + Math.random() * 80,
+            hue: 18 + Math.random() * 25
+        });
+    };
+
+    const animate = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (particles.length < 140) {
+            for (let i = 0; i < 4; i += 1) spawnParticle();
+        }
+
+        for (let i = particles.length - 1; i >= 0; i -= 1) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y -= p.vy;
+            p.life -= 1;
+
+            const alpha = Math.max(p.life / 130, 0);
+            ctx.beginPath();
+            ctx.fillStyle = `hsla(${p.hue}, 100%, 58%, ${alpha})`;
+            ctx.shadowColor = `hsla(${p.hue}, 100%, 62%, ${alpha})`;
+            ctx.shadowBlur = 14;
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (p.life <= 0 || p.y < -20) {
+                particles.splice(i, 1);
+            }
+        }
+
+        requestAnimationFrame(animate);
+    };
+
+    resize();
+    window.addEventListener('resize', resize);
+    animate();
+}
+
+function getAudioContext() {
+    if (fireAudioCtx) return fireAudioCtx;
+    const AudioContextRef = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextRef) return null;
+    fireAudioCtx = new AudioContextRef();
+    return fireAudioCtx;
+}
+
+function playFireSound(type = 'click') {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    osc.type = 'triangle';
+    filter.type = 'bandpass';
+    filter.frequency.value = type === 'close' ? 280 : 420;
+
+    const startFreq = type === 'open' ? 240 : type === 'close' ? 460 : 300;
+    const endFreq = type === 'open' ? 560 : type === 'close' ? 200 : 430;
+
+    osc.frequency.setValueAtTime(startFreq, now);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.14);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.05, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.17);
+}
+
+function setupFireAudioInteractions() {
+    const primingEvents = ['pointerdown', 'keydown'];
+    const unlockAudio = () => {
+        const ctx = getAudioContext();
+        if (ctx && ctx.state === 'suspended') {
+            ctx.resume();
+        }
+        primingEvents.forEach(evt => window.removeEventListener(evt, unlockAudio));
+    };
+
+    primingEvents.forEach(evt => window.addEventListener(evt, unlockAudio, { once: true }));
+
+    document.addEventListener('click', (event) => {
+        const interactive = event.target.closest('button, a, .big-button, .chapter-btn, .volume-btn, .close-modal');
+        if (interactive) {
+            playFireSound('click');
+        }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            playFireSound('open');
+        }
+    });
+
+    window.addEventListener('beforeunload', () => {
+        playFireSound('close');
+    });
 }
 
 // Inicializar a aplicação
@@ -83,6 +234,7 @@ function init() {
     
     // Configurar event listeners
     setupEventListeners();
+    initFireFX();
     renderCharacters();
     renderArtworkTypeFilters();
     renderArtworks();
@@ -434,6 +586,7 @@ function renderArtworks() {
                 openImageModal(imageUrl, title, description, year, artist);
             } else {
                 console.warn('Função openImageModal não encontrada!');
+                playFireSound('open');
                 window.open(imageUrl, '_blank');
             }
         });
@@ -466,6 +619,7 @@ function renderMusic() {
         
         card.addEventListener('click', function() {
             const youtubeUrl = this.getAttribute('data-url');
+            playFireSound('open');
             window.open(youtubeUrl, '_blank');
         });
     });
@@ -512,6 +666,7 @@ function renderChapters() {
     document.getElementById('confirm-read').addEventListener('click', function() {
         if (selectedVolume && selectedChapter && selectedFile) {
             const pdfPath = `./posts/volume${selectedVolume}/${selectedFile}`;
+            playFireSound('open');
             window.open(pdfPath, '_blank');
             closeModal(document.getElementById('modal-ler'));
         }

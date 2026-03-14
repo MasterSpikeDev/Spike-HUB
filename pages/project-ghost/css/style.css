@@ -9,6 +9,66 @@
     --card-bg: #090000;
 }
 
+
+/* ===== FIRE EXPERIENCE LAYER ===== */
+#fire-particles {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 4;
+    opacity: 0.85;
+}
+
+.fire-ambience {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    background:
+        radial-gradient(circle at 50% 110%, rgba(255, 80, 0, 0.28), transparent 45%),
+        radial-gradient(circle at 10% 0%, rgba(255, 30, 0, 0.09), transparent 40%),
+        radial-gradient(circle at 90% 15%, rgba(255, 140, 0, 0.08), transparent 35%);
+    mix-blend-mode: screen;
+    animation: fireAmbienceShift 12s ease-in-out infinite alternate;
+}
+
+@keyframes fireAmbienceShift {
+    0% { filter: saturate(1) brightness(1); }
+    100% { filter: saturate(1.15) brightness(1.08); }
+}
+
+.fire-spark {
+    position: fixed;
+    bottom: -40px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, #ffe8a8 0%, #ff8f1f 65%, transparent 100%);
+    box-shadow: 0 0 12px rgba(255, 109, 22, 0.8);
+    opacity: 0;
+    z-index: 5;
+    animation-name: floatSpark;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes floatSpark {
+    0% {
+        transform: translate3d(0, 0, 0) scale(0.8);
+        opacity: 0;
+    }
+    12% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate3d(var(--drift-x, 30px), -120vh, 0) scale(0.15);
+        opacity: 0;
+    }
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -3120,4 +3180,73 @@ body.modal-open {
 .legend-number {
     font-size: 1.05rem;
     min-width: 30px;
+}
+
+
+body,
+body * {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' shape-rendering='crispEdges' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='none'/%3E%3Crect x='13' y='2' width='3' height='3' fill='%23fff2b0'/%3E%3Crect x='10' y='5' width='9' height='3' fill='%23ffe16e'/%3E%3Crect x='8' y='8' width='13' height='4' fill='%23ffb347'/%3E%3Crect x='7' y='12' width='14' height='5' fill='%23ff7f2a'/%3E%3Crect x='8' y='17' width='12' height='5' fill='%23ff4f1f'/%3E%3Crect x='10' y='22' width='8' height='5' fill='%23c91e00'/%3E%3Crect x='12' y='27' width='4' height='3' fill='%23080000'/%3E%3C/svg%3E") 8 4, auto;
+}
+
+a,
+button,
+.big-button,
+.modal,
+.close-modal,
+input,
+.cta-button,
+.volume-btn,
+.chapter-btn,
+.character-card,
+.gallery-item,
+.music-card {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' shape-rendering='crispEdges' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='none'/%3E%3Crect x='13' y='2' width='3' height='3' fill='%23fff2b0'/%3E%3Crect x='10' y='5' width='9' height='3' fill='%23ffe16e'/%3E%3Crect x='8' y='8' width='13' height='4' fill='%23ffb347'/%3E%3Crect x='7' y='12' width='14' height='5' fill='%23ff7f2a'/%3E%3Crect x='8' y='17' width='12' height='5' fill='%23ff4f1f'/%3E%3Crect x='10' y='22' width='8' height='5' fill='%23c91e00'/%3E%3Crect x='12' y='27' width='4' height='3' fill='%23080000'/%3E%3C/svg%3E") 8 4, pointer;
+}
+
+header,
+.hero,
+.buttons-grid,
+.curiosities-section,
+footer,
+.modal-content {
+    position: relative;
+    z-index: 6;
+}
+
+header {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 64, 0, 0.2);
+}
+
+.logo i,
+.button-icon,
+.section-header h2 i,
+.section-header h3 i {
+    color: #ff6a00;
+    text-shadow: 0 0 12px rgba(255, 95, 0, 0.8);
+}
+
+.big-button {
+    border: 1px solid rgba(255, 90, 0, 0.45);
+}
+
+.big-button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(130deg, transparent 15%, rgba(255, 90, 0, 0.28) 50%, transparent 85%);
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+.big-button:hover::after {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #fire-particles,
+    .fire-spark,
+    .fire-ambience {
+        display: none !important;
+    }
 }
