@@ -1134,3 +1134,187 @@ document.querySelectorAll(".modal-content").forEach(modal => {
     });
 });
 
+
+/* ===== FIRE EXPERIENCE ENHANCEMENTS ===== */
+(function setupFireExperience() {
+    const ready = () => {
+        setupFireCursorGlow();
+        setupEmberParticles();
+        setupFireSounds();
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', ready, { once: true });
+    } else {
+        ready();
+    }
+})();
+
+function setupFireCursorGlow() {
+    const glow = document.querySelector('.fire-cursor-glow');
+    if (!glow) return;
+
+    const moveGlow = (event) => {
+        glow.style.transform = `translate(${event.clientX - 21}px, ${event.clientY - 21}px)`;
+    };
+
+    document.addEventListener('mousemove', moveGlow, { passive: true });
+    document.addEventListener('mouseleave', () => {
+        glow.style.transform = 'translate(-999px, -999px)';
+    });
+}
+
+function setupEmberParticles() {
+    const canvas = document.getElementById('ember-canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const embers = [];
+    const EMBER_COUNT = 85;
+    let width = 0;
+    let height = 0;
+
+    const resize = () => {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+    };
+
+    const makeEmber = (resetBottom = false) => ({
+        x: Math.random() * width,
+        y: resetBottom ? height + Math.random() * 60 : Math.random() * height,
+        size: Math.random() * 2.8 + 0.8,
+        speedY: Math.random() * 1.5 + 0.4,
+        drift: (Math.random() - 0.5) * 0.9,
+        alpha: Math.random() * 0.55 + 0.2,
+        hue: 18 + Math.random() * 40,
+        life: Math.random() * 220 + 40
+    });
+
+    const init = () => {
+        embers.length = 0;
+        for (let i = 0; i < EMBER_COUNT; i += 1) {
+            embers.push(makeEmber());
+        }
+    };
+
+    const draw = () => {
+        ctx.clearRect(0, 0, width, height);
+
+        embers.forEach((ember, index) => {
+            ember.x += ember.drift;
+            ember.y -= ember.speedY;
+            ember.life -= 1;
+
+            if (ember.y < -20 || ember.x < -30 || ember.x > width + 30 || ember.life <= 0) {
+                embers[index] = makeEmber(true);
+                return;
+            }
+
+            const gradient = ctx.createRadialGradient(ember.x, ember.y, 0, ember.x, ember.y, ember.size * 5);
+            gradient.addColorStop(0, `hsla(${ember.hue}, 100%, 75%, ${ember.alpha})`);
+            gradient.addColorStop(0.5, `hsla(${ember.hue + 8}, 100%, 55%, ${ember.alpha * 0.6})`);
+            gradient.addColorStop(1, 'rgba(255, 40, 0, 0)');
+
+            ctx.beginPath();
+            ctx.fillStyle = gradient;
+            ctx.arc(ember.x, ember.y, ember.size * 4.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.fillStyle = `hsla(${ember.hue + 8}, 100%, 72%, ${Math.min(1, ember.alpha + 0.12)})`;
+            ctx.arc(ember.x, ember.y, ember.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        requestAnimationFrame(draw);
+    };
+
+    resize();
+    init();
+    draw();
+    window.addEventListener('resize', () => {
+        resize();
+        init();
+    });
+}
+
+function setupFireSounds() {
+    let audioCtx = null;
+
+    const getAudioCtx = () => {
+        if (!audioCtx) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return null;
+            audioCtx = new AudioContextClass();
+        }
+
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        return audioCtx;
+    };
+
+    const playFireTone = (type = 'click') => {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+
+        const now = ctx.currentTime;
+        const gain = ctx.createGain();
+        const osc = ctx.createOscillator();
+        const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.12, ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+
+        for (let i = 0; i < data.length; i += 1) {
+            data[i] = (Math.random() * 2 - 1) * 0.12;
+        }
+
+        const noise = ctx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        const noiseFilter = ctx.createBiquadFilter();
+        noiseFilter.type = 'highpass';
+        noiseFilter.frequency.value = type === 'close' ? 450 : 700;
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(type === 'close' ? 180 : 240, now);
+        osc.frequency.exponentialRampToValueAtTime(type === 'close' ? 120 : 360, now + 0.08);
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.045, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+
+        noise.connect(noiseFilter);
+        noiseFilter.connect(gain);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now);
+        noise.start(now);
+        osc.stop(now + 0.16);
+        noise.stop(now + 0.13);
+    };
+
+    document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!target) return;
+
+        if (target.closest('.close-modal')) {
+            playFireTone('close');
+            return;
+        }
+
+        if (target.closest('a, button, .big-button, [data-open-modal]')) {
+            playFireTone('click');
+        }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            playFireTone('click');
+        }
+    });
+}

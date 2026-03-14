@@ -3121,3 +3121,126 @@ body.modal-open {
     font-size: 1.05rem;
     min-width: 30px;
 }
+
+/* ===== FIRE IMMERSION PACK ===== */
+:root {
+    --fire-hot: #ff6a00;
+    --fire-warm: #ff2f00;
+    --fire-soft: rgba(255, 106, 0, 0.24);
+}
+
+html,
+body {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' shape-rendering='crispEdges' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='none'/%3E%3Crect x='13' y='1' width='6' height='3' fill='%23fff4cc'/%3E%3Crect x='11' y='4' width='10' height='4' fill='%23ffd166'/%3E%3Crect x='9' y='8' width='14' height='5' fill='%23ff9f1c'/%3E%3Crect x='8' y='13' width='16' height='6' fill='%23ff6a00'/%3E%3Crect x='10' y='19' width='12' height='7' fill='%23ff2f00'/%3E%3Crect x='12' y='26' width='8' height='4' fill='%238a1400'/%3E%3C/svg%3E") 10 5, auto;
+}
+
+a,
+button,
+.big-button,
+.close-modal,
+input,
+textarea,
+[role="button"] {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' shape-rendering='crispEdges' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='none'/%3E%3Crect x='13' y='1' width='6' height='3' fill='%23fff4cc'/%3E%3Crect x='11' y='4' width='10' height='4' fill='%23ffd166'/%3E%3Crect x='9' y='8' width='14' height='5' fill='%23ff9f1c'/%3E%3Crect x='8' y='13' width='16' height='6' fill='%23ff6a00'/%3E%3Crect x='10' y='19' width='12' height='7' fill='%23ff2f00'/%3E%3Crect x='12' y='26' width='8' height='4' fill='%238a1400'/%3E%3C/svg%3E") 10 5, pointer;
+}
+
+#ember-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 12;
+    opacity: 0.95;
+}
+
+.fire-vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 8;
+    background:
+        radial-gradient(circle at 50% 120%, rgba(255, 90, 0, 0.16), transparent 45%),
+        radial-gradient(circle at 5% 80%, rgba(255, 136, 0, 0.14), transparent 35%),
+        radial-gradient(circle at 95% 75%, rgba(255, 60, 0, 0.14), transparent 35%);
+    animation: fireVignettePulse 5.5s ease-in-out infinite;
+}
+
+.fire-cursor-glow {
+    position: fixed;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 20;
+    background: radial-gradient(circle, rgba(255, 202, 102, 0.45) 0%, rgba(255, 82, 0, 0.25) 40%, transparent 70%);
+    mix-blend-mode: screen;
+    transform: translate(-999px, -999px);
+    transition: transform 0.05s linear;
+}
+
+header,
+.hero,
+.big-button,
+.curiosity-card,
+.modal-content,
+footer {
+    position: relative;
+    overflow: hidden;
+}
+
+header::before,
+.hero::before,
+.big-button::before,
+.curiosity-card::before,
+.modal-content::before,
+footer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(110deg, transparent 0%, rgba(255, 165, 64, 0.07) 45%, rgba(255, 88, 0, 0.13) 50%, transparent 58%);
+    transform: translateX(-140%);
+    animation: fireSweep 8s linear infinite;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 180px;
+    background: radial-gradient(ellipse at bottom, rgba(255, 73, 0, 0.36), rgba(255, 73, 0, 0.08) 50%, transparent 70%);
+    filter: blur(12px);
+    animation: floorFlame 4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes fireSweep {
+    from { transform: translateX(-140%); }
+    to { transform: translateX(140%); }
+}
+
+@keyframes floorFlame {
+    0%, 100% { opacity: 0.4; transform: scaleX(1); }
+    50% { opacity: 0.75; transform: scaleX(1.07); }
+}
+
+@keyframes fireVignettePulse {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 0.95; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #ember-canvas,
+    .fire-vignette,
+    .fire-cursor-glow,
+    header::before,
+    .hero::before,
+    .big-button::before,
+    .curiosity-card::before,
+    .modal-content::before,
+    footer::before,
+    .hero::after {
+        animation: none !important;
+    }
+}
