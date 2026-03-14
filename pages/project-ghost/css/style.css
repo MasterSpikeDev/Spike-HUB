@@ -1481,6 +1481,7 @@ nav a:hover::after {
 /* ===== MODAL DE IMAGEM CORRIGIDO SEM LIMITES ===== */
 #modal-image {
     background: rgba(0, 0, 0, 0.98);
+    z-index: 11050;
 }
 
 #modal-image .modal-content {
