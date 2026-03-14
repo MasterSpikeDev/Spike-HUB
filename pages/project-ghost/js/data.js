@@ -125,12 +125,34 @@ const characters = {
 // Dados das artes (com descrições expandidas)
 const artworks = [
     {
+        id: 9,
+        title: "Dupla principal",
+        artType: "arte oficial",
+        image: "assets/images/arts/artes/12.png",
+        description: "Haruki Takamatsu e Fumiko Emi, arte completa",
+        year: "2026",
+        artist: "Official Art - Visual Direction / Samuel Victor",
+        tags: ["haruki", "fumiko"]
+    },
+    {
         id: 10,
         title: "Haruki Takamatsu - A vingança",
+        artType: "arte oficial",
         image: "assets/images/arts/artes/10.png",
         description: "''Agora eu vou te ensinar a diferença entre fogo e vingança. Corre, eu gosto quando o medo acende primeiro que minhas chamas''",
         year: "2026",
-        artist: "Official Art - Visual Direction / Samuel Victor"
+        artist: "Official Art - Visual Direction / Samuel Victor",
+        tags: ["haruki"]
+    },
+    {
+        id: 13,
+        title: "Fumiko Emi - A promessa",
+        artType: "arte oficial",
+        image: "assets/images/arts/artes/11.png",
+        description: "''Promessas feitas na nossa organização não são palavras jogadas ao vento. São escolhas que continuam valendo mesmo quando você se arrepende.''",
+        year: "2026",
+        artist: "Official Art - Visual Direction / Samuel Victor",
+        tags: ["fumiko"]
     },
     {
         id: 1,
@@ -157,7 +179,7 @@ const artworks = [
         title: "Fumiko Emi - Concept Art 1",
         artType: "concept art",
         image: "assets/images/arts/concept-arts/fumiko/1.png",
-        description: "Arte conceitual gerada por IA, de Fumiko Emi",
+        description: "Arte conceitual gerada por IA, de Fumiko Emi, roupas escolares",
         year: "2025",
         artist: "Concept Art - IA",
         tags: ["fumiko"]
@@ -220,17 +242,7 @@ const artworks = [
         description: "Arte feita em sua primeira versão da história (The Ghoul`s Prophecy), na arte temos Fumiko Emi roubando as iconicas batatinhas fritas de Nero.",
         year: "2022",
         artist: "Fan Art - Ludivine / Yellow Mariana",
-        tags: ["fumiko", "nero"]
-    },
-    {
-        id: 9,
-        title: "Dupla principal",
-        artType: "arte oficial",
-        image: "assets/images/arts/artes/1.png",
-        description: "Haruki Takamatsu e Fumiko Emi, arte completa",
-        year: "2025",
-        artist: "Official Art - IA",
-        tags: ["haruki", "fumiko"]
+        tags: ["fumiko", "nero", "haruki"]
     }
 ];
 // Dados dos capítulos (mantidos iguais)
