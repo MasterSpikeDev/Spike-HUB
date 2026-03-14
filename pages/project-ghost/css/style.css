@@ -3008,3 +3008,116 @@ body.modal-open {
     background: rgba(255, 255, 255, 0.05);
     border-color: transparent;
 }
+
+/* ===== REFINO VISUAL: STATUS DA FICHA DE PERSONAGEM ===== */
+.star-chart-container {
+    max-width: 360px;
+    padding: 18px;
+    border-radius: 14px;
+    background:
+        linear-gradient(145deg, rgba(20, 14, 34, 0.95), rgba(10, 8, 20, 0.95));
+    border: 1px solid rgba(255, 76, 76, 0.45);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.star-chart-title {
+    font-size: 1.45rem;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+}
+
+.total-score {
+    padding: 12px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(88, 25, 25, 0.35), rgba(35, 12, 18, 0.5));
+    border: 1px solid rgba(255, 86, 86, 0.35);
+}
+
+.score-label {
+    font-size: 0.82rem;
+    color: #d6c8c8;
+}
+
+.score-value {
+    font-size: 1.9rem;
+    letter-spacing: 0.5px;
+    color: #ff4242;
+}
+
+.star-status-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin: 10px 0 14px;
+}
+
+.star-status-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: rgba(14, 16, 30, 0.9);
+    border: 1px solid rgba(255, 86, 86, 0.25);
+    border-left: 4px solid rgba(255, 72, 72, 0.8);
+    border-radius: 8px;
+    padding: 9px 10px;
+}
+
+.star-status-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #bdb6c9;
+}
+
+.star-status-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.star-chart {
+    width: 285px;
+    height: 285px;
+}
+
+.star-label {
+    font-size: 0.72rem;
+    background: rgba(8, 10, 18, 0.92);
+    border-color: rgba(255, 76, 76, 0.4);
+    border-radius: 7px;
+    padding: 6px 8px;
+}
+
+.star-label-value {
+    font-size: 1.15rem;
+}
+
+.star-legend {
+    margin-top: 16px;
+    padding: 14px;
+    border-radius: 10px;
+    background: rgba(12, 10, 19, 0.85);
+    border: 1px solid rgba(255, 77, 77, 0.25);
+}
+
+.legend-item {
+    padding: 8px 4px;
+}
+
+.legend-name {
+    font-size: 0.9rem;
+    color: #f0e9e9;
+    letter-spacing: 0.4px;
+}
+
+.legend-bar {
+    width: 88px;
+    height: 11px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.legend-number {
+    font-size: 1.05rem;
+    min-width: 30px;
+}
