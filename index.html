@@ -1607,6 +1607,12 @@
 
     const IMGS = { main: "assets/images/me-main2.jpeg", about: "assets/images/me-about2.jpeg" };
 
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const isDataSaverEnabled = Boolean(connection && connection.saveData);
+    const isLowEndDevice = typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 4;
+    const useLightBackgroundMode = prefersReducedMotion || isDataSaverEnabled || isLowEndDevice;
+
     const $ = (q, r = document) => r.querySelector(q);
     const $$ = (q, r = document) => [...r.querySelectorAll(q)];
 
@@ -1616,7 +1622,7 @@
 
     const BACKGROUNDS = {
       main: {
-        type: 'video', // 'image' ou 'video'
+        type: useLightBackgroundMode ? 'image' : 'video', // 'image' ou 'video'
         src: 'assets/background/bg-main.jpg', // Para imagens
         videoSrc: 'assets/background/videos/natori.absolute_zero.mp4' // Para vídeos
       },
@@ -1670,15 +1676,14 @@
         video.muted = true;
         video.autoplay = true;
         video.playsInline = true;
+        video.preload = 'none';
+        video.disablePictureInPicture = true;
+        video.setAttribute('playsinline', '');
+        video.setAttribute('preload', 'none');
         video.volume = this.volume;
+        video.poster = bgConfig.src || '';
         video.setAttribute('data-view', view);
         video.setAttribute('data-src', bgConfig.videoSrc);
-
-        const source = document.createElement('source');
-        source.src = bgConfig.videoSrc;
-        source.type = 'video/mp4';
-
-        video.appendChild(source);
         video.appendChild(document.createTextNode('Seu navegador não suporta vídeos HTML5.'));
 
         bgElement.appendChild(video);
@@ -1688,7 +1693,8 @@
           element: video,
           src: bgConfig.videoSrc,
           currentTime: 0,
-          isPlaying: false
+          isPlaying: false,
+          isLoaded: false
         };
 
         // Adiciona event listeners para salvar estado
@@ -1711,6 +1717,20 @@
         });
 
         return video;
+      },
+
+
+      ensureVideoSource(videoData, preloadMode = 'metadata') {
+        if (!videoData || !videoData.element || videoData.isLoaded) return;
+
+        const source = document.createElement('source');
+        source.src = videoData.src;
+        source.type = 'video/mp4';
+        videoData.element.preload = preloadMode;
+        videoData.element.setAttribute('preload', preloadMode);
+        videoData.element.appendChild(source);
+        videoData.element.load();
+        videoData.isLoaded = true;
       },
 
       // Pausa todos os vídeos exceto o especificado
@@ -1742,6 +1762,8 @@
 
         // Se estamos indo para uma view com vídeo
         if (toVideo && toVideo.element) {
+          this.ensureVideoSource(toVideo, 'auto');
+
           // Verifica se é o mesmo vídeo que estava tocando
           const isSameVideo = fromVideo &&
             this.isSameVideo(fromVideo.src, toVideo.src);
@@ -1922,6 +1944,15 @@
       if (bgConfig.type === 'video' && bgConfig.videoSrc) {
         // Usa o gerenciador de vídeos para obter ou criar o vídeo
         const video = videoManager.getOrCreateVideo(view, bgElement, bgConfig);
+        const isActiveView = document.body.getAttribute('data-view') === view;
+
+        // Só inicia download/tocagem quando a view está ativa
+        if (!isActiveView) {
+          return;
+        }
+
+        const videoData = videoManager.videos[`video-${view}`];
+        videoManager.ensureVideoSource(videoData, 'auto');
 
         // Tenta tocar o vídeo (mutado inicialmente)
         const playPromise = video.play();
@@ -2090,6 +2121,18 @@
 
     // Configura todos os backgrounds inicialmente
     Object.keys(BACKGROUNDS).forEach(view => setupBackground(view));
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        videoManager.pauseAllVideos();
+        return;
+      }
+
+      const activeView = document.body.getAttribute('data-view');
+      if (activeView) {
+        videoManager.switchView(videoManager.currentView, activeView);
+      }
+    });
 
     $('#lang').addEventListener('change', (e) => {
       const v = e.target.value;
