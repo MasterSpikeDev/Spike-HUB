@@ -1348,6 +1348,12 @@ nav a:hover::after {
 }
 
 
+.art-search-bar,
+.character-gallery-search-bar {
+    margin-bottom: 12px;
+}
+
+
 .gallery-item {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;

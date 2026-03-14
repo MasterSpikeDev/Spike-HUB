@@ -10,6 +10,7 @@ let selectedVolume = null;
 let selectedChapter = null;
 let selectedFile = null;
 let selectedArtworkType = 'all';
+let selectedArtworkSearch = '';
 
 const artTypeLabels = {
     all: 'Todas',
@@ -167,6 +168,15 @@ function setupEventListeners() {
         });
     });
 
+    // Pesquisa da galeria de artes
+    const artSearch = document.getElementById('art-search');
+    if (artSearch) {
+        artSearch.addEventListener('input', function() {
+            selectedArtworkSearch = this.value;
+            renderArtworks();
+        });
+    }
+
     // Abrir modal de contato
     document.querySelector('.curiosities-cta .cta-button').addEventListener('click', function(e) {
         e.preventDefault();
@@ -316,6 +326,16 @@ function getFilteredArtworksByType(items, type) {
     return items.filter((art) => normalizeArtType(art.artType) === type);
 }
 
+function getFilteredArtworksBySearch(items, searchTerm) {
+    const term = (searchTerm || '').toLowerCase().trim();
+    if (!term) return items;
+
+    return items.filter((art) => {
+        const text = `${art.title || ''} ${art.description || ''} ${art.artist || ''}`.toLowerCase();
+        return text.includes(term);
+    });
+}
+
 function renderArtworkTypeFilters() {
     const filtersContainer = document.getElementById('art-filters');
     if (!filtersContainer) return;
@@ -352,10 +372,11 @@ function renderArtworks() {
         return;
     }
 
-    const filteredArtworks = getFilteredArtworksByType(artworks, selectedArtworkType);
+    const artworksByType = getFilteredArtworksByType(artworks, selectedArtworkType);
+    const filteredArtworks = getFilteredArtworksBySearch(artworksByType, selectedArtworkSearch);
 
     if (filteredArtworks.length === 0) {
-        galleryGrid.innerHTML = '<p class="no-artworks" style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">Nenhuma arte encontrada para esse tipo.</p>';
+        galleryGrid.innerHTML = '<p class="no-artworks" style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">Nenhuma arte encontrada para os filtros atuais.</p>';
         return;
     }
 
@@ -545,6 +566,10 @@ function renderCharacterGallery(items) {
             `).join('')}
         </div>
 
+        <div class="search-bar character-gallery-search-bar">
+            <input type="text" class="character-art-search" placeholder="Pesquisar artes deste personagem...">
+        </div>
+
         <div class="character-gallery-grid">
             ${items.map((art) => `
                 <button class="character-gallery-item" type="button"
@@ -586,31 +611,46 @@ function setupCharacterSheetTabs(sheet) {
     const characterGalleryItems = sheet.querySelectorAll('.character-gallery-item');
     const characterGalleryEmpty = sheet.querySelector('.character-gallery-empty');
 
-    function applyCharacterGalleryFilter(type) {
+    let selectedCharacterArtworkType = 'all';
+    let selectedCharacterArtworkSearch = '';
+
+    function applyCharacterGalleryFilters() {
         let visibleCount = 0;
 
         characterGalleryItems.forEach((item) => {
             const itemType = item.dataset.artType;
-            const shouldShow = type === 'all' || itemType === type;
+            const haystack = `${item.dataset.title || ''} ${item.dataset.description || ''} ${item.dataset.artist || ''}`.toLowerCase();
+            const matchesType = selectedCharacterArtworkType === 'all' || itemType === selectedCharacterArtworkType;
+            const matchesSearch = !selectedCharacterArtworkSearch || haystack.includes(selectedCharacterArtworkSearch);
+            const shouldShow = matchesType && matchesSearch;
             item.style.display = shouldShow ? 'block' : 'none';
             if (shouldShow) visibleCount += 1;
         });
 
         if (characterGalleryEmpty) {
             characterGalleryEmpty.style.display = visibleCount === 0 ? 'block' : 'none';
+            characterGalleryEmpty.querySelector('p').textContent = 'Nenhuma arte encontrada para os filtros atuais.';
         }
     }
 
     sheet.querySelectorAll('.character-art-filter-btn').forEach((button) => {
         button.addEventListener('click', () => {
-            const type = button.dataset.artType;
+            selectedCharacterArtworkType = button.dataset.artType;
 
             sheet.querySelectorAll('.character-art-filter-btn').forEach((btn) => btn.classList.remove('active'));
             button.classList.add('active');
 
-            applyCharacterGalleryFilter(type);
+            applyCharacterGalleryFilters();
         });
     });
+
+    const characterArtSearch = sheet.querySelector('.character-art-search');
+    if (characterArtSearch) {
+        characterArtSearch.addEventListener('input', function() {
+            selectedCharacterArtworkSearch = this.value.toLowerCase().trim();
+            applyCharacterGalleryFilters();
+        });
+    }
 
     sheet.querySelectorAll('.character-gallery-item').forEach((item) => {
         item.addEventListener('click', () => {
@@ -624,7 +664,7 @@ function setupCharacterSheetTabs(sheet) {
         });
     });
 
-    applyCharacterGalleryFilter('all');
+    applyCharacterGalleryFilters();
 }
 
 function openCharacterSheet(characterId) {

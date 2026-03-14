@@ -149,7 +149,7 @@ const artworks = [
         image: "assets/images/arts/concept-arts/haruki/2.png",
         description: "Arte conceitual gerada por IA, do traje anti-chama de Haruki Takamatsu, agora com sua iconica touca e mascará / Ember Blade, parte 1",
         year: "2025",
-        artist: "Concept Art - Visual Direction / Samuel Victor",
+        artist: "Concept Art - IA",
         tags: ["haruki"]
     },
     {
