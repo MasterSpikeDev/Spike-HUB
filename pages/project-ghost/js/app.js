@@ -927,7 +927,16 @@ function generateStarChart(stats, characterName) {
     const totalScore = attributes.reduce((sum, attr) => sum + attr.value, 0);
     const maxPossibleScore = maxValue * attributes.length;
     const percentageScore = Math.round((totalScore / maxPossibleScore) * 100);
-    
+    const averageScore = (totalScore / attributes.length).toFixed(1);
+    const bestAttribute = [...attributes].sort((a, b) => b.value - a.value)[0];
+
+    let powerRank = 'C';
+    if (percentageScore >= 90) powerRank = 'S';
+    else if (percentageScore >= 75) powerRank = 'A';
+    else if (percentageScore >= 60) powerRank = 'B';
+    else if (percentageScore >= 45) powerRank = 'C';
+    else powerRank = 'D';
+
     return `
         <div class="star-chart-container">
             <div class="star-chart-title">ATRIBUTOS DO PERSONAGEM</div>
@@ -936,6 +945,21 @@ function generateStarChart(stats, characterName) {
             <div class="total-score">
                 <div class="score-label">PONTUAÇÃO TOTAL</div>
                 <div class="score-value">${totalScore}/${maxPossibleScore} (${percentageScore}%)</div>
+            </div>
+
+            <div class="star-status-grid">
+                <div class="star-status-card">
+                    <span class="star-status-label">Rank de Poder</span>
+                    <span class="star-status-value">${powerRank}</span>
+                </div>
+                <div class="star-status-card">
+                    <span class="star-status-label">Maior Atributo</span>
+                    <span class="star-status-value">${bestAttribute.name} ${bestAttribute.value}/${maxValue}</span>
+                </div>
+                <div class="star-status-card">
+                    <span class="star-status-label">Média Geral</span>
+                    <span class="star-status-value">${averageScore}/${maxValue}</span>
+                </div>
             </div>
             
             <div class="star-chart">
