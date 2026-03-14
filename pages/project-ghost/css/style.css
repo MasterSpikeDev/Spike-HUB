@@ -9,6 +9,19 @@
     --card-bg: #090000;
 }
 
+/* Cursor customizado (adicione o PNG em: assets/cursor/custom-cursor.png) */
+html,
+body {
+    cursor: url('../assets/cursor/custom-cursor.png') 16 16, auto;
+}
+
+a,
+button,
+.big-button,
+[role='button'] {
+    cursor: url('../assets/cursor/custom-cursor.png') 16 16, pointer;
+}
+
 
 /* ===== FIRE EXPERIENCE LAYER ===== */
 #fire-particles {
