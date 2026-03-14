@@ -12,6 +12,112 @@ let selectedFile = null;
 let selectedArtworkType = 'all';
 let selectedArtworkSearch = '';
 
+
+
+let fireAudioContext;
+
+function playFireSound(type = 'click') {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+
+    if (!fireAudioContext) {
+        fireAudioContext = new AudioCtx();
+    }
+
+    if (fireAudioContext.state === 'suspended') {
+        fireAudioContext.resume();
+    }
+
+    const now = fireAudioContext.currentTime;
+    const osc = fireAudioContext.createOscillator();
+    const gain = fireAudioContext.createGain();
+
+    const profiles = {
+        click: { start: 720, end: 320, wave: 'triangle', gain: 0.045, duration: 0.09 },
+        open: { start: 480, end: 880, wave: 'sine', gain: 0.06, duration: 0.16 },
+        close: { start: 720, end: 220, wave: 'square', gain: 0.04, duration: 0.14 },
+        tab: { start: 350, end: 620, wave: 'triangle', gain: 0.03, duration: 0.12 }
+    };
+
+    const config = profiles[type] || profiles.click;
+
+    osc.type = config.wave;
+    osc.frequency.setValueAtTime(config.start, now);
+    osc.frequency.exponentialRampToValueAtTime(config.end, now + config.duration);
+
+    gain.gain.setValueAtTime(config.gain, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + config.duration);
+
+    osc.connect(gain);
+    gain.connect(fireAudioContext.destination);
+    osc.start(now);
+    osc.stop(now + config.duration);
+}
+
+function initEmberParticles() {
+    const canvas = document.getElementById('embers-canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const particles = [];
+    const maxParticles = 180;
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    function createParticle() {
+        const fromBottom = Math.random() > 0.35;
+        return {
+            x: Math.random() * canvas.width,
+            y: fromBottom ? canvas.height + Math.random() * 80 : Math.random() * canvas.height,
+            size: Math.random() * 2.8 + 0.7,
+            speedY: Math.random() * -1.3 - 0.25,
+            speedX: (Math.random() - 0.5) * 0.65,
+            alpha: Math.random() * 0.7 + 0.2,
+            hue: Math.random() > 0.45 ? 24 : 46,
+            life: Math.random() * 260 + 140
+        };
+    }
+
+    function drawParticle(p) {
+        ctx.beginPath();
+        ctx.fillStyle = `hsla(${p.hue}, 100%, 60%, ${p.alpha})`;
+        ctx.shadowColor = p.hue === 24 ? 'rgba(255, 92, 20, 0.85)' : 'rgba(255, 214, 88, 0.8)';
+        ctx.shadowBlur = 10;
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (particles.length < maxParticles) {
+            particles.push(createParticle());
+        }
+
+        particles.forEach((p, index) => {
+            p.x += p.speedX;
+            p.y += p.speedY;
+            p.life -= 1;
+            p.alpha *= 0.996;
+
+            if (p.life <= 0 || p.y < -20 || p.alpha < 0.04) {
+                particles[index] = createParticle();
+            }
+
+            drawParticle(particles[index]);
+        });
+
+        requestAnimationFrame(animate);
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    animate();
+}
+
 const artTypeLabels = {
     all: 'Todas',
     'concept art': 'Concept Art',
@@ -57,6 +163,7 @@ function renderChaptersForVolume(volumeNumber) {
 
 // Função para abrir modal CORRIGIDA
 function openModal(modal) {
+    playFireSound('open');
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     
@@ -68,6 +175,7 @@ function openModal(modal) {
 
 // Função para fechar modal CORRIGIDA
 function closeModal(modal) {
+    playFireSound('close');
     modal.classList.remove('active');
     
     // Esperar a animação terminar antes de esconder
@@ -83,6 +191,7 @@ function init() {
     
     // Configurar event listeners
     setupEventListeners();
+    initEmberParticles();
     renderCharacters();
     renderArtworkTypeFilters();
     renderArtworks();
@@ -93,6 +202,14 @@ function init() {
 // Configurar event listeners - VERSÃO CORRIGIDA
 function setupEventListeners() {
     console.log('Configurando event listeners...');
+
+    document.addEventListener('click', function () {
+        playFireSound('click');
+    });
+
+    document.addEventListener('visibilitychange', function () {
+        playFireSound('tab');
+    });
 
     // Abrir modais dos botões principais
     document.getElementById('btn-ler').addEventListener('click', function() {
