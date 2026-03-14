@@ -123,12 +123,20 @@ const characters = {
 // Dados das artes (com descrições expandidas)
 const artworks = [
     {
+        id: 10,
+        title: "Haruki Takamatsu - A vingança",
+        image: "assets/images/arts/artes/10.png",
+        description: "''Agora eu vou te ensinar a diferença entre fogo e vingança. Corre, eu gosto quando o medo acende primeiro que minhas chamas''",
+        year: "2026",
+        artist: "Official Art - Visual Direction / Samuel Victor"
+    },
+    {
         id: 1,
         title: "Haruki Takamatsu - Traje Anti-Chama (Parte 1)",
         image: "assets/images/arts/concept-arts/haruki/1.png",
         description: "Arte conceitual gerada por IA, do traje anti-chama de Haruki Takamatsu / Ember Blade, parte 1",
         year: "2025",
-        artist: "Concept Art - IA"
+        artist: "Concept Art - Visual Direction / Samuel Victor"
     },
     {
         id: 2,
@@ -136,7 +144,7 @@ const artworks = [
         image: "assets/images/arts/concept-arts/haruki/2.png",
         description: "Arte conceitual gerada por IA, do traje anti-chama de Haruki Takamatsu, agora com sua iconica touca e mascará / Ember Blade, parte 1",
         year: "2025",
-        artist: "Concept Art - IA"
+        artist: "Concept Art - Visual Direction / Samuel Victor"
     },
     {
         id: 3,
@@ -144,7 +152,7 @@ const artworks = [
         image: "assets/images/arts/concept-arts/fumiko/1.png",
         description: "Arte conceitual gerada por IA, de Fumiko Emi",
         year: "2025",
-        artist: "Concept Art - IA"
+        artist: "Concept Art - Visual Direction / Samuel Victor"
     },
     {
         id: 9,
@@ -152,7 +160,7 @@ const artworks = [
         image: "assets/images/arts/artes/9.png",
         description: "Arte feita em sua primeira versão da história (The Ghoul`s Prophecy), na arte temos Genki Kato, um dos membros da Divisão Fantasma. Curiosidade: Essa arte foi feita para apresentar o lançamento do capitulo 3.",
         year: "2022",
-        artist: "Arte Oficial - Moon Honey"
+        artist: "Official Art - Moon Honey"
     },
     {
         id: 4,
@@ -160,7 +168,7 @@ const artworks = [
         image: "assets/images/arts/concept-arts/fumiko/2.png",
         description: "Arte conceitual gerada por IA, de Fumiko Emi",
         year: "2025",
-        artist: "Concept Art - IA"
+        artist: "Concept Art - Visual Direction / Samuel Victor"
     },
     {
         id: 5,
@@ -168,7 +176,7 @@ const artworks = [
         image: "assets/images/arts/artes/2.png",
         description: "Arte feita pelo Autor em sua primeira versão da história (The Ghoul`s Prophecy), na arte temos Haruki Clássico e Nero Clássico. Curiosidade: Essa foi a primeira arte e o primeiro conceito de criar uma obra própria.",
         year: "2021",
-        artist: "Arte Oficial"
+        artist: "Official Art - Visual Direction / Samuel Victor"
     },
     {
         id: 6,
@@ -176,7 +184,7 @@ const artworks = [
         image: "assets/images/arts/artes/3.png",
         description: "Arte feita em sua primeira versão da história (The Ghoul`s Prophecy), na arte temos Fumiko Emi belíssima, usando sua primeira versão de seu poder. Curiosidade: Na primeira versão, Fumiko Emi teria poderes de dar vida a brinquedos danificados, e usa-los para criar seu proprio mini-exercito para batalhas. Descontinuado por amadurecimento da obra e questões de balanceamento (era um poder fraco demais).",
         year: "2022",
-        artist: "Arte Oficial - Moon Honey"
+        artist: "Official Art - Moon Honey"
     },
     {
         id: 7,
@@ -193,15 +201,14 @@ const artworks = [
         description: "Arte feita em sua primeira versão da história (The Ghoul`s Prophecy), na arte temos Fumiko Emi roubando as iconicas batatinhas fritas de Nero.",
         year: "2022",
         artist: "Fan Art - Ludivine / Yellow Mariana"
-    },
-    {
+    }, {
         id: 9,
         title: "Dupla principal",
         image: "assets/images/arts/artes/1.png",
         description: "Haruki Takamatsu e Fumiko Emi, arte completa",
         year: "2025",
-        artist: "Official Art - IA"
-    }
+        artist: "Official Art - Visual Direction / Samuel Victor"
+    },
 ];
 // Dados dos capítulos (mantidos iguais)
 const chaptersData = {
