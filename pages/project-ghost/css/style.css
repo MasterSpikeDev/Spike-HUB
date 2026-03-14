@@ -3185,7 +3185,7 @@ body.modal-open {
 
 body,
 body * {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' shape-rendering='crispEdges' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='none'/%3E%3Crect x='13' y='2' width='3' height='3' fill='%23fff2b0'/%3E%3Crect x='10' y='5' width='9' height='3' fill='%23ffe16e'/%3E%3Crect x='8' y='8' width='13' height='4' fill='%23ffb347'/%3E%3Crect x='7' y='12' width='14' height='5' fill='%23ff7f2a'/%3E%3Crect x='8' y='17' width='12' height='5' fill='%23ff4f1f'/%3E%3Crect x='10' y='22' width='8' height='5' fill='%23c91e00'/%3E%3Crect x='12' y='27' width='4' height='3' fill='%23080000'/%3E%3C/svg%3E") 8 4, auto;
+    cursor: url("../assets/cursor/cursor.png") 32 32, auto;
 }
 
 a,
@@ -3200,7 +3200,7 @@ input,
 .character-card,
 .gallery-item,
 .music-card {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' shape-rendering='crispEdges' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='none'/%3E%3Crect x='13' y='2' width='3' height='3' fill='%23fff2b0'/%3E%3Crect x='10' y='5' width='9' height='3' fill='%23ffe16e'/%3E%3Crect x='8' y='8' width='13' height='4' fill='%23ffb347'/%3E%3Crect x='7' y='12' width='14' height='5' fill='%23ff7f2a'/%3E%3Crect x='8' y='17' width='12' height='5' fill='%23ff4f1f'/%3E%3Crect x='10' y='22' width='8' height='5' fill='%23c91e00'/%3E%3Crect x='12' y='27' width='4' height='3' fill='%23080000'/%3E%3C/svg%3E") 8 4, pointer;
+    cursor: url("../assets/cursor/cursor.png") 32 32, pointer;
 }
 
 header,
