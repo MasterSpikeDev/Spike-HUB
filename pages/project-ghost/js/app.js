@@ -57,6 +57,8 @@ function renderChaptersForVolume(volumeNumber) {
 
 // Função para abrir modal CORRIGIDA
 function openModal(modal) {
+    playFireSound('open');
+    burstFireParticles();
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     
@@ -68,6 +70,7 @@ function openModal(modal) {
 
 // Função para fechar modal CORRIGIDA
 function closeModal(modal) {
+    playFireSound('close');
     modal.classList.remove('active');
     
     // Esperar a animação terminar antes de esconder
@@ -80,6 +83,7 @@ function closeModal(modal) {
 // Inicializar a aplicação
 function init() {
     console.log('Inicializando aplicação...');
+    initFireMode();
     
     // Configurar event listeners
     setupEventListeners();
@@ -1134,3 +1138,156 @@ document.querySelectorAll(".modal-content").forEach(modal => {
     });
 });
 
+
+
+// =========================
+// Modo Fogo (cursor, faíscas e áudio)
+// =========================
+let fireCanvas;
+let fireCtx;
+let fireParticles = [];
+let fireAnimationId;
+let fireAudioCtx;
+
+function initFireMode() {
+    setupFireParticles();
+    setupFireAudio();
+}
+
+function setupFireParticles() {
+    fireCanvas = document.createElement('canvas');
+    fireCanvas.id = 'fire-particles';
+    document.body.appendChild(fireCanvas);
+    fireCtx = fireCanvas.getContext('2d');
+
+    const resize = () => {
+        fireCanvas.width = window.innerWidth;
+        fireCanvas.height = window.innerHeight;
+    };
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    for (let i = 0; i < 55; i += 1) {
+        fireParticles.push(createParticle());
+    }
+
+    const animate = () => {
+        fireCtx.clearRect(0, 0, fireCanvas.width, fireCanvas.height);
+        fireParticles.forEach((particle, index) => {
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            particle.life -= 1;
+            if (particle.life <= 0 || particle.y < -20) {
+                fireParticles[index] = createParticle();
+                return;
+            }
+
+            const alpha = Math.max(particle.life / particle.maxLife, 0);
+            const glow = fireCtx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.size * 4);
+            glow.addColorStop(0, `rgba(255, 236, 170, ${0.75 * alpha})`);
+            glow.addColorStop(0.35, `rgba(255, 133, 25, ${0.55 * alpha})`);
+            glow.addColorStop(1, 'rgba(255, 60, 0, 0)');
+            fireCtx.fillStyle = glow;
+            fireCtx.beginPath();
+            fireCtx.arc(particle.x, particle.y, particle.size * 4, 0, Math.PI * 2);
+            fireCtx.fill();
+        });
+
+        fireAnimationId = requestAnimationFrame(animate);
+    };
+
+    animate();
+}
+
+function createParticle(stronger = false) {
+    const startX = Math.random() * (window.innerWidth || 1000);
+    const startY = (window.innerHeight || 800) + Math.random() * 160;
+    const boost = stronger ? 1.7 : 1;
+    return {
+        x: startX,
+        y: startY,
+        vx: (Math.random() - 0.5) * 0.4 * boost,
+        vy: -(0.5 + Math.random() * 1.6) * boost,
+        size: (Math.random() * 1.6 + 0.8) * boost,
+        life: Math.floor((100 + Math.random() * 110) / boost),
+        maxLife: Math.floor((100 + Math.random() * 110) / boost)
+    };
+}
+
+function burstFireParticles() {
+    for (let i = 0; i < 16; i += 1) {
+        fireParticles.push(createParticle(true));
+    }
+    if (fireParticles.length > 120) {
+        fireParticles = fireParticles.slice(-120);
+    }
+}
+
+function setupFireAudio() {
+    const primeAudio = () => {
+        if (!fireAudioCtx) {
+            fireAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (fireAudioCtx.state === 'suspended') {
+            fireAudioCtx.resume();
+        }
+        document.removeEventListener('pointerdown', primeAudio);
+    };
+
+    document.addEventListener('pointerdown', primeAudio, { once: true });
+
+    document.addEventListener('click', (event) => {
+        if (event.target.closest('button, a, .big-button, .modal, .close-modal')) {
+            playFireSound('click');
+        }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            playFireSound('tab-open');
+        } else {
+            playFireSound('tab-close');
+        }
+    });
+}
+
+function playFireSound(type = 'click') {
+    if (!window.AudioContext && !window.webkitAudioContext) return;
+    if (!fireAudioCtx) return;
+
+    const now = fireAudioCtx.currentTime;
+    const gain = fireAudioCtx.createGain();
+    gain.connect(fireAudioCtx.destination);
+
+    const osc = fireAudioCtx.createOscillator();
+    const osc2 = fireAudioCtx.createOscillator();
+    osc.type = 'triangle';
+    osc2.type = 'sine';
+
+    const map = {
+        click: [220, 440, 0.03],
+        open: [280, 640, 0.09],
+        close: [360, 180, 0.08],
+        'tab-open': [260, 520, 0.05],
+        'tab-close': [300, 140, 0.05]
+    };
+
+    const [start, end, duration] = map[type] || map.click;
+
+    osc.frequency.setValueAtTime(start, now);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(end, 40), now + duration);
+    osc2.frequency.setValueAtTime(start * 1.5, now);
+    osc2.frequency.exponentialRampToValueAtTime(Math.max(end * 0.8, 40), now + duration);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.05, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    osc.connect(gain);
+    osc2.connect(gain);
+    osc.start(now);
+    osc2.start(now);
+    osc.stop(now + duration);
+    osc2.stop(now + duration);
+}
