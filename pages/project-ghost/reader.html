@@ -220,7 +220,19 @@
     if (reader.pdf?.desktop && !reader.pdf.desktop.startsWith('./')) reader.pdf.desktop = `./posts/volume${payload.volume || 1}/${reader.pdf.desktop}`;
     if (reader.pdf?.mobile && !reader.pdf.mobile.startsWith('./')) reader.pdf.mobile = `./posts/volume${payload.volume || 1}/${reader.pdf.mobile}`;
 
-    const st = { doc:null, page:reader.pageStart || 1, total:1, zoom:1, layout:payload.layout || 'auto', muted:false, active:null, inactive:null, currentScene:null };
+    const st = {
+      doc:null,
+      page:reader.pageStart || 1,
+      total:1,
+      zoom:1,
+      layout:payload.layout || 'auto',
+      muted:false,
+      active:null,
+      inactive:null,
+      currentScene:null,
+      pageMin: 1,
+      pageMax: 1
+    };
     const els = {
       start: document.getElementById('start'), startBtn: document.getElementById('startBtn'), chapterTitle:document.getElementById('chapterTitle'),
       prev:document.getElementById('prevBtn'), next:document.getElementById('nextBtn'), mute:document.getElementById('muteBtn'), back:document.getElementById('backBtn'),
@@ -248,6 +260,11 @@
     function loading(on,msg){ els.loading.style.display = on ? 'block' : 'none'; if(msg) els.loading.textContent=msg; }
     function getScene(page){ return (reader.scenes || []).find(s => page >= s.from && page <= s.to) || (reader.scenes || [])[0]; }
     function updateMeta(scene){ els.pageStatus.textContent = `Página ${st.page} / ${st.total}`; els.sceneStatus.textContent = `Cena: ${scene?.label || '--'} • páginas ${scene?.from || 1}-${scene?.to || st.total}`; }
+    function getMaxScenePage() {
+      const scenes = Array.isArray(reader.scenes) ? reader.scenes : [];
+      if (!scenes.length) return 1;
+      return scenes.reduce((maxPage, scene) => Math.max(maxPage, Number(scene?.to) || 1), 1);
+    }
     function applySceneTheme(scene){
       const theme = scene?.theme || {};
       if (theme.accent) document.documentElement.style.setProperty('--accent', theme.accent);
@@ -278,8 +295,8 @@
       const scene = getScene(pageNo); if(scene && st.currentScene !== scene.id){ setBg(scene.background); applySceneTheme(scene); try{ await setSceneAudio(scene); } catch { console.warn('Áudio bloqueado ou arquivo ausente.'); }
         st.currentScene = scene.id; }
       st.page = pageNo; updateMeta(scene); loading(false); sessionStorage.setItem('pg_reader_page', String(st.page));
-      els.prev.disabled = st.page <= (reader.pageStart || 1);
-      els.next.disabled = st.page >= Math.min(st.total, reader.pageEnd || st.total);
+      els.prev.disabled = st.page <= st.pageMin;
+      els.next.disabled = st.page >= st.pageMax;
     }
 
     async function loadAndStart(){
@@ -288,7 +305,17 @@
       loading(true, `Carregando ${pdfFile}...`);
       st.doc = await pdfjsLib.getDocument(pdfFile).promise;
       st.total = st.doc.numPages;
-      st.page = Math.min(Math.max(reader.pageStart || 1, Number(sessionStorage.getItem('pg_reader_page')) || (reader.pageStart || 1)), Math.min(st.total, reader.pageEnd || st.total));
+      const configuredPageStart = Math.max(1, Number(reader.pageStart) || 1);
+      const configuredPageEnd = Math.max(
+        configuredPageStart,
+        Number(reader.pageEnd) || configuredPageStart,
+        getMaxScenePage()
+      );
+      st.pageMin = Math.min(configuredPageStart, st.total);
+      st.pageMax = Math.min(configuredPageEnd, st.total);
+
+      const savedPage = Number(sessionStorage.getItem('pg_reader_page'));
+      st.page = Math.min(Math.max(st.pageMin, savedPage || st.pageMin), st.pageMax);
       els.start.style.display='none';
 
       const firstScene = getScene(st.page);
@@ -300,8 +327,8 @@
     }
 
     els.startBtn.addEventListener('click', loadAndStart);
-    els.prev.addEventListener('click', ()=> renderPage(Math.max(reader.pageStart || 1, st.page - 1)));
-    els.next.addEventListener('click', ()=> renderPage(Math.min(Math.min(st.total, reader.pageEnd || st.total), st.page + 1)));
+    els.prev.addEventListener('click', ()=> renderPage(Math.max(st.pageMin, st.page - 1)));
+    els.next.addEventListener('click', ()=> renderPage(Math.min(st.pageMax, st.page + 1)));
     els.zoom.addEventListener('input', ()=> { st.zoom = Number(els.zoom.value); renderPage(st.page); });
     els.back.addEventListener('click', ()=> { window.location.href = './ghost.html'; });
     els.mute.addEventListener('click', ()=> {
