@@ -28,33 +28,26 @@
     .viewer-stage {
       width: min(1480px, 100%);
       height: 100%;
-      display: grid;
-      grid-template-columns: 78px minmax(0, 1fr) 78px;
-      gap: 8px;
-      align-items: stretch;
-    }
-    .nav-rail {
       display: flex;
-      align-items: center;
+      align-items: stretch;
       justify-content: center;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background: color-mix(in srgb, var(--panel) 85%, rgba(0,0,0,.15) 15%);
-      backdrop-filter: blur(8px);
-      height: calc(100% - 12px);
-      margin: 6px 0;
     }
     .page-host {
-      min-width: 0;
+      width: 100%;
       height: calc(100% - 12px);
       margin: 6px 0;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background: rgba(0, 0, 0, 0.24);
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
+      position: relative;
+    }
+    .page-frame {
+      position: relative;
+      max-width: 100%;
+      max-height: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     canvas {
       max-width: 100%;
@@ -69,7 +62,7 @@
       height: 56px;
       border-radius: 999px;
       background: color-mix(in srgb, var(--panel) 78%, var(--accent) 22%);
-      border: 1px solid var(--accent-soft);
+      border: none;
       color: var(--text);
       font-size: 24px;
       display: grid;
@@ -77,9 +70,15 @@
       box-shadow: 0 10px 24px rgba(0,0,0,.4);
       cursor: pointer;
       transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
     }
-    .side-nav-btn:hover { transform: scale(1.06); box-shadow: 0 14px 30px rgba(0,0,0,.52); }
-    .side-nav-btn:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+    .side-nav-btn.prev { left: -72px; }
+    .side-nav-btn.next { right: -72px; }
+    .side-nav-btn:hover { transform: translateY(-50%) scale(1.06); box-shadow: 0 14px 30px rgba(0,0,0,.52); }
+    .side-nav-btn:disabled { opacity: .35; cursor: not-allowed; transform: translateY(-50%); }
     .start {
       position: fixed;
       inset: 0;
@@ -181,8 +180,10 @@
     @media (max-width: 900px) {
       .bar{flex-direction:column; align-items:flex-start;}
       .footer{flex-direction:column; gap:8px;}
-      .viewer-stage { grid-template-columns: 62px minmax(0, 1fr) 62px; }
+      .viewer-stage { width: 100%; }
       .side-nav-btn { width:48px; height:48px; font-size:20px; }
+      .side-nav-btn.prev { left: -56px; }
+      .side-nav-btn.next { right: -56px; }
       .layout-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -201,14 +202,12 @@
     </header>
     <main class="viewer">
       <div class="viewer-stage">
-        <div class="nav-rail">
-          <button id="prevBtn" class="side-nav-btn" type="button" aria-label="Página anterior">←</button>
-        </div>
         <div class="page-host">
-          <canvas id="pdfCanvas"></canvas>
-        </div>
-        <div class="nav-rail">
-          <button id="nextBtn" class="side-nav-btn" type="button" aria-label="Próxima página">→</button>
+          <div class="page-frame">
+            <button id="prevBtn" class="side-nav-btn prev" type="button" aria-label="Página anterior">←</button>
+            <canvas id="pdfCanvas"></canvas>
+            <button id="nextBtn" class="side-nav-btn next" type="button" aria-label="Próxima página">→</button>
+          </div>
         </div>
       </div>
     </main>
