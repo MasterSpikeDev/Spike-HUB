@@ -258,7 +258,7 @@ const chaptersData = {
                     chapter: "prologo",
                     title: "Prólogo",
                     available: true,
-                    file: "prologo.pdf",
+                    file: "prologo/prologo-base.pdf",
                     reader: {
                         title: "Prólogo",
                         pageStart: {
@@ -271,8 +271,8 @@ const chaptersData = {
                         },
                         googleDocsUrl: "",
                         pdf: {
-                            desktop: "prologo.pdf",
-                            mobile: "prologo.pdf"
+                            desktop: "prologo/prologo-pc.pdf",
+                            mobile: "prologo/prologo-mobile.pdf"
                         },
                         scenes: [
                             {
