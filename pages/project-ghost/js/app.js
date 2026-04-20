@@ -9,6 +9,7 @@ const modalCharacter = document.getElementById('modal-character');
 let selectedVolume = null;
 let selectedChapter = null;
 let selectedFile = null;
+let selectedChapterData = null;
 let selectedArtworkType = 'all';
 let selectedArtworkSearch = '';
 let fireAudioCtx = null;
@@ -44,6 +45,7 @@ function renderChaptersForVolume(volumeNumber) {
                 this.classList.add('active');
                 selectedChapter = chapter.chapter;
                 selectedFile = chapter.file;
+                selectedChapterData = chapter;
                 updateReadButton();
             });
         }
@@ -53,6 +55,7 @@ function renderChaptersForVolume(volumeNumber) {
     
     selectedChapter = null;
     selectedFile = null;
+    selectedChapterData = null;
     updateReadButton();
 }   
 
@@ -635,6 +638,19 @@ function renderChapters() {
         <div class="selection-title" style="margin-top: 30px;">Selecione o Capítulo:</div>
         <div class="chapter-selection" id="chapter-selection"></div>
         
+        <div class="selection-title" style="margin-top: 30px;">Visual do Reader:</div>
+        <div style="display:flex; gap:10px; flex-wrap: wrap; margin-bottom: 20px;">
+            <label style="display:flex; gap:8px; align-items:center;">
+                <input type="radio" name="reader-layout" value="desktop" checked> Desktop
+            </label>
+            <label style="display:flex; gap:8px; align-items:center;">
+                <input type="radio" name="reader-layout" value="mobile"> Mobile
+            </label>
+            <label style="display:flex; gap:8px; align-items:center;">
+                <input type="radio" name="reader-layout" value="auto"> Automático
+            </label>
+        </div>
+
         <button class="read-btn" id="confirm-read" disabled>Ler Capítulo</button>
     `;
     
@@ -665,10 +681,21 @@ function renderChapters() {
     // Botão de leitura
     document.getElementById('confirm-read').addEventListener('click', function() {
         if (selectedVolume && selectedChapter && selectedFile) {
-            const pdfPath = `./posts/volume${selectedVolume}/${selectedFile}`;
+            const readerLayout = document.querySelector('input[name="reader-layout"]:checked')?.value || 'auto';
+            const chapterPayload = {
+                volume: selectedVolume,
+                chapter: selectedChapter,
+                file: selectedFile,
+                title: selectedChapterData?.title || selectedChapter,
+                reader: selectedChapterData?.reader || null,
+                layout: readerLayout
+            };
+
+            sessionStorage.setItem('pg_reader_chapter', JSON.stringify(chapterPayload));
+            sessionStorage.setItem('pg_reader_autostart_audio', '1');
+
             playFireSound('open');
-            window.open(pdfPath, '_blank');
-            closeModal(document.getElementById('modal-ler'));
+            window.location.href = './reader.html';
         }
     });
 }

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Ghost — Reader Imersivo</title>
+  <style>
+    :root { --bg:#07070b; --text:#f3f3f3; --muted:#babaca; --panel:rgba(10,10,14,.78); --border:rgba(255,255,255,.09); }
+    * { box-sizing: border-box; }
+    html, body { margin:0; width:100%; height:100%; background:var(--bg); color:var(--text); overflow:hidden; font-family: Georgia, serif; }
+    .bg, .bgNext { position:fixed; inset:0; background-size:cover; background-position:center; transition:opacity .8s ease; }
+    .bg { z-index:0; } .bgNext { z-index:1; opacity:0; }
+    .overlay { position:fixed; inset:0; z-index:2; background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.68)); }
+    .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr auto; height:100%; }
+    .bar { display:flex; gap:10px; align-items:center; justify-content:space-between; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); }
+    .controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    button, select, input[type=range] { border:1px solid var(--border); background:var(--panel); color:var(--text); border-radius:999px; padding:8px 12px; }
+    .viewer { display:flex; align-items:center; justify-content:center; padding:18px; min-height:0; }
+    canvas { max-width:100%; max-height:100%; border-radius:18px; box-shadow:0 18px 60px rgba(0,0,0,.4); background:#ececef; }
+    .footer { padding:10px 18px; border-top:1px solid var(--border); background:var(--panel); font-size:13px; color:var(--muted); display:flex; justify-content:space-between; }
+    .start { position:fixed; inset:0; z-index:20; display:flex; align-items:center; justify-content:center; background:rgba(3,3,7,.76); }
+    .card { width:min(620px, 92vw); background:rgba(12,12,18,.95); border:1px solid var(--border); border-radius:20px; padding:22px; }
+    .layout { display:flex; gap:14px; margin:18px 0; }
+    .layout label { display:flex; gap:8px; align-items:center; }
+    #loading { position:fixed; z-index:15; left:50%; top:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,.8); padding:10px 14px; border-radius:10px; border:1px solid var(--border); display:none; }
+    @media (max-width: 900px) { .bar{flex-direction:column; align-items:flex-start;} .footer{flex-direction:column; gap:8px;} }
+  </style>
+</head>
+<body>
+  <div id="bg" class="bg"></div><div id="bgNext" class="bgNext"></div><div class="overlay"></div>
+  <div id="loading">Carregando...</div>
+  <div class="reader">
+    <header class="bar">
+      <strong id="chapterTitle">Project Ghost — Reader</strong>
+      <div class="controls">
+        <button id="prevBtn" type="button">← Anterior</button>
+        <button id="nextBtn" type="button">Próxima →</button>
+        <button id="muteBtn" type="button">Mutar</button>
+        <button id="backBtn" type="button">Voltar</button>
+        <label>Zoom <input id="zoom" type="range" min="0.8" max="2" step="0.05" value="1"></label>
+      </div>
+    </header>
+    <main class="viewer"><canvas id="pdfCanvas"></canvas></main>
+    <footer class="footer">
+      <span id="pageStatus">Página 1 / 1</span>
+      <span id="sceneStatus">Cena: --</span>
+    </footer>
+  </div>
+
+  <div id="start" class="start">
+    <div class="card">
+      <h2 style="margin:0 0 8px;">Antes de começar</h2>
+      <p style="margin:0; color:var(--muted)">Escolha o formato de leitura. Ao clicar em começar, o PDF abre e a trilha toca automaticamente (sem botão separado de áudio).</p>
+      <div class="layout">
+        <label><input type="radio" name="layout" value="desktop"> Desktop</label>
+        <label><input type="radio" name="layout" value="mobile"> Mobile</label>
+      </div>
+      <button id="startBtn" type="button" style="width:100%;">Começar leitura</button>
+    </div>
+  </div>
+
+  <audio id="audioA" loop preload="auto"></audio>
+  <audio id="audioB" loop preload="auto"></audio>
+
+  <script type="module">
+    import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
+
+    const payload = JSON.parse(sessionStorage.getItem('pg_reader_chapter') || '{}');
+    const fallbackReader = {
+      title: payload.title || 'Capítulo', pageStart: 1, pageEnd: 999,
+      pdf: { desktop: `./posts/volume${payload.volume || 1}/${payload.file || 'prologo.pdf'}`, mobile: `./posts/volume${payload.volume || 1}/${payload.file || 'prologo.pdf'}` },
+      scenes: [{ id:'default', label:'Cena principal', description:'Leitura', from:1, to:999, background:'assets/images/website/background_main3.png', audio:'assets/audio/clock_ambience.mp3' }]
+    };
+    const reader = payload.reader || fallbackReader;
+    if (reader.pdf?.desktop && !reader.pdf.desktop.startsWith('./')) reader.pdf.desktop = `./posts/volume${payload.volume || 1}/${reader.pdf.desktop}`;
+    if (reader.pdf?.mobile && !reader.pdf.mobile.startsWith('./')) reader.pdf.mobile = `./posts/volume${payload.volume || 1}/${reader.pdf.mobile}`;
+
+    const st = { doc:null, page:reader.pageStart || 1, total:1, zoom:1, layout:payload.layout || 'auto', muted:false, active:null, inactive:null, currentScene:null };
+    const els = {
+      start: document.getElementById('start'), startBtn: document.getElementById('startBtn'), chapterTitle:document.getElementById('chapterTitle'),
+      prev:document.getElementById('prevBtn'), next:document.getElementById('nextBtn'), mute:document.getElementById('muteBtn'), back:document.getElementById('backBtn'),
+      zoom:document.getElementById('zoom'), canvas:document.getElementById('pdfCanvas'), pageStatus:document.getElementById('pageStatus'), sceneStatus:document.getElementById('sceneStatus'),
+      bg:document.getElementById('bg'), bgNext:document.getElementById('bgNext'), loading:document.getElementById('loading'), audioA:document.getElementById('audioA'), audioB:document.getElementById('audioB')
+    };
+    const ctx = els.canvas.getContext('2d', { alpha:false }); st.active = els.audioA; st.inactive = els.audioB;
+
+    els.chapterTitle.textContent = `Project Ghost — ${reader.title}`;
+    document.querySelector(`input[name="layout"][value="${(payload.layout==='auto'?(window.innerWidth<=768?'mobile':'desktop'):payload.layout)}"]`)?.setAttribute('checked','checked');
+
+    function loading(on,msg){ els.loading.style.display = on ? 'block' : 'none'; if(msg) els.loading.textContent=msg; }
+    function getScene(page){ return (reader.scenes || []).find(s => page >= s.from && page <= s.to) || (reader.scenes || [])[0]; }
+    function updateMeta(scene){ els.pageStatus.textContent = `Página ${st.page} / ${st.total}`; els.sceneStatus.textContent = `Cena: ${scene?.label || '--'} • páginas ${scene?.from || 1}-${scene?.to || st.total}`; }
+    function setBg(url){ const next = `url('${url}')`; if(!els.bg.style.backgroundImage || els.bg.style.backgroundImage===next){ els.bg.style.backgroundImage=next; return; }
+      els.bgNext.style.backgroundImage=next; els.bgNext.style.opacity='1'; setTimeout(()=>{ els.bg.style.backgroundImage=next; els.bgNext.style.opacity='0'; }, 420);
+    }
+    function fade(audio,from,to,d=700){ const t0=performance.now(); const run=(t)=>{ const p=Math.min(1,(t-t0)/d); audio.volume=Math.max(0,Math.min(1,from+(to-from)*p)); if(p<1) requestAnimationFrame(run); }; requestAnimationFrame(run); }
+
+    async function setSceneAudio(scene){ if(st.muted || !scene?.audio) return; const src = st.active.getAttribute('data-src') || ''; if(src===scene.audio) return;
+      st.inactive.pause(); st.inactive.src = scene.audio; st.inactive.currentTime = 0; st.inactive.volume = 0; st.inactive.setAttribute('data-src', scene.audio);
+      await st.inactive.play(); fade(st.inactive,0,0.55,1200); fade(st.active,st.active.volume || 0.55,0,1200);
+      setTimeout(()=>{ st.active.pause(); st.active.currentTime = 0; [st.active, st.inactive] = [st.inactive, st.active]; }, 1250);
+    }
+
+    async function renderPage(pageNo){ if(!st.doc) return; loading(true,`Renderizando página ${pageNo}...`);
+      const pg = await st.doc.getPage(pageNo); const base = pg.getViewport({scale:1}); const vw = window.innerWidth - 90; const vh = window.innerHeight - 210;
+      const fit = Math.min(vw/base.width, vh/base.height); const scale = Math.max(0.2, fit * st.zoom); const vp = pg.getViewport({scale});
+      const pixel = window.devicePixelRatio || 1; els.canvas.width = Math.floor(vp.width * pixel); els.canvas.height = Math.floor(vp.height * pixel);
+      els.canvas.style.width = `${vp.width}px`; els.canvas.style.height = `${vp.height}px`; ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,els.canvas.width,els.canvas.height);
+      await pg.render({ canvasContext:ctx, viewport:vp, transform: pixel!==1 ? [pixel,0,0,pixel,0,0] : null }).promise;
+
+      const scene = getScene(pageNo); if(scene && st.currentScene !== scene.id){ setBg(scene.background); try{ await setSceneAudio(scene); } catch { console.warn('Áudio bloqueado ou arquivo ausente.'); }
+        st.currentScene = scene.id; }
+      st.page = pageNo; updateMeta(scene); loading(false); sessionStorage.setItem('pg_reader_page', String(st.page));
+    }
+
+    async function loadAndStart(){
+      const selectedLayout = document.querySelector('input[name="layout"]:checked')?.value || 'desktop'; st.layout = selectedLayout;
+      const pdfFile = selectedLayout === 'mobile' ? reader.pdf.mobile : reader.pdf.desktop;
+      loading(true, `Carregando ${pdfFile}...`);
+      st.doc = await pdfjsLib.getDocument(pdfFile).promise;
+      st.total = st.doc.numPages;
+      st.page = Math.min(Math.max(reader.pageStart || 1, Number(sessionStorage.getItem('pg_reader_page')) || (reader.pageStart || 1)), Math.min(st.total, reader.pageEnd || st.total));
+      els.start.style.display='none';
+
+      const firstScene = getScene(st.page);
+      if (firstScene?.audio && sessionStorage.getItem('pg_reader_autostart_audio') === '1') {
+        try { st.inactive.src = firstScene.audio; await st.inactive.play(); st.inactive.pause(); st.inactive.currentTime = 0; sessionStorage.removeItem('pg_reader_autostart_audio'); } catch {}
+      }
+
+      await renderPage(st.page);
+    }
+
+    els.startBtn.addEventListener('click', loadAndStart);
+    els.prev.addEventListener('click', ()=> renderPage(Math.max(reader.pageStart || 1, st.page - 1)));
+    els.next.addEventListener('click', ()=> renderPage(Math.min(Math.min(st.total, reader.pageEnd || st.total), st.page + 1)));
+    els.zoom.addEventListener('input', ()=> { st.zoom = Number(els.zoom.value); renderPage(st.page); });
+    els.back.addEventListener('click', ()=> { window.location.href = './ghost.html'; });
+    els.mute.addEventListener('click', ()=> {
+      st.muted = !st.muted; els.mute.textContent = st.muted ? 'Desmutar' : 'Mutar';
+      if(st.muted){ fade(st.active, st.active.volume || .55, 0, 400); fade(st.inactive, st.inactive.volume || 0, 0, 400); setTimeout(()=>{ st.active.pause(); st.inactive.pause(); }, 450); }
+      else { const scene = getScene(st.page); setSceneAudio(scene).catch(()=>{}); }
+    });
+
+    window.addEventListener('keydown',(e)=>{ if(e.key==='ArrowRight') els.next.click(); if(e.key==='ArrowLeft') els.prev.click(); if(e.key.toLowerCase()==='m') els.mute.click(); });
+    let t; window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(()=> st.doc && renderPage(st.page), 180); });
+  </script>
+</body>
+</html>
