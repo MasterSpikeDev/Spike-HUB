@@ -254,7 +254,39 @@ const chaptersData = {
             title: "Volume 1: O Contrato",
             available: true,
             chapters: [
-                { chapter: "prologo", title: "Prólogo", available: true, file: "prologo.pdf" }
+                {
+                    chapter: "prologo",
+                    title: "Prólogo",
+                    available: true,
+                    file: "prologo.pdf",
+                    reader: {
+                        title: "Prólogo",
+                        pageStart: 1,
+                        pageEnd: 5,
+                        googleDocsUrl: "",
+                        pdf: {
+                            desktop: "prologo.pdf",
+                            mobile: "prologo.pdf"
+                        },
+                        scenes: [
+                            {
+                                id: "clock_dream",
+                                label: "Sonho do relógio",
+                                description: "Vazio, escuridão, fumaça e sensação de tempo suspenso.",
+                                from: 1,
+                                to: 5,
+                                background: "assets/images/website/background_main3.png",
+                                audio: "assets/audio/clock_ambience.mp3",
+                                theme: {
+                                    accent: "#ff3a3a",
+                                    panel: "rgba(34, 8, 10, 0.78)",
+                                    text: "#fff5f5",
+                                    muted: "#ffd0d0"
+                                }
+                            }
+                        ]
+                    }
+                }
             ]
         }
     ]

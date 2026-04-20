@@ -9,6 +9,7 @@ const modalCharacter = document.getElementById('modal-character');
 let selectedVolume = null;
 let selectedChapter = null;
 let selectedFile = null;
+let selectedChapterData = null;
 let selectedArtworkType = 'all';
 let selectedArtworkSearch = '';
 let fireAudioCtx = null;
@@ -44,6 +45,7 @@ function renderChaptersForVolume(volumeNumber) {
                 this.classList.add('active');
                 selectedChapter = chapter.chapter;
                 selectedFile = chapter.file;
+                selectedChapterData = chapter;
                 updateReadButton();
             });
         }
@@ -53,6 +55,7 @@ function renderChaptersForVolume(volumeNumber) {
     
     selectedChapter = null;
     selectedFile = null;
+    selectedChapterData = null;
     updateReadButton();
 }   
 
@@ -634,7 +637,7 @@ function renderChapters() {
         
         <div class="selection-title" style="margin-top: 30px;">Selecione o Capítulo:</div>
         <div class="chapter-selection" id="chapter-selection"></div>
-        
+
         <button class="read-btn" id="confirm-read" disabled>Ler Capítulo</button>
     `;
     
@@ -665,12 +668,59 @@ function renderChapters() {
     // Botão de leitura
     document.getElementById('confirm-read').addEventListener('click', function() {
         if (selectedVolume && selectedChapter && selectedFile) {
-            const pdfPath = `./posts/volume${selectedVolume}/${selectedFile}`;
-            playFireSound('open');
-            window.open(pdfPath, '_blank');
-            closeModal(document.getElementById('modal-ler'));
+            const chapterReader = selectedChapterData?.reader || {};
+            const chapterPayload = {
+                volume: selectedVolume,
+                chapter: selectedChapter,
+                file: selectedFile,
+                title: selectedChapterData?.title || selectedChapter,
+                reader: chapterReader
+            };
+
+            sessionStorage.setItem('pg_reader_chapter', JSON.stringify(chapterPayload));
+            openReadMethodModal();
         }
     });
+}
+
+function openReadMethodModal() {
+    const methodModal = document.getElementById('modal-read-method');
+    const chapterReader = selectedChapterData?.reader || {};
+
+    const pdfPath = `./posts/volume${selectedVolume}/${selectedFile}`;
+    const googleDocsUrl = chapterReader.googleDocsUrl || '';
+    const immersivePath = './reader.html';
+
+    const openPdfBtn = document.getElementById('open-raw-pdf-btn');
+    const openGoogleDocsBtn = document.getElementById('open-google-docs-btn');
+    const openImmersiveReaderBtn = document.getElementById('open-immersive-reader-btn');
+
+    openPdfBtn.onclick = () => {
+        playFireSound('open');
+        window.open(pdfPath, '_blank');
+        closeModal(methodModal);
+        closeModal(document.getElementById('modal-ler'));
+    };
+
+    openGoogleDocsBtn.disabled = !googleDocsUrl;
+    openGoogleDocsBtn.title = googleDocsUrl ? "Abrir capítulo no Google Docs" : "Link do Google Docs ainda não configurado para este capítulo";
+    openGoogleDocsBtn.onclick = () => {
+        if (!googleDocsUrl) return;
+        playFireSound('open');
+        window.open(googleDocsUrl, '_blank');
+        closeModal(methodModal);
+        closeModal(document.getElementById('modal-ler'));
+    };
+
+    openImmersiveReaderBtn.onclick = () => {
+        sessionStorage.setItem('pg_reader_autostart_audio', '1');
+        playFireSound('open');
+        closeModal(methodModal);
+        closeModal(document.getElementById('modal-ler'));
+        window.location.href = immersivePath;
+    };
+
+    openModal(methodModal);
 }
 
 
@@ -1288,4 +1338,3 @@ document.querySelectorAll(".modal-content").forEach(modal => {
         e.stopPropagation(); // impede que o clique feche o modal
     });
 });
-
