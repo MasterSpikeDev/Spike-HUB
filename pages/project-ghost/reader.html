@@ -17,8 +17,18 @@
     }
     * { box-sizing: border-box; }
     html, body { margin:0; width:100%; height:100%; background:var(--bg); color:var(--text); overflow:hidden; font-family: Georgia, serif; }
-    .bg, .bgNext { position:fixed; inset:0; background-size:cover; background-position:center; transition:opacity .8s ease; }
-    .bg { z-index:0; } .bgNext { z-index:1; opacity:0; }
+    .bg-layer { position:fixed; inset:0; transition:opacity .8s ease; overflow:hidden; background:#000; }
+    .bg-layer.active { z-index:1; opacity:1; }
+    .bg-layer.inactive { z-index:0; opacity:0; }
+    .bg-image, .bg-video {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    .bg-image { background-size:cover; background-position:center; background-repeat:no-repeat; }
+    .bg-video { display:none; }
     .overlay { position:fixed; inset:0; z-index:2; background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.68)); }
     .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr auto; height:100%; }
     .bar { display:flex; gap:10px; align-items:center; justify-content:space-between; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); }
@@ -189,7 +199,15 @@
   </style>
 </head>
 <body>
-  <div id="bg" class="bg"></div><div id="bgNext" class="bgNext"></div><div class="overlay"></div>
+  <div id="bgA" class="bg-layer active">
+    <div class="bg-image"></div>
+    <video class="bg-video" muted loop playsinline preload="auto"></video>
+  </div>
+  <div id="bgB" class="bg-layer inactive">
+    <div class="bg-image"></div>
+    <video class="bg-video" muted loop playsinline preload="auto"></video>
+  </div>
+  <div class="overlay"></div>
   <div id="loading">Carregando...</div>
   <div class="reader">
     <header class="bar">
@@ -237,8 +255,7 @@
     </div>
   </div>
 
-  <audio id="audioA" loop preload="auto"></audio>
-  <audio id="audioB" loop preload="auto"></audio>
+  <div id="audioHost" hidden></div>
 
   <script type="module">
     import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";
@@ -261,9 +278,11 @@
       zoom:1,
       layout:payload.layout || 'auto',
       muted:false,
-      active:null,
-      inactive:null,
+      bgActiveLayer:null,
+      bgInactiveLayer:null,
       currentScene:null,
+      currentSceneAudioKey:'',
+      activeAudios:[],
       pageMin: 1,
       pageMax: 1
     };
@@ -271,9 +290,11 @@
       start: document.getElementById('start'), startBtn: document.getElementById('startBtn'), chapterTitle:document.getElementById('chapterTitle'),
       prev:document.getElementById('prevBtn'), next:document.getElementById('nextBtn'), mute:document.getElementById('muteBtn'), back:document.getElementById('backBtn'),
       zoom:document.getElementById('zoom'), canvas:document.getElementById('pdfCanvas'), pageStatus:document.getElementById('pageStatus'), sceneStatus:document.getElementById('sceneStatus'),
-      bg:document.getElementById('bg'), bgNext:document.getElementById('bgNext'), loading:document.getElementById('loading'), audioA:document.getElementById('audioA'), audioB:document.getElementById('audioB')
+      bgA:document.getElementById('bgA'), bgB:document.getElementById('bgB'), loading:document.getElementById('loading'), audioHost:document.getElementById('audioHost')
     };
-    const ctx = els.canvas.getContext('2d', { alpha:false }); st.active = els.audioA; st.inactive = els.audioB;
+    const ctx = els.canvas.getContext('2d', { alpha:false });
+    st.bgActiveLayer = els.bgA;
+    st.bgInactiveLayer = els.bgB;
 
     els.chapterTitle.textContent = `Project Ghost — ${reader.title}`;
     const defaultLayout = payload.layout && payload.layout !== 'auto'
@@ -318,15 +339,118 @@
       if (theme.accent) document.documentElement.style.setProperty('--accent-soft', `${theme.accent}66`);
     }
 
-    function setBg(url){ const next = `url('${url}')`; if(!els.bg.style.backgroundImage || els.bg.style.backgroundImage===next){ els.bg.style.backgroundImage=next; return; }
-      els.bgNext.style.backgroundImage=next; els.bgNext.style.opacity='1'; setTimeout(()=>{ els.bg.style.backgroundImage=next; els.bgNext.style.opacity='0'; }, 420);
+    function isNoneValue(value){
+      return typeof value === 'string' && value.trim().toLowerCase() === 'none';
     }
-    function fade(audio,from,to,d=700){ const t0=performance.now(); const run=(t)=>{ const p=Math.min(1,(t-t0)/d); audio.volume=Math.max(0,Math.min(1,from+(to-from)*p)); if(p<1) requestAnimationFrame(run); }; requestAnimationFrame(run); }
+    function normalizeSceneMedia(value){
+      if (Array.isArray(value)) return value.map((item) => String(item || '').trim()).filter((item) => item && !isNoneValue(item));
+      if (value == null) return [];
+      const one = String(value).trim();
+      if (!one || isNoneValue(one)) return [];
+      return [one];
+    }
+    function resolveBackgroundType(path){
+      const cleanPath = String(path || '').split('?')[0].toLowerCase();
+      if (/\.(mp4|webm|ogg|mov|m4v)$/.test(cleanPath)) return 'video';
+      return 'image';
+    }
+    function getLayerEls(layer){
+      return {
+        image: layer.querySelector('.bg-image'),
+        video: layer.querySelector('.bg-video')
+      };
+    }
+    async function applyBackgroundToLayer(layer, backgroundValue){
+      const { image, video } = getLayerEls(layer);
+      const selected = normalizeSceneMedia(backgroundValue)[0] || '';
+      if (!selected) {
+        image.style.backgroundImage = '';
+        image.style.display = 'none';
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+        video.style.display = 'none';
+        layer.style.background = '#000';
+        return;
+      }
 
-    async function setSceneAudio(scene){ if(st.muted || !scene?.audio) return; const src = st.active.getAttribute('data-src') || ''; if(src===scene.audio) return;
-      st.inactive.pause(); st.inactive.src = scene.audio; st.inactive.currentTime = 0; st.inactive.volume = 0; st.inactive.setAttribute('data-src', scene.audio);
-      await st.inactive.play(); fade(st.inactive,0,0.55,1200); fade(st.active,st.active.volume || 0.55,0,1200);
-      setTimeout(()=>{ st.active.pause(); st.active.currentTime = 0; [st.active, st.inactive] = [st.inactive, st.active]; }, 1250);
+      layer.style.background = '#000';
+      const backgroundType = resolveBackgroundType(selected);
+      if (backgroundType === 'video') {
+        image.style.display = 'none';
+        image.style.backgroundImage = '';
+        video.style.display = 'block';
+        if (video.getAttribute('data-src') !== selected) {
+          video.pause();
+          video.src = selected;
+          video.setAttribute('data-src', selected);
+          video.currentTime = 0;
+        }
+        try { await video.play(); } catch {}
+        return;
+      }
+
+      video.pause();
+      video.removeAttribute('src');
+      video.load();
+      video.style.display = 'none';
+      image.style.display = 'block';
+      image.style.backgroundImage = `url('${selected}')`;
+    }
+    async function setSceneBackground(scene){
+      await applyBackgroundToLayer(st.bgInactiveLayer, scene?.background);
+      st.bgInactiveLayer.classList.remove('inactive');
+      st.bgInactiveLayer.classList.add('active');
+      st.bgActiveLayer.classList.remove('active');
+      st.bgActiveLayer.classList.add('inactive');
+      [st.bgActiveLayer, st.bgInactiveLayer] = [st.bgInactiveLayer, st.bgActiveLayer];
+    }
+
+    function fade(audio,from,to,d=700){ const t0=performance.now(); const run=(t)=>{ const p=Math.min(1,(t-t0)/d); audio.volume=Math.max(0,Math.min(1,from+(to-from)*p)); if(p<1) requestAnimationFrame(run); }; requestAnimationFrame(run); }
+    async function fadeOutAndStop(audio, duration = 500) {
+      const startVolume = Number.isFinite(audio.volume) ? audio.volume : 0.55;
+      fade(audio, startVolume, 0, duration);
+      await new Promise((resolve) => setTimeout(resolve, duration + 40));
+      audio.pause();
+      audio.currentTime = 0;
+      audio.removeAttribute('src');
+      audio.load();
+      audio.remove();
+    }
+    function createSceneAudio(src){
+      const audio = document.createElement('audio');
+      audio.loop = true;
+      audio.preload = 'auto';
+      audio.setAttribute('data-src', src);
+      audio.src = src;
+      audio.volume = 0;
+      els.audioHost.appendChild(audio);
+      return audio;
+    }
+    async function setSceneAudio(scene){
+      const sceneAudioList = normalizeSceneMedia(scene?.audio);
+      const sceneAudioKey = sceneAudioList.join('|');
+      if (sceneAudioKey === st.currentSceneAudioKey) return;
+
+      const previousAudios = [...st.activeAudios];
+      st.activeAudios = [];
+      st.currentSceneAudioKey = sceneAudioKey;
+
+      if (st.muted || sceneAudioList.length === 0) {
+        await Promise.all(previousAudios.map((audio) => fadeOutAndStop(audio, 450)));
+        return;
+      }
+
+      const nextAudios = sceneAudioList.map((src) => createSceneAudio(src));
+      st.activeAudios = nextAudios;
+
+      await Promise.all(nextAudios.map(async (audio) => {
+        try {
+          await audio.play();
+          fade(audio, 0, 0.55, 1200);
+        } catch {}
+      }));
+      await Promise.all(previousAudios.map((audio) => fadeOutAndStop(audio, 900)));
     }
 
     async function renderPage(pageNo){ if(!st.doc) return; loading(true,`Renderizando página ${pageNo}...`);
@@ -336,7 +460,7 @@
       els.canvas.style.width = `${vp.width}px`; els.canvas.style.height = `${vp.height}px`; ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,els.canvas.width,els.canvas.height);
       await pg.render({ canvasContext:ctx, viewport:vp, transform: pixel!==1 ? [pixel,0,0,pixel,0,0] : null }).promise;
 
-      const scene = getScene(pageNo); if(scene && st.currentScene !== scene.id){ setBg(scene.background); applySceneTheme(scene); try{ await setSceneAudio(scene); } catch { console.warn('Áudio bloqueado ou arquivo ausente.'); }
+      const scene = getScene(pageNo); if(scene && st.currentScene !== scene.id){ await setSceneBackground(scene); applySceneTheme(scene); try{ await setSceneAudio(scene); } catch { console.warn('Áudio bloqueado ou arquivo ausente.'); }
         st.currentScene = scene.id; }
       st.page = pageNo; updateMeta(scene); loading(false); sessionStorage.setItem('pg_reader_page', String(st.page));
       els.prev.disabled = st.page <= st.pageMin;
@@ -363,8 +487,11 @@
       els.start.style.display='none';
 
       const firstScene = getScene(st.page);
-      if (firstScene?.audio && sessionStorage.getItem('pg_reader_autostart_audio') === '1') {
-        try { st.inactive.src = firstScene.audio; await st.inactive.play(); st.inactive.pause(); st.inactive.currentTime = 0; sessionStorage.removeItem('pg_reader_autostart_audio'); } catch {}
+      const firstAudio = normalizeSceneMedia(firstScene?.audio)[0];
+      if (firstAudio && sessionStorage.getItem('pg_reader_autostart_audio') === '1') {
+        const primer = createSceneAudio(firstAudio);
+        try { await primer.play(); primer.pause(); primer.currentTime = 0; sessionStorage.removeItem('pg_reader_autostart_audio'); } catch {}
+        primer.remove();
       }
 
       await renderPage(st.page);
@@ -377,7 +504,7 @@
     els.back.addEventListener('click', ()=> { window.location.href = './ghost.html'; });
     els.mute.addEventListener('click', ()=> {
       st.muted = !st.muted; els.mute.textContent = st.muted ? 'Desmutar' : 'Mutar';
-      if(st.muted){ fade(st.active, st.active.volume || .55, 0, 400); fade(st.inactive, st.inactive.volume || 0, 0, 400); setTimeout(()=>{ st.active.pause(); st.inactive.pause(); }, 450); }
+      if(st.muted){ st.activeAudios.forEach((audio)=> fade(audio, audio.volume || .55, 0, 400)); setTimeout(()=>{ st.activeAudios.forEach((audio)=>audio.pause()); }, 450); }
       else { const scene = getScene(st.page); setSceneAudio(scene).catch(()=>{}); }
     });
 
