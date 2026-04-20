@@ -261,8 +261,14 @@ const chaptersData = {
                     file: "prologo.pdf",
                     reader: {
                         title: "Prólogo",
-                        pageStart: 1,
-                        pageEnd: 5,
+                        pageStart: {
+                            desktop: 1,
+                            mobile: 1
+                        },
+                        pageEnd: {
+                            desktop: 5,
+                            mobile: 5
+                        },
                         googleDocsUrl: "",
                         pdf: {
                             desktop: "prologo.pdf",
