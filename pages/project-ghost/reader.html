@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Project Ghost — Reader Imersivo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
       --bg:#07070b;
@@ -49,10 +50,103 @@
     .side-nav-btn:disabled { opacity: .35; cursor: not-allowed; transform: translateY(-50%); }
     #prevBtn { left: 18px; }
     #nextBtn { right: 18px; }
-    .start { position:fixed; inset:0; z-index:20; display:flex; align-items:center; justify-content:center; background:rgba(3,3,7,.76); }
-    .card { width:min(620px, 92vw); background:rgba(12,12,18,.95); border:1px solid var(--border); border-radius:20px; padding:22px; }
-    .layout { display:flex; gap:14px; margin:18px 0; }
-    .layout label { display:flex; gap:8px; align-items:center; }
+    .start {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255, 58, 58, 0.18), transparent 45%),
+        radial-gradient(circle at 80% 80%, rgba(255, 58, 58, 0.12), transparent 40%),
+        rgba(2, 2, 8, 0.84);
+      backdrop-filter: blur(9px);
+    }
+    .card {
+      width: min(760px, 94vw);
+      background: linear-gradient(180deg, rgba(18, 9, 13, 0.96), rgba(10, 8, 14, 0.96));
+      border: 1px solid rgba(255, 70, 70, 0.48);
+      border-radius: 18px;
+      padding: 26px;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.58), 0 0 32px rgba(255, 58, 58, 0.18);
+    }
+    .start-title {
+      margin: 0 0 8px;
+      color: #ff4f4f;
+      font-size: clamp(1.6rem, 2.8vw, 2.15rem);
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+    .start-description {
+      margin: 0;
+      color: #f1d8d8;
+      line-height: 1.5;
+      font-size: 1.05rem;
+    }
+    .layout-grid {
+      margin: 22px 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .layout-option {
+      min-height: 120px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+      padding: 16px;
+      text-align: left;
+      display: grid;
+      align-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+    .layout-option i {
+      font-size: 1.5rem;
+      color: #ff5b5b;
+    }
+    .layout-option strong {
+      font-size: 1.05rem;
+      letter-spacing: .02em;
+    }
+    .layout-option small {
+      color: #dfc3c3;
+      font-size: .86rem;
+      line-height: 1.35;
+    }
+    .layout-option:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 83, 83, 0.8);
+      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.36);
+      background: linear-gradient(180deg, rgba(89, 22, 22, 0.62), rgba(21, 8, 8, 0.65));
+    }
+    .layout-option.active {
+      border-color: rgba(255, 83, 83, 0.95);
+      box-shadow: 0 0 0 1px rgba(255, 83, 83, 0.48), 0 14px 34px rgba(255, 50, 50, 0.24);
+      background: linear-gradient(180deg, rgba(122, 24, 24, 0.75), rgba(35, 9, 9, 0.76));
+    }
+    .start-main-btn {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 110, 110, 0.62);
+      background: linear-gradient(90deg, #b01325 0%, #ff2f3c 52%, #ff5868 100%);
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: .02em;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease;
+      text-transform: uppercase;
+    }
+    .start-main-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(255, 61, 77, 0.45);
+    }
     #loading { position:fixed; z-index:15; left:50%; top:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,.8); padding:10px 14px; border-radius:10px; border:1px solid var(--border); display:none; }
     @media (max-width: 900px) {
       .bar{flex-direction:column; align-items:flex-start;}
@@ -60,6 +154,7 @@
       .side-nav-btn { width:48px; height:48px; font-size:20px; }
       #prevBtn { left: 6px; }
       #nextBtn { right: 6px; }
+      .layout-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -90,13 +185,21 @@
 
   <div id="start" class="start">
     <div class="card">
-      <h2 style="margin:0 0 8px;">Antes de começar</h2>
-      <p style="margin:0; color:var(--muted)">Escolha o formato de leitura. Ao clicar em começar, o PDF abre e a trilha toca automaticamente (sem botão separado de áudio).</p>
-      <div class="layout">
-        <label><input type="radio" name="layout" value="desktop"> Desktop</label>
-        <label><input type="radio" name="layout" value="mobile"> Mobile</label>
+      <h2 class="start-title">Antes de começar</h2>
+      <p class="start-description">Escolha o formato da leitura imersiva para o capítulo. A trilha é iniciada junto do início da leitura.</p>
+      <div class="layout-grid">
+        <button class="layout-option" data-layout-option="desktop" type="button">
+          <i class="fas fa-desktop"></i>
+          <strong>Modo Desktop</strong>
+          <small>Página maior e espaçamento ideal para tela ampla.</small>
+        </button>
+        <button class="layout-option" data-layout-option="mobile" type="button">
+          <i class="fas fa-mobile-screen-button"></i>
+          <strong>Modo Mobile</strong>
+          <small>Viewport ajustado para leitura em celular.</small>
+        </button>
       </div>
-      <button id="startBtn" type="button" style="width:100%;">Começar leitura</button>
+      <button id="startBtn" class="start-main-btn" type="button">Começar leitura</button>
     </div>
   </div>
 
@@ -127,7 +230,20 @@
     const ctx = els.canvas.getContext('2d', { alpha:false }); st.active = els.audioA; st.inactive = els.audioB;
 
     els.chapterTitle.textContent = `Project Ghost — ${reader.title}`;
-    document.querySelector(`input[name="layout"][value="${(payload.layout==='auto'?(window.innerWidth<=768?'mobile':'desktop'):payload.layout)}"]`)?.setAttribute('checked','checked');
+    const defaultLayout = payload.layout && payload.layout !== 'auto'
+      ? payload.layout
+      : (window.innerWidth <= 768 ? 'mobile' : 'desktop');
+    let selectedLayout = defaultLayout;
+
+    document.querySelectorAll('[data-layout-option]').forEach((btn) => {
+      const isActive = btn.getAttribute('data-layout-option') === selectedLayout;
+      btn.classList.toggle('active', isActive);
+      btn.addEventListener('click', () => {
+        selectedLayout = btn.getAttribute('data-layout-option') || 'desktop';
+        document.querySelectorAll('[data-layout-option]').forEach((item) => item.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
 
     function loading(on,msg){ els.loading.style.display = on ? 'block' : 'none'; if(msg) els.loading.textContent=msg; }
     function getScene(page){ return (reader.scenes || []).find(s => page >= s.from && page <= s.to) || (reader.scenes || [])[0]; }
@@ -167,7 +283,7 @@
     }
 
     async function loadAndStart(){
-      const selectedLayout = document.querySelector('input[name="layout"]:checked')?.value || 'desktop'; st.layout = selectedLayout;
+      st.layout = selectedLayout;
       const pdfFile = selectedLayout === 'mobile' ? reader.pdf.mobile : reader.pdf.desktop;
       loading(true, `Carregando ${pdfFile}...`);
       st.doc = await pdfjsLib.getDocument(pdfFile).promise;
