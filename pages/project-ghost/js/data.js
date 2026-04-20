@@ -269,7 +269,7 @@ const chaptersData = {
                             desktop: 5,
                             mobile: 5
                         },
-                        googleDocsUrl: "",
+                        googleDocsUrl: "https://docs.google.com/document/d/1J3BpHaeWOi7-Dz8iaLW-i4VxXWLOK3kwb8EN9WZpRaQ/edit?usp=sharing",
                         pdf: {
                             desktop: "prologo/prologo-pc.pdf",
                             mobile: "prologo/prologo-mobile.pdf"
