@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Project Ghost — Reader Imersivo</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -48,6 +48,7 @@
       position: relative;
       overflow:auto;
       overscroll-behavior:contain;
+      touch-action:none;
     }
     .viewer-stage {
       width: max-content;
@@ -73,7 +74,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      touch-action: pan-y;
+      touch-action:none;
       flex:0 0 auto;
     }
     canvas {
@@ -84,9 +85,11 @@
       border-radius: 12px;
       box-shadow: 0 18px 60px rgba(0,0,0,.4);
       background: #ececef;
-      cursor: pointer;
+      cursor: grab;
       user-select: none;
+      touch-action:none;
     }
+    canvas:active { cursor: grabbing; }
     .footer { padding:10px 18px; border-top:1px solid var(--border); background:var(--panel); font-size:13px; color:var(--muted); display:flex; justify-content:space-between; gap:12px; }
     .page-nav {
       display:grid;
@@ -158,50 +161,23 @@
       line-height: 1.5;
       font-size: 1.05rem;
     }
-    .layout-grid {
+    .start-tips {
       margin: 22px 0;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
+      gap: 10px;
+      color: #f4dddd;
+      line-height: 1.45;
     }
-    .layout-option {
-      min-height: 120px;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      background: rgba(255, 255, 255, 0.04);
-      color: #fff;
-      padding: 16px;
-      text-align: left;
-      display: grid;
-      align-content: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: all .2s ease;
+    .start-tips span {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.045);
     }
-    .layout-option i {
-      font-size: 1.5rem;
-      color: #ff5b5b;
-    }
-    .layout-option strong {
-      font-size: 1.05rem;
-      letter-spacing: .02em;
-    }
-    .layout-option small {
-      color: #dfc3c3;
-      font-size: .86rem;
-      line-height: 1.35;
-    }
-    .layout-option:hover {
-      transform: translateY(-3px);
-      border-color: rgba(255, 83, 83, 0.8);
-      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.36);
-      background: linear-gradient(180deg, rgba(89, 22, 22, 0.62), rgba(21, 8, 8, 0.65));
-    }
-    .layout-option.active {
-      border-color: rgba(255, 83, 83, 0.95);
-      box-shadow: 0 0 0 1px rgba(255, 83, 83, 0.48), 0 14px 34px rgba(255, 50, 50, 0.24);
-      background: linear-gradient(180deg, rgba(122, 24, 24, 0.75), rgba(35, 9, 9, 0.76));
-    }
+    .start-tips i { color: #ff5b5b; width: 20px; text-align: center; }
     .start-main-btn {
       width: 100%;
       border-radius: 12px;
@@ -233,7 +209,6 @@
       .page-nav-btn { min-width:0; width:100%; min-height:46px; }
       .page-jump input[type=range] { width:100%; }
       .tap-hint { display:none; }
-      .layout-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -277,7 +252,7 @@
       <label class="page-jump" for="pageScrubber">
         <strong id="pageJumpStatus">Página 1 de 1</strong>
         <input id="pageScrubber" type="range" min="1" max="1" step="1" value="1" aria-label="Arrastar para escolher a página">
-        <span class="tap-hint">Arraste para qualquer página, use ←/→ no teclado, ou clique/toque nas laterais do PDF.</span>
+        <span class="tap-hint">Role o mouse para zoom no ponto do cursor, use pinça no toque, arraste a página ampliada ou clique nas laterais para navegar.</span>
       </label>
       <button id="nextBtn" class="page-nav-btn" type="button" aria-label="Próxima página">
         <span>Próxima</span>
@@ -293,18 +268,10 @@
   <div id="start" class="start">
     <div class="card">
       <h2 class="start-title">Antes de começar</h2>
-      <p class="start-description">Escolha o formato da leitura imersiva para o capítulo. A trilha é iniciada junto do início da leitura.</p>
-      <div class="layout-grid">
-        <button class="layout-option" data-layout-option="desktop" type="button">
-          <i class="fas fa-desktop"></i>
-          <strong>Modo Desktop</strong>
-          <small>Página maior e espaçamento ideal para tela ampla.</small>
-        </button>
-        <button class="layout-option" data-layout-option="mobile" type="button">
-          <i class="fas fa-mobile-screen-button"></i>
-          <strong>Modo Mobile</strong>
-          <small>Viewport ajustado para leitura em celular.</small>
-        </button>
+      <p class="start-description">A leitura agora usa um único modo adaptativo para celular, tablet e computador. A trilha é iniciada junto do início da leitura.</p>
+      <div class="start-tips" aria-label="Controles de leitura">
+        <span><i class="fas fa-computer-mouse"></i> No PC, role o mouse sobre o PDF para aproximar ou afastar mirando no ponto desejado.</span>
+        <span><i class="fas fa-hand-pointer"></i> No celular, faça pinça com dois dedos para controlar o zoom e arraste quando a página estiver ampliada.</span>
       </div>
       <button id="startBtn" class="start-main-btn" type="button">Começar leitura</button>
     </div>
@@ -324,9 +291,12 @@
     };
     const reader = payload.reader || fallbackReader;
     function resolveReaderPdf(pdfConfig) {
+      const configuredPdf = pdfConfig && typeof pdfConfig === 'object'
+        ? Object.values(pdfConfig).find((value) => typeof value === 'string' && value.trim())
+        : '';
       const selected = typeof pdfConfig === 'string'
         ? pdfConfig
-        : (pdfConfig?.file || pdfConfig?.src || pdfConfig?.desktop || pdfConfig?.mobile || payload.file || 'prologo.pdf');
+        : (pdfConfig?.file || pdfConfig?.src || pdfConfig?.unified || pdfConfig?.default || configuredPdf || payload.file || 'prologo.pdf');
       return selected.startsWith('./') ? selected : `./posts/volume${payload.volume || 1}/${selected}`;
     }
     const readerPdf = resolveReaderPdf(reader.pdf);
@@ -336,10 +306,12 @@
       page:reader.pageStart || 1,
       total:1,
       zoom:1,
-      layout:payload.layout || 'auto',
+      minZoom:0.65,
+      maxZoom:4,
       muted:false,
       isRendering:false,
       pendingPage:null,
+      pendingZoomAnchor:null,
       bgActiveLayer:null,
       bgInactiveLayer:null,
       currentScene:null,
@@ -359,20 +331,6 @@
     st.bgInactiveLayer = els.bgB;
 
     els.chapterTitle.textContent = `Project Ghost — ${reader.title}`;
-    const defaultLayout = payload.layout && payload.layout !== 'auto'
-      ? payload.layout
-      : (window.innerWidth <= 768 ? 'mobile' : 'desktop');
-    let selectedLayout = defaultLayout;
-
-    document.querySelectorAll('[data-layout-option]').forEach((btn) => {
-      const isActive = btn.getAttribute('data-layout-option') === selectedLayout;
-      btn.classList.toggle('active', isActive);
-      btn.addEventListener('click', () => {
-        selectedLayout = btn.getAttribute('data-layout-option') || 'desktop';
-        document.querySelectorAll('[data-layout-option]').forEach((item) => item.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
 
     function loading(on,msg){ els.loading.style.display = on ? 'block' : 'none'; if(msg) els.loading.textContent=msg; }
     function getScene(page){ return (reader.scenes || []).find(s => page >= s.from && page <= s.to) || (reader.scenes || [])[0]; }
@@ -394,15 +352,16 @@
       if (target === st.page && !st.isRendering) return;
       renderPage(target);
     }
-    function getLayoutLimit(layout, key) {
-      const limitsByLayout = reader.pageLimits?.[layout] || reader.pageRange?.[layout] || null;
-      if (limitsByLayout && Number.isFinite(Number(limitsByLayout[key]))) return Number(limitsByLayout[key]);
-
-      if (reader[key] && typeof reader[key] === 'object' && Number.isFinite(Number(reader[key][layout]))) {
-        return Number(reader[key][layout]);
+    function getReaderLimit(key) {
+      const value = reader[key];
+      if (Number.isFinite(Number(value))) return Number(value);
+      if (value && typeof value === 'object') {
+        const preferred = value.auto ?? value.unified ?? value.default;
+        if (Number.isFinite(Number(preferred))) return Number(preferred);
+        const firstNumeric = Object.values(value).find((item) => Number.isFinite(Number(item)));
+        if (firstNumeric != null) return Number(firstNumeric);
       }
-
-      return Number(reader[key]);
+      return undefined;
     }
     function getMaxScenePage() {
       const scenes = Array.isArray(reader.scenes) ? reader.scenes : [];
@@ -532,10 +491,60 @@
       await Promise.all(previousAudios.map((audio) => fadeOutAndStop(audio, 900)));
     }
 
-    async function renderPage(pageNo){
+
+    function clamp(value, min, max){
+      return Math.min(Math.max(value, min), max);
+    }
+    function getViewer(){ return document.querySelector('.viewer'); }
+    function getZoomAnchor(clientX, clientY){
+      const rect = els.canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return null;
+      return {
+        clientX,
+        clientY,
+        xRatio: clamp((clientX - rect.left) / rect.width, 0, 1),
+        yRatio: clamp((clientY - rect.top) / rect.height, 0, 1)
+      };
+    }
+    function restoreZoomAnchor(anchor){
+      const viewer = getViewer();
+      if (!viewer || !anchor) return;
+      requestAnimationFrame(() => {
+        const rect = els.canvas.getBoundingClientRect();
+        viewer.scrollLeft += (rect.left + rect.width * anchor.xRatio) - anchor.clientX;
+        viewer.scrollTop += (rect.top + rect.height * anchor.yRatio) - anchor.clientY;
+      });
+    }
+    function syncZoomControl(){
+      els.zoom.min = String(st.minZoom);
+      els.zoom.max = String(st.maxZoom);
+      els.zoom.value = String(st.zoom);
+      els.zoom.setAttribute('aria-valuetext', `${Math.round(st.zoom * 100)}%`);
+      els.zoom.title = `Zoom ${Math.round(st.zoom * 100)}%`;
+    }
+    function setZoom(nextZoom, clientX = window.innerWidth / 2, clientY = window.innerHeight / 2){
+      if (!st.doc) return;
+      const clampedZoom = Math.round(clamp(nextZoom, st.minZoom, st.maxZoom) * 100) / 100;
+      if (Math.abs(clampedZoom - st.zoom) < 0.001) return;
+      const anchor = getZoomAnchor(clientX, clientY);
+      st.zoom = clampedZoom;
+      syncZoomControl();
+      renderPage(st.page, anchor);
+    }
+    function hasScrollablePage(){
+      const viewer = getViewer();
+      if (!viewer) return false;
+      return viewer.scrollWidth > viewer.clientWidth + 2 || viewer.scrollHeight > viewer.clientHeight + 2;
+    }
+
+    async function renderPage(pageNo, zoomAnchor = null){
       if(!st.doc) return;
       const targetPage = Math.min(Math.max(st.pageMin, Number(pageNo) || st.pageMin), st.pageMax);
-      if (st.isRendering) { st.pendingPage = targetPage; return; }
+      if (st.isRendering) {
+        st.pendingPage = targetPage;
+        st.pendingZoomAnchor = zoomAnchor;
+        return;
+      }
       st.isRendering = true;
       loading(true,`Renderizando página ${targetPage}...`);
       try {
@@ -550,6 +559,7 @@
         const pixel = window.devicePixelRatio || 1; els.canvas.width = Math.floor(vp.width * pixel); els.canvas.height = Math.floor(vp.height * pixel);
         els.canvas.style.width = `${vp.width}px`; els.canvas.style.height = `${vp.height}px`; ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,els.canvas.width,els.canvas.height);
         await pg.render({ canvasContext:ctx, viewport:vp, transform: pixel!==1 ? [pixel,0,0,pixel,0,0] : null }).promise;
+        restoreZoomAnchor(zoomAnchor);
 
         const scene = getScene(targetPage); if(scene && st.currentScene !== scene.id){ await setSceneBackground(scene); applySceneTheme(scene); try{ await setSceneAudio(scene); } catch { console.warn('Áudio bloqueado ou arquivo ausente.'); }
           st.currentScene = scene.id; }
@@ -559,26 +569,28 @@
       } finally {
         loading(false);
         st.isRendering = false;
-        if (st.pendingPage && st.pendingPage !== st.page) {
+        if (st.pendingPage) {
           const queuedPage = st.pendingPage;
+          const queuedAnchor = st.pendingZoomAnchor;
           st.pendingPage = null;
-          renderPage(queuedPage);
+          st.pendingZoomAnchor = null;
+          renderPage(queuedPage, queuedAnchor);
         } else {
           st.pendingPage = null;
+          st.pendingZoomAnchor = null;
         }
       }
     }
 
     async function loadAndStart(){
-      st.layout = selectedLayout;
       const pdfFile = readerPdf;
       loading(true, `Carregando ${pdfFile}...`);
       st.doc = await pdfjsLib.getDocument(pdfFile).promise;
       st.total = st.doc.numPages;
-      const configuredPageStart = Math.max(1, getLayoutLimit(selectedLayout, 'pageStart') || 1);
+      const configuredPageStart = Math.max(1, getReaderLimit('pageStart') || 1);
       const configuredPageEnd = Math.max(
         configuredPageStart,
-        getLayoutLimit(selectedLayout, 'pageEnd') || configuredPageStart,
+        getReaderLimit('pageEnd') || configuredPageStart,
         getMaxScenePage()
       );
       st.pageMin = Math.min(configuredPageStart, st.total);
@@ -608,16 +620,11 @@
       els.pageJumpStatus.textContent = `Página ${els.pageScrubber.value} de ${st.total}`;
     });
     els.pageScrubber.addEventListener('change', () => goToPage(els.pageScrubber.value));
-    function updateZoomRange(){
-      const smallScreen = window.innerWidth <= 700;
-      els.zoom.max = smallScreen ? '2.6' : '3.5';
-      els.zoom.min = smallScreen ? '0.7' : '0.75';
-      if (Number(els.zoom.value) > Number(els.zoom.max)) els.zoom.value = els.zoom.max;
-      if (Number(els.zoom.value) < Number(els.zoom.min)) els.zoom.value = els.zoom.min;
-      st.zoom = Number(els.zoom.value);
-    }
-    updateZoomRange();
-    els.zoom.addEventListener('input', ()=> { st.zoom = Number(els.zoom.value); renderPage(st.page); });
+    syncZoomControl();
+    els.zoom.addEventListener('input', (event)=> {
+      const rect = els.canvas.getBoundingClientRect();
+      setZoom(Number(event.target.value), rect.left + rect.width / 2, rect.top + rect.height / 2);
+    });
     els.back.addEventListener('click', ()=> { window.location.href = './ghost.html'; });
     els.mute.addEventListener('click', ()=> {
       st.muted = !st.muted; updateMuteButton();
@@ -626,14 +633,86 @@
     });
 
     let suppressCanvasClick = false;
+    const activePointers = new Map();
+    let pointerStartX = 0;
+    let pointerStartY = 0;
+    let lastPanPoint = null;
+    let pinchState = null;
+
+    function getPointerCenter(points){
+      return {
+        x: (points[0].clientX + points[1].clientX) / 2,
+        y: (points[0].clientY + points[1].clientY) / 2
+      };
+    }
+    function getPointerDistance(points){
+      return Math.hypot(points[0].clientX - points[1].clientX, points[0].clientY - points[1].clientY);
+    }
+
+    const viewer = getViewer();
+    viewer.addEventListener('wheel', (event) => {
+      if (!st.doc) return;
+      event.preventDefault();
+      const factor = Math.exp(-event.deltaY * 0.0025);
+      setZoom(st.zoom * factor, event.clientX, event.clientY);
+    }, { passive:false });
+
+    viewer.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse') return;
+      activePointers.set(event.pointerId, { clientX:event.clientX, clientY:event.clientY });
+      viewer.setPointerCapture?.(event.pointerId);
+      if (activePointers.size === 1) {
+        lastPanPoint = { x:event.clientX, y:event.clientY };
+      }
+      if (activePointers.size === 2) {
+        const points = [...activePointers.values()];
+        pinchState = { distance:getPointerDistance(points), zoom:st.zoom };
+        suppressCanvasClick = true;
+      }
+    });
+    viewer.addEventListener('pointermove', (event) => {
+      if (event.pointerType === 'mouse' || !activePointers.has(event.pointerId)) return;
+      activePointers.set(event.pointerId, { clientX:event.clientX, clientY:event.clientY });
+
+      if (activePointers.size === 2 && pinchState) {
+        event.preventDefault();
+        const points = [...activePointers.values()];
+        const distance = getPointerDistance(points);
+        const center = getPointerCenter(points);
+        if (pinchState.distance > 0) setZoom(pinchState.zoom * (distance / pinchState.distance), center.x, center.y);
+        return;
+      }
+
+      if (activePointers.size === 1 && lastPanPoint && hasScrollablePage()) {
+        event.preventDefault();
+        const dx = event.clientX - lastPanPoint.x;
+        const dy = event.clientY - lastPanPoint.y;
+        viewer.scrollLeft -= dx;
+        viewer.scrollTop -= dy;
+        if (Math.hypot(event.clientX - pointerStartX, event.clientY - pointerStartY) > 8) suppressCanvasClick = true;
+        lastPanPoint = { x:event.clientX, y:event.clientY };
+      }
+    }, { passive:false });
+    function clearPointer(event){
+      activePointers.delete(event.pointerId);
+      if (activePointers.size < 2) pinchState = null;
+      if (activePointers.size === 0) lastPanPoint = null;
+    }
+    viewer.addEventListener('pointerup', clearPointer);
+    viewer.addEventListener('pointercancel', clearPointer);
+
     els.canvas.addEventListener('click', (event) => {
       if (suppressCanvasClick) { suppressCanvasClick = false; return; }
       const bounds = els.canvas.getBoundingClientRect();
       goToPage(event.clientX - bounds.left > bounds.width / 2 ? st.page + 1 : st.page - 1);
     });
-    let pointerStartX = 0;
-    els.canvas.addEventListener('pointerdown', (event) => { pointerStartX = event.clientX; });
+    els.canvas.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'mouse' && activePointers.size > 1) return;
+      pointerStartX = event.clientX;
+      pointerStartY = event.clientY;
+    });
     els.canvas.addEventListener('pointerup', (event) => {
+      if (event.pointerType !== 'mouse' && (pinchState || hasScrollablePage())) return;
       const delta = event.clientX - pointerStartX;
       if (Math.abs(delta) > 48) {
         suppressCanvasClick = true;
@@ -642,7 +721,7 @@
     });
 
     window.addEventListener('keydown',(e)=>{ if(e.key==='ArrowRight') goToPage(st.page + 1); if(e.key==='ArrowLeft') goToPage(st.page - 1); if(e.key.toLowerCase()==='m') els.mute.click(); });
-    let t; window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(()=> { updateZoomRange(); if (st.doc) renderPage(st.page); }, 180); });
+    let t; window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(()=> { syncZoomControl(); if (st.doc) renderPage(st.page); }, 180); });
   </script>
 </body>
 </html>
