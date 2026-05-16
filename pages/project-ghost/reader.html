@@ -34,21 +34,35 @@
     .bar { display:flex; gap:10px; align-items:center; justify-content:space-between; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); }
     .controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
     .control-btn, select, input[type=range] { border:1px solid var(--border); background:var(--panel); color:var(--text); border-radius:999px; padding:8px 12px; }
+    .zoom-control { display:flex; align-items:center; gap:8px; min-width:min(320px, 100%); white-space:nowrap; }
+    .zoom-control input[type=range] { width:clamp(120px, 18vw, 260px); flex:1 1 120px; accent-color:var(--accent); }
     .control-btn { display:inline-flex; align-items:center; gap:8px; cursor:pointer; transition:transform .18s ease, border-color .18s ease, background .18s ease; }
     .control-btn:hover { transform:translateY(-1px); border-color:var(--accent-soft); background:rgba(255,255,255,.08); }
     .control-btn.icon-only { width:42px; height:42px; justify-content:center; padding:0; font-size:1rem; }
-    .viewer { display:flex; align-items:stretch; justify-content:center; padding:0 8px; min-height:0; position: relative; }
+    .viewer {
+      display:flex;
+      align-items:flex-start;
+      justify-content:flex-start;
+      padding:8px;
+      min-height:0;
+      position: relative;
+      overflow:auto;
+      overscroll-behavior:contain;
+    }
     .viewer-stage {
-      width: min(1480px, 100%);
-      height: 100%;
+      width: max-content;
+      height: max-content;
+      min-width: 100%;
+      min-height: 100%;
       display: flex;
-      align-items: stretch;
+      align-items: center;
       justify-content: center;
     }
     .page-host {
-      width: 100%;
-      height: calc(100% - 12px);
-      margin: 6px 0;
+      width: max-content;
+      height: max-content;
+      min-width: 100%;
+      min-height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -56,16 +70,17 @@
     }
     .page-frame {
       position: relative;
-      max-width: 100%;
-      max-height: 100%;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       touch-action: pan-y;
+      flex:0 0 auto;
     }
     canvas {
-      max-width: 100%;
-      max-height: 100%;
+      display:block;
+      flex:0 0 auto;
+      max-width:none;
+      max-height:none;
       border-radius: 12px;
       box-shadow: 0 18px 60px rgba(0,0,0,.4);
       background: #ececef;
@@ -209,8 +224,10 @@
     @media (max-width: 900px) {
       .bar{flex-direction:column; align-items:flex-start; padding:10px 12px;}
       .controls { width:100%; justify-content:space-between; }
+      .zoom-control { min-width:100%; }
+      .zoom-control input[type=range] { width:100%; }
       .footer{flex-direction:column; gap:8px; padding:8px 12px;}
-      .viewer-stage { width: 100%; }
+      .viewer { padding:6px; }
       .page-nav { grid-template-columns:1fr 1fr; gap:10px; padding:10px 12px; }
       .page-jump { grid-column:1 / -1; grid-row:1; }
       .page-nav-btn { min-width:0; width:100%; min-height:46px; }
@@ -240,7 +257,7 @@
           <span id="muteLabel">Som ligado</span>
         </button>
         <button id="backBtn" class="control-btn" type="button"><i class="fas fa-arrow-left" aria-hidden="true"></i> Voltar</button>
-        <label>Zoom <input id="zoom" type="range" min="0.8" max="2" step="0.05" value="1"></label>
+        <label class="zoom-control">Zoom <input id="zoom" type="range" min="0.75" max="3" step="0.05" value="1"></label>
       </div>
     </header>
     <main class="viewer">
@@ -523,10 +540,12 @@
       loading(true,`Renderizando página ${targetPage}...`);
       try {
         const pg = await st.doc.getPage(targetPage); const base = pg.getViewport({scale:1});
-        const navHeight = document.querySelector('.page-nav')?.offsetHeight || 0;
-        const barHeight = document.querySelector('.bar')?.offsetHeight || 0;
-        const footerHeight = document.querySelector('.footer')?.offsetHeight || 0;
-        const vw = window.innerWidth - 24; const vh = window.innerHeight - barHeight - navHeight - footerHeight - 28;
+        const viewer = document.querySelector('.viewer');
+        const viewerStyles = viewer ? getComputedStyle(viewer) : null;
+        const horizontalPadding = viewerStyles ? parseFloat(viewerStyles.paddingLeft) + parseFloat(viewerStyles.paddingRight) : 16;
+        const verticalPadding = viewerStyles ? parseFloat(viewerStyles.paddingTop) + parseFloat(viewerStyles.paddingBottom) : 16;
+        const vw = Math.max(1, (viewer?.clientWidth || window.innerWidth) - horizontalPadding);
+        const vh = Math.max(1, (viewer?.clientHeight || window.innerHeight) - verticalPadding);
         const fit = Math.min(vw/base.width, vh/base.height); const scale = Math.max(0.2, fit * st.zoom); const vp = pg.getViewport({scale});
         const pixel = window.devicePixelRatio || 1; els.canvas.width = Math.floor(vp.width * pixel); els.canvas.height = Math.floor(vp.height * pixel);
         els.canvas.style.width = `${vp.width}px`; els.canvas.style.height = `${vp.height}px`; ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,els.canvas.width,els.canvas.height);
@@ -589,6 +608,15 @@
       els.pageJumpStatus.textContent = `Página ${els.pageScrubber.value} de ${st.total}`;
     });
     els.pageScrubber.addEventListener('change', () => goToPage(els.pageScrubber.value));
+    function updateZoomRange(){
+      const smallScreen = window.innerWidth <= 700;
+      els.zoom.max = smallScreen ? '2.6' : '3.5';
+      els.zoom.min = smallScreen ? '0.7' : '0.75';
+      if (Number(els.zoom.value) > Number(els.zoom.max)) els.zoom.value = els.zoom.max;
+      if (Number(els.zoom.value) < Number(els.zoom.min)) els.zoom.value = els.zoom.min;
+      st.zoom = Number(els.zoom.value);
+    }
+    updateZoomRange();
     els.zoom.addEventListener('input', ()=> { st.zoom = Number(els.zoom.value); renderPage(st.page); });
     els.back.addEventListener('click', ()=> { window.location.href = './ghost.html'; });
     els.mute.addEventListener('click', ()=> {
@@ -614,7 +642,7 @@
     });
 
     window.addEventListener('keydown',(e)=>{ if(e.key==='ArrowRight') goToPage(st.page + 1); if(e.key==='ArrowLeft') goToPage(st.page - 1); if(e.key.toLowerCase()==='m') els.mute.click(); });
-    let t; window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(()=> st.doc && renderPage(st.page), 180); });
+    let t; window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(()=> { updateZoomRange(); if (st.doc) renderPage(st.page); }, 180); });
   </script>
 </body>
 </html>
