@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Project Ghost — Reader Imersivo</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -31,24 +31,110 @@
     .bg-video { display:none; }
     .overlay { position:fixed; inset:0; z-index:2; background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.68)); }
     .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr auto auto; height:100%; }
-    .bar { display:flex; gap:10px; align-items:center; justify-content:space-between; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); }
-    .controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .bar { display:grid; grid-template-columns:1fr auto; gap:10px 14px; align-items:center; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); overflow:hidden; transition:grid-template-rows .28s ease, padding .28s ease; }
+    .controls { display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
     .control-btn, select, input[type=range] { border:1px solid var(--border); background:var(--panel); color:var(--text); border-radius:999px; padding:8px 12px; }
     .control-btn { display:inline-flex; align-items:center; gap:8px; cursor:pointer; transition:transform .18s ease, border-color .18s ease, background .18s ease; }
     .control-btn:hover { transform:translateY(-1px); border-color:var(--accent-soft); background:rgba(255,255,255,.08); }
     .control-btn.icon-only { width:42px; height:42px; justify-content:center; padding:0; font-size:1rem; }
-    .viewer { display:flex; align-items:stretch; justify-content:center; padding:0 8px; min-height:0; position: relative; }
+    .media-player {
+      grid-column:1 / -1;
+      display:grid;
+      grid-template-columns:auto minmax(180px, 1fr) auto;
+      gap:12px;
+      align-items:center;
+      max-height:150px;
+      opacity:1;
+      transform:translateY(0);
+      overflow:hidden;
+      transition:max-height .34s ease, opacity .24s ease, transform .34s ease, margin .34s ease;
+    }
+    .bar.media-collapsed .media-player { max-height:0; opacity:0; transform:translateY(-110%); margin-top:-10px; pointer-events:none; }
+    .bar.media-collapsed #mediaToggleIcon { transform:rotate(180deg); }
+    #mediaToggleIcon { transition:transform .25s ease; }
+    .media-cover-wrap { position:relative; width:58px; height:58px; flex:0 0 auto; }
+    .media-cover {
+      width:100%;
+      height:100%;
+      border-radius:14px;
+      object-fit:cover;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.13);
+      box-shadow:0 0 calc(10px + var(--beat, 0) * 24px) rgba(255,58,58,.28);
+      transform:scale(calc(1 + var(--beat, 0) * .045));
+      transition:transform .08s linear, box-shadow .08s linear;
+    }
+    .media-cover-wrap::after {
+      content:'';
+      position:absolute;
+      inset:-5px;
+      border-radius:18px;
+      border:1px solid rgba(255,58,58,calc(.18 + var(--beat, 0) * .4));
+      opacity:calc(.35 + var(--beat, 0) * .55);
+      pointer-events:none;
+    }
+    .media-info { display:grid; gap:7px; min-width:0; }
+    .media-title-row { display:flex; align-items:baseline; justify-content:space-between; gap:10px; min-width:0; }
+    .media-title { font-weight:800; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .media-subtitle { color:var(--muted); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .media-time { color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .media-progress-row { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:8px; }
+    .media-progress, .media-volume { accent-color:var(--accent); cursor:pointer; padding:0; background:transparent; border:none; }
+    .media-progress { width:100%; min-width:120px; }
+    .media-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
+    .media-icon-btn {
+      width:38px;
+      height:38px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.055);
+      color:var(--text);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      text-decoration:none;
+      transition:transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .media-icon-btn:hover { transform:translateY(-1px); border-color:var(--accent-soft); background:rgba(255,255,255,.1); }
+    .media-icon-btn.disabled { opacity:.42; pointer-events:none; }
+    .media-play { width:44px; height:44px; background:linear-gradient(135deg, rgba(255,58,58,.85), rgba(255,255,255,.12)); }
+    .media-volume { width:96px; }
+    .visualizer { display:flex; align-items:end; gap:3px; height:28px; min-width:42px; }
+    .visualizer span {
+      display:block;
+      width:4px;
+      height:calc(6px + var(--level, .2) * 22px);
+      border-radius:999px;
+      background:linear-gradient(180deg, #fff, var(--accent));
+      box-shadow:0 0 12px rgba(255,58,58,.35);
+      transition:height .08s linear;
+    }
+    .viewer {
+      display:flex;
+      align-items:flex-start;
+      justify-content:flex-start;
+      padding:8px;
+      min-height:0;
+      position: relative;
+      overflow:auto;
+      overscroll-behavior:contain;
+      touch-action:none;
+    }
     .viewer-stage {
-      width: min(1480px, 100%);
-      height: 100%;
+      width: max-content;
+      height: max-content;
+      min-width: 100%;
+      min-height: 100%;
       display: flex;
-      align-items: stretch;
+      align-items: center;
       justify-content: center;
     }
     .page-host {
-      width: 100%;
-      height: calc(100% - 12px);
-      margin: 6px 0;
+      width: max-content;
+      height: max-content;
+      min-width: 100%;
+      min-height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -56,22 +142,25 @@
     }
     .page-frame {
       position: relative;
-      max-width: 100%;
-      max-height: 100%;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      touch-action: pan-y;
+      touch-action:none;
+      flex:0 0 auto;
     }
     canvas {
-      max-width: 100%;
-      max-height: 100%;
+      display:block;
+      flex:0 0 auto;
+      max-width:none;
+      max-height:none;
       border-radius: 12px;
       box-shadow: 0 18px 60px rgba(0,0,0,.4);
       background: #ececef;
-      cursor: pointer;
+      cursor: grab;
       user-select: none;
+      touch-action:none;
     }
+    canvas:active, .viewer.is-panning canvas { cursor: grabbing; }
     .footer { padding:10px 18px; border-top:1px solid var(--border); background:var(--panel); font-size:13px; color:var(--muted); display:flex; justify-content:space-between; gap:12px; }
     .page-nav {
       display:grid;
@@ -143,50 +232,23 @@
       line-height: 1.5;
       font-size: 1.05rem;
     }
-    .layout-grid {
+    .start-tips {
       margin: 22px 0;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
+      gap: 10px;
+      color: #f4dddd;
+      line-height: 1.45;
     }
-    .layout-option {
-      min-height: 120px;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      background: rgba(255, 255, 255, 0.04);
-      color: #fff;
-      padding: 16px;
-      text-align: left;
-      display: grid;
-      align-content: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: all .2s ease;
+    .start-tips span {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.045);
     }
-    .layout-option i {
-      font-size: 1.5rem;
-      color: #ff5b5b;
-    }
-    .layout-option strong {
-      font-size: 1.05rem;
-      letter-spacing: .02em;
-    }
-    .layout-option small {
-      color: #dfc3c3;
-      font-size: .86rem;
-      line-height: 1.35;
-    }
-    .layout-option:hover {
-      transform: translateY(-3px);
-      border-color: rgba(255, 83, 83, 0.8);
-      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.36);
-      background: linear-gradient(180deg, rgba(89, 22, 22, 0.62), rgba(21, 8, 8, 0.65));
-    }
-    .layout-option.active {
-      border-color: rgba(255, 83, 83, 0.95);
-      box-shadow: 0 0 0 1px rgba(255, 83, 83, 0.48), 0 14px 34px rgba(255, 50, 50, 0.24);
-      background: linear-gradient(180deg, rgba(122, 24, 24, 0.75), rgba(35, 9, 9, 0.76));
-    }
+    .start-tips i { color: #ff5b5b; width: 20px; text-align: center; }
     .start-main-btn {
       width: 100%;
       border-radius: 12px;
@@ -207,16 +269,18 @@
     }
     #loading { position:fixed; z-index:15; left:50%; top:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,.8); padding:10px 14px; border-radius:10px; border:1px solid var(--border); display:none; }
     @media (max-width: 900px) {
-      .bar{flex-direction:column; align-items:flex-start; padding:10px 12px;}
-      .controls { width:100%; justify-content:space-between; }
+      .bar{grid-template-columns:1fr auto; padding:10px 12px;}
+      .controls { justify-content:flex-end; }
+      .media-player { grid-template-columns:auto 1fr; gap:10px; }
+      .media-actions { grid-column:1 / -1; justify-content:space-between; }
+      .media-volume { width:min(26vw, 110px); }
       .footer{flex-direction:column; gap:8px; padding:8px 12px;}
-      .viewer-stage { width: 100%; }
+      .viewer { padding:6px; }
       .page-nav { grid-template-columns:1fr 1fr; gap:10px; padding:10px 12px; }
       .page-jump { grid-column:1 / -1; grid-row:1; }
       .page-nav-btn { min-width:0; width:100%; min-height:46px; }
       .page-jump input[type=range] { width:100%; }
       .tap-hint { display:none; }
-      .layout-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -232,16 +296,39 @@
   <div class="overlay"></div>
   <div id="loading">Carregando...</div>
   <div class="reader">
-    <header class="bar">
+    <header id="topBar" class="bar">
       <strong id="chapterTitle">Project Ghost — Reader</strong>
       <div class="controls">
-        <button id="muteBtn" class="control-btn" type="button" aria-label="Desativar som" title="Som ligado">
-          <i id="muteIcon" class="fas fa-volume-high" aria-hidden="true"></i>
-          <span id="muteLabel">Som ligado</span>
-        </button>
         <button id="backBtn" class="control-btn" type="button"><i class="fas fa-arrow-left" aria-hidden="true"></i> Voltar</button>
-        <label>Zoom <input id="zoom" type="range" min="0.8" max="2" step="0.05" value="1"></label>
+        <button id="mediaToggle" class="control-btn icon-only" type="button" aria-expanded="true" aria-label="Ocultar barra de música" title="Ocultar barra de música">
+          <i id="mediaToggleIcon" class="fas fa-chevron-up" aria-hidden="true"></i>
+        </button>
       </div>
+      <section id="mediaPlayer" class="media-player" aria-label="Barra de música">
+        <div class="media-cover-wrap"><img id="mediaCover" class="media-cover" alt="Capa da música" src="assets/images/website/logo.png"></div>
+        <div class="media-info">
+          <div class="media-title-row">
+            <div>
+              <div id="mediaTitle" class="media-title">Sem música tocando</div>
+              <div id="mediaSubtitle" class="media-subtitle">A trilha da cena aparece aqui.</div>
+            </div>
+            <span id="mediaDurationText" class="media-time">0:00</span>
+          </div>
+          <div class="media-progress-row">
+            <span id="mediaCurrentText" class="media-time">0:00</span>
+            <input id="mediaProgress" class="media-progress" type="range" min="0" max="1000" step="1" value="0" aria-label="Progresso da música">
+            <span id="mediaRemainingText" class="media-time">-0:00</span>
+          </div>
+        </div>
+        <div class="media-actions">
+          <button id="mediaRestart" class="media-icon-btn" type="button" aria-label="Voltar para o início da música" title="Voltar música"><i class="fas fa-backward-step" aria-hidden="true"></i></button>
+          <button id="mediaPlay" class="media-icon-btn media-play" type="button" aria-label="Pausar música" title="Pausar música"><i id="mediaPlayIcon" class="fas fa-pause" aria-hidden="true"></i></button>
+          <button id="mediaMute" class="media-icon-btn" type="button" aria-label="Mutar música" title="Mutar"><i id="mediaMuteIcon" class="fas fa-volume-high" aria-hidden="true"></i></button>
+          <input id="mediaVolume" class="media-volume" type="range" min="0" max="1" step="0.01" value="0.55" aria-label="Volume da música">
+          <a id="mediaDownload" class="media-icon-btn" href="#" download aria-label="Baixar música" title="Baixar música"><i class="fas fa-download" aria-hidden="true"></i></a>
+          <div id="visualizer" class="visualizer" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+      </section>
     </header>
     <main class="viewer">
       <div class="viewer-stage">
@@ -260,7 +347,7 @@
       <label class="page-jump" for="pageScrubber">
         <strong id="pageJumpStatus">Página 1 de 1</strong>
         <input id="pageScrubber" type="range" min="1" max="1" step="1" value="1" aria-label="Arrastar para escolher a página">
-        <span class="tap-hint">Arraste para qualquer página, use ←/→ no teclado, ou clique/toque nas laterais do PDF.</span>
+        <span class="tap-hint">Role o mouse para zoom, clique e puxe o PDF para arrastar, use pinça/toque no celular ou clique nas laterais para navegar.</span>
       </label>
       <button id="nextBtn" class="page-nav-btn" type="button" aria-label="Próxima página">
         <span>Próxima</span>
@@ -276,18 +363,10 @@
   <div id="start" class="start">
     <div class="card">
       <h2 class="start-title">Antes de começar</h2>
-      <p class="start-description">Escolha o formato da leitura imersiva para o capítulo. A trilha é iniciada junto do início da leitura.</p>
-      <div class="layout-grid">
-        <button class="layout-option" data-layout-option="desktop" type="button">
-          <i class="fas fa-desktop"></i>
-          <strong>Modo Desktop</strong>
-          <small>Página maior e espaçamento ideal para tela ampla.</small>
-        </button>
-        <button class="layout-option" data-layout-option="mobile" type="button">
-          <i class="fas fa-mobile-screen-button"></i>
-          <strong>Modo Mobile</strong>
-          <small>Viewport ajustado para leitura em celular.</small>
-        </button>
+      <p class="start-description">A leitura agora usa um único modo adaptativo para celular, tablet e computador. A trilha é iniciada junto do início da leitura.</p>
+      <div class="start-tips" aria-label="Controles de leitura">
+        <span><i class="fas fa-computer-mouse"></i> No PC, role o mouse sobre o PDF para aproximar/afastar e clique + arraste para puxar a página.</span>
+        <span><i class="fas fa-hand-pointer"></i> No celular, faça pinça com dois dedos para controlar o zoom e arraste com um dedo para mover a página ampliada.</span>
       </div>
       <button id="startBtn" class="start-main-btn" type="button">Começar leitura</button>
     </div>
@@ -307,9 +386,12 @@
     };
     const reader = payload.reader || fallbackReader;
     function resolveReaderPdf(pdfConfig) {
+      const configuredPdf = pdfConfig && typeof pdfConfig === 'object'
+        ? Object.values(pdfConfig).find((value) => typeof value === 'string' && value.trim())
+        : '';
       const selected = typeof pdfConfig === 'string'
         ? pdfConfig
-        : (pdfConfig?.file || pdfConfig?.src || pdfConfig?.desktop || pdfConfig?.mobile || payload.file || 'prologo.pdf');
+        : (pdfConfig?.file || pdfConfig?.src || pdfConfig?.unified || pdfConfig?.default || configuredPdf || payload.file || 'prologo.pdf');
       return selected.startsWith('./') ? selected : `./posts/volume${payload.volume || 1}/${selected}`;
     }
     const readerPdf = resolveReaderPdf(reader.pdf);
@@ -319,10 +401,18 @@
       page:reader.pageStart || 1,
       total:1,
       zoom:1,
-      layout:payload.layout || 'auto',
+      minZoom:0.65,
+      maxZoom:4,
       muted:false,
+      mediaPaused:false,
+      volume:0.55,
+      mediaRaf:null,
+      analyser:null,
+      analyserData:null,
+      audioCtx:null,
       isRendering:false,
       pendingPage:null,
+      pendingZoomAnchor:null,
       bgActiveLayer:null,
       bgInactiveLayer:null,
       currentScene:null,
@@ -332,9 +422,10 @@
       pageMax: 1
     };
     const els = {
-      start: document.getElementById('start'), startBtn: document.getElementById('startBtn'), chapterTitle:document.getElementById('chapterTitle'),
-      prev:document.getElementById('prevBtn'), next:document.getElementById('nextBtn'), mute:document.getElementById('muteBtn'), muteIcon:document.getElementById('muteIcon'), muteLabel:document.getElementById('muteLabel'), back:document.getElementById('backBtn'),
-      zoom:document.getElementById('zoom'), canvas:document.getElementById('pdfCanvas'), pageStatus:document.getElementById('pageStatus'), pageJumpStatus:document.getElementById('pageJumpStatus'), pageScrubber:document.getElementById('pageScrubber'), sceneStatus:document.getElementById('sceneStatus'),
+      topBar:document.getElementById('topBar'), start: document.getElementById('start'), startBtn: document.getElementById('startBtn'), chapterTitle:document.getElementById('chapterTitle'),
+      prev:document.getElementById('prevBtn'), next:document.getElementById('nextBtn'), back:document.getElementById('backBtn'), mediaToggle:document.getElementById('mediaToggle'), mediaToggleIcon:document.getElementById('mediaToggleIcon'),
+      mediaPlayer:document.getElementById('mediaPlayer'), mediaCover:document.getElementById('mediaCover'), mediaTitle:document.getElementById('mediaTitle'), mediaSubtitle:document.getElementById('mediaSubtitle'), mediaCurrentText:document.getElementById('mediaCurrentText'), mediaDurationText:document.getElementById('mediaDurationText'), mediaRemainingText:document.getElementById('mediaRemainingText'), mediaProgress:document.getElementById('mediaProgress'), mediaRestart:document.getElementById('mediaRestart'), mediaPlay:document.getElementById('mediaPlay'), mediaPlayIcon:document.getElementById('mediaPlayIcon'), mediaMute:document.getElementById('mediaMute'), mediaMuteIcon:document.getElementById('mediaMuteIcon'), mediaVolume:document.getElementById('mediaVolume'), mediaDownload:document.getElementById('mediaDownload'), visualizer:document.getElementById('visualizer'),
+      canvas:document.getElementById('pdfCanvas'), pageStatus:document.getElementById('pageStatus'), pageJumpStatus:document.getElementById('pageJumpStatus'), pageScrubber:document.getElementById('pageScrubber'), sceneStatus:document.getElementById('sceneStatus'),
       bgA:document.getElementById('bgA'), bgB:document.getElementById('bgB'), loading:document.getElementById('loading'), audioHost:document.getElementById('audioHost')
     };
     const ctx = els.canvas.getContext('2d', { alpha:false });
@@ -342,20 +433,6 @@
     st.bgInactiveLayer = els.bgB;
 
     els.chapterTitle.textContent = `Project Ghost — ${reader.title}`;
-    const defaultLayout = payload.layout && payload.layout !== 'auto'
-      ? payload.layout
-      : (window.innerWidth <= 768 ? 'mobile' : 'desktop');
-    let selectedLayout = defaultLayout;
-
-    document.querySelectorAll('[data-layout-option]').forEach((btn) => {
-      const isActive = btn.getAttribute('data-layout-option') === selectedLayout;
-      btn.classList.toggle('active', isActive);
-      btn.addEventListener('click', () => {
-        selectedLayout = btn.getAttribute('data-layout-option') || 'desktop';
-        document.querySelectorAll('[data-layout-option]').forEach((item) => item.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
 
     function loading(on,msg){ els.loading.style.display = on ? 'block' : 'none'; if(msg) els.loading.textContent=msg; }
     function getScene(page){ return (reader.scenes || []).find(s => page >= s.from && page <= s.to) || (reader.scenes || [])[0]; }
@@ -366,26 +443,32 @@
       els.pageScrubber.value = String(st.page);
       els.sceneStatus.textContent = `Cena: ${scene?.label || '--'} • páginas ${scene?.from || 1}-${scene?.to || st.total}`;
     }
-    function updateMuteButton(){
-      els.muteIcon.className = st.muted ? 'fas fa-volume-xmark' : 'fas fa-volume-high';
-      els.muteLabel.textContent = st.muted ? 'Som desligado' : 'Som ligado';
-      els.mute.setAttribute('aria-label', st.muted ? 'Ativar som' : 'Desativar som');
-      els.mute.title = st.muted ? 'Som desligado' : 'Som ligado';
+    function updateMediaButtons(){
+      const audio = getPrimaryAudio();
+      const isPaused = st.mediaPaused || !audio || audio.paused;
+      els.mediaPlayIcon.className = isPaused ? 'fas fa-play' : 'fas fa-pause';
+      els.mediaPlay.setAttribute('aria-label', isPaused ? 'Tocar música' : 'Pausar música');
+      els.mediaPlay.title = isPaused ? 'Tocar música' : 'Pausar música';
+      els.mediaMuteIcon.className = st.muted || st.volume <= 0 ? 'fas fa-volume-xmark' : 'fas fa-volume-high';
+      els.mediaMute.setAttribute('aria-label', st.muted ? 'Ativar som' : 'Mutar música');
+      els.mediaMute.title = st.muted ? 'Ativar som' : 'Mutar';
+      els.mediaVolume.value = String(st.muted ? 0 : st.volume);
     }
     function goToPage(pageNo){
       const target = Math.min(Math.max(st.pageMin, Number(pageNo) || st.pageMin), st.pageMax);
       if (target === st.page && !st.isRendering) return;
       renderPage(target);
     }
-    function getLayoutLimit(layout, key) {
-      const limitsByLayout = reader.pageLimits?.[layout] || reader.pageRange?.[layout] || null;
-      if (limitsByLayout && Number.isFinite(Number(limitsByLayout[key]))) return Number(limitsByLayout[key]);
-
-      if (reader[key] && typeof reader[key] === 'object' && Number.isFinite(Number(reader[key][layout]))) {
-        return Number(reader[key][layout]);
+    function getReaderLimit(key) {
+      const value = reader[key];
+      if (Number.isFinite(Number(value))) return Number(value);
+      if (value && typeof value === 'object') {
+        const preferred = value.auto ?? value.unified ?? value.default;
+        if (Number.isFinite(Number(preferred))) return Number(preferred);
+        const firstNumeric = Object.values(value).find((item) => Number.isFinite(Number(item)));
+        if (firstNumeric != null) return Number(firstNumeric);
       }
-
-      return Number(reader[key]);
+      return undefined;
     }
     function getMaxScenePage() {
       const scenes = Array.isArray(reader.scenes) ? reader.scenes : [];
@@ -468,6 +551,116 @@
       [st.bgActiveLayer, st.bgInactiveLayer] = [st.bgInactiveLayer, st.bgActiveLayer];
     }
 
+    function getPrimaryAudio(){ return st.activeAudios[0] || null; }
+    function formatTime(seconds){
+      if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+    function getMediaTitle(src){
+      const clean = String(src || '').split('?')[0].split('/').pop() || '';
+      const name = clean.replace(/\.[^.]+$/, '').replace(/[._-]+/g, ' ').trim();
+      return name ? name.replace(/\b\w/g, (letter) => letter.toUpperCase()) : 'Sem música tocando';
+    }
+    function getSceneArtwork(scene){
+      const configured = scene?.cover || scene?.artwork || scene?.image || scene?.musicImage || scene?.thumbnail;
+      const selected = normalizeSceneMedia(configured)[0] || normalizeSceneMedia(scene?.background).find((item) => resolveBackgroundType(item) === 'image');
+      return selected || 'assets/images/website/logo.png';
+    }
+    function applyMediaVolume(){
+      st.activeAudios.forEach((audio) => {
+        audio.muted = st.muted;
+        audio.volume = st.muted ? 0 : st.volume;
+      });
+      updateMediaButtons();
+    }
+    function updateMediaMetadata(scene){
+      const audio = getPrimaryAudio();
+      const src = audio?.getAttribute('data-src') || normalizeSceneMedia(scene?.audio)[0] || '';
+      els.mediaTitle.textContent = scene?.musicTitle || scene?.audioTitle || getMediaTitle(src);
+      els.mediaSubtitle.textContent = src ? `${scene?.label || 'Cena'} • ${src.split('/').pop()}` : 'Nenhuma trilha para esta cena.';
+      els.mediaCover.src = getSceneArtwork(scene);
+      els.mediaDownload.href = src || '#';
+      els.mediaDownload.toggleAttribute('download', Boolean(src));
+      els.mediaDownload.classList.toggle('disabled', !src);
+      updateMediaButtons();
+      updateMediaProgress();
+      setupAnalyser(audio);
+      startMediaAnimation();
+    }
+    function updateMediaProgress(){
+      const audio = getPrimaryAudio();
+      const duration = audio?.duration || 0;
+      const current = audio?.currentTime || 0;
+      const progress = duration ? Math.round((current / duration) * 1000) : 0;
+      els.mediaProgress.value = String(progress);
+      els.mediaCurrentText.textContent = formatTime(current);
+      els.mediaDurationText.textContent = formatTime(duration);
+      els.mediaRemainingText.textContent = `-${formatTime(Math.max(duration - current, 0))}`;
+    }
+    function ensureAudioContext(){
+      if (st.audioCtx) return st.audioCtx;
+      const AudioContextRef = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextRef) return null;
+      st.audioCtx = new AudioContextRef();
+      return st.audioCtx;
+    }
+    function setupAnalyser(audio){
+      if (!audio) {
+        st.analyser = null;
+        st.analyserData = null;
+        return;
+      }
+      try {
+        const ctx = ensureAudioContext();
+        if (!ctx) return;
+        if (!audio._pgMediaSource) audio._pgMediaSource = ctx.createMediaElementSource(audio);
+        if (!audio._pgAnalyser) {
+          audio._pgAnalyser = ctx.createAnalyser();
+          audio._pgAnalyser.fftSize = 64;
+          audio._pgMediaSource.connect(audio._pgAnalyser);
+          audio._pgAnalyser.connect(ctx.destination);
+        }
+        st.analyser = audio._pgAnalyser;
+        st.analyserData = new Uint8Array(st.analyser.frequencyBinCount);
+      } catch {
+        st.analyser = null;
+        st.analyserData = null;
+      }
+    }
+    function animateVisualizer(){
+      const bars = [...els.visualizer.querySelectorAll('span')];
+      let beat = 0;
+      if (st.analyser && st.analyserData) {
+        st.analyser.getByteFrequencyData(st.analyserData);
+        bars.forEach((bar, index) => {
+          const value = st.analyserData[index * 3] || 0;
+          const level = value / 255;
+          beat += level;
+          bar.style.setProperty('--level', String(Math.max(level, 0.08)));
+        });
+        beat = beat / Math.max(bars.length, 1);
+      } else {
+        const audio = getPrimaryAudio();
+        const t = audio?.currentTime || performance.now() / 1000;
+        bars.forEach((bar, index) => {
+          const level = Math.abs(Math.sin(t * (2.2 + index * .4))) * (audio && !audio.paused && !st.muted ? .75 : .12);
+          beat += level;
+          bar.style.setProperty('--level', String(Math.max(level, 0.08)));
+        });
+        beat = beat / Math.max(bars.length, 1);
+      }
+      els.mediaPlayer.style.setProperty('--beat', String(Math.min(beat, 1)));
+      els.mediaCover.style.setProperty('--beat', String(Math.min(beat, 1)));
+      updateMediaProgress();
+      st.mediaRaf = requestAnimationFrame(animateVisualizer);
+    }
+    function startMediaAnimation(){
+      if (st.mediaRaf) cancelAnimationFrame(st.mediaRaf);
+      st.mediaRaf = requestAnimationFrame(animateVisualizer);
+    }
+
     function fade(audio,from,to,d=700){ const t0=performance.now(); const run=(t)=>{ const p=Math.min(1,(t-t0)/d); audio.volume=Math.max(0,Math.min(1,from+(to-from)*p)); if(p<1) requestAnimationFrame(run); }; requestAnimationFrame(run); }
     async function fadeOutAndStop(audio, duration = 500) {
       const startVolume = Number.isFinite(audio.volume) ? audio.volume : 0.55;
@@ -486,51 +679,109 @@
       audio.setAttribute('data-src', src);
       audio.src = src;
       audio.volume = 0;
+      audio.muted = st.muted;
       els.audioHost.appendChild(audio);
       return audio;
     }
     async function setSceneAudio(scene){
       const sceneAudioList = normalizeSceneMedia(scene?.audio);
       const sceneAudioKey = sceneAudioList.join('|');
-      if (sceneAudioKey === st.currentSceneAudioKey) return;
+      if (sceneAudioKey === st.currentSceneAudioKey) {
+        updateMediaMetadata(scene);
+        return;
+      }
 
       const previousAudios = [...st.activeAudios];
       st.activeAudios = [];
       st.currentSceneAudioKey = sceneAudioKey;
 
-      if (st.muted || sceneAudioList.length === 0) {
+      if (sceneAudioList.length === 0) {
+        updateMediaMetadata(scene);
         await Promise.all(previousAudios.map((audio) => fadeOutAndStop(audio, 450)));
         return;
       }
 
       const nextAudios = sceneAudioList.map((src) => createSceneAudio(src));
       st.activeAudios = nextAudios;
+      updateMediaMetadata(scene);
 
       await Promise.all(nextAudios.map(async (audio) => {
+        audio.muted = st.muted;
         try {
-          await audio.play();
-          fade(audio, 0, 0.55, 1200);
+          if (!st.mediaPaused) await audio.play();
+          fade(audio, 0, st.muted ? 0 : st.volume, 1200);
         } catch {}
       }));
       await Promise.all(previousAudios.map((audio) => fadeOutAndStop(audio, 900)));
+      updateMediaButtons();
     }
 
-    async function renderPage(pageNo){
+
+
+    function clamp(value, min, max){
+      return Math.min(Math.max(value, min), max);
+    }
+    function getViewer(){ return document.querySelector('.viewer'); }
+    function getZoomAnchor(clientX, clientY){
+      const rect = els.canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return null;
+      return {
+        clientX,
+        clientY,
+        xRatio: clamp((clientX - rect.left) / rect.width, 0, 1),
+        yRatio: clamp((clientY - rect.top) / rect.height, 0, 1)
+      };
+    }
+    function restoreZoomAnchor(anchor){
+      const viewer = getViewer();
+      if (!viewer || !anchor) return;
+      requestAnimationFrame(() => {
+        const rect = els.canvas.getBoundingClientRect();
+        viewer.scrollLeft += (rect.left + rect.width * anchor.xRatio) - anchor.clientX;
+        viewer.scrollTop += (rect.top + rect.height * anchor.yRatio) - anchor.clientY;
+      });
+    }
+    function syncZoomControl(){
+      // O zoom agora é controlado por scroll/pinça; mantido para sincronizar futuras UIs sem quebrar o fluxo.
+    }
+    function setZoom(nextZoom, clientX = window.innerWidth / 2, clientY = window.innerHeight / 2){
+      if (!st.doc) return;
+      const clampedZoom = Math.round(clamp(nextZoom, st.minZoom, st.maxZoom) * 100) / 100;
+      if (Math.abs(clampedZoom - st.zoom) < 0.001) return;
+      const anchor = getZoomAnchor(clientX, clientY);
+      st.zoom = clampedZoom;
+      syncZoomControl();
+      renderPage(st.page, anchor);
+    }
+    function hasScrollablePage(){
+      const viewer = getViewer();
+      if (!viewer) return false;
+      return viewer.scrollWidth > viewer.clientWidth + 2 || viewer.scrollHeight > viewer.clientHeight + 2;
+    }
+
+    async function renderPage(pageNo, zoomAnchor = null){
       if(!st.doc) return;
       const targetPage = Math.min(Math.max(st.pageMin, Number(pageNo) || st.pageMin), st.pageMax);
-      if (st.isRendering) { st.pendingPage = targetPage; return; }
+      if (st.isRendering) {
+        st.pendingPage = targetPage;
+        st.pendingZoomAnchor = zoomAnchor;
+        return;
+      }
       st.isRendering = true;
       loading(true,`Renderizando página ${targetPage}...`);
       try {
         const pg = await st.doc.getPage(targetPage); const base = pg.getViewport({scale:1});
-        const navHeight = document.querySelector('.page-nav')?.offsetHeight || 0;
-        const barHeight = document.querySelector('.bar')?.offsetHeight || 0;
-        const footerHeight = document.querySelector('.footer')?.offsetHeight || 0;
-        const vw = window.innerWidth - 24; const vh = window.innerHeight - barHeight - navHeight - footerHeight - 28;
+        const viewer = document.querySelector('.viewer');
+        const viewerStyles = viewer ? getComputedStyle(viewer) : null;
+        const horizontalPadding = viewerStyles ? parseFloat(viewerStyles.paddingLeft) + parseFloat(viewerStyles.paddingRight) : 16;
+        const verticalPadding = viewerStyles ? parseFloat(viewerStyles.paddingTop) + parseFloat(viewerStyles.paddingBottom) : 16;
+        const vw = Math.max(1, (viewer?.clientWidth || window.innerWidth) - horizontalPadding);
+        const vh = Math.max(1, (viewer?.clientHeight || window.innerHeight) - verticalPadding);
         const fit = Math.min(vw/base.width, vh/base.height); const scale = Math.max(0.2, fit * st.zoom); const vp = pg.getViewport({scale});
         const pixel = window.devicePixelRatio || 1; els.canvas.width = Math.floor(vp.width * pixel); els.canvas.height = Math.floor(vp.height * pixel);
         els.canvas.style.width = `${vp.width}px`; els.canvas.style.height = `${vp.height}px`; ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,els.canvas.width,els.canvas.height);
         await pg.render({ canvasContext:ctx, viewport:vp, transform: pixel!==1 ? [pixel,0,0,pixel,0,0] : null }).promise;
+        restoreZoomAnchor(zoomAnchor);
 
         const scene = getScene(targetPage); if(scene && st.currentScene !== scene.id){ await setSceneBackground(scene); applySceneTheme(scene); try{ await setSceneAudio(scene); } catch { console.warn('Áudio bloqueado ou arquivo ausente.'); }
           st.currentScene = scene.id; }
@@ -540,26 +791,28 @@
       } finally {
         loading(false);
         st.isRendering = false;
-        if (st.pendingPage && st.pendingPage !== st.page) {
+        if (st.pendingPage) {
           const queuedPage = st.pendingPage;
+          const queuedAnchor = st.pendingZoomAnchor;
           st.pendingPage = null;
-          renderPage(queuedPage);
+          st.pendingZoomAnchor = null;
+          renderPage(queuedPage, queuedAnchor);
         } else {
           st.pendingPage = null;
+          st.pendingZoomAnchor = null;
         }
       }
     }
 
     async function loadAndStart(){
-      st.layout = selectedLayout;
       const pdfFile = readerPdf;
       loading(true, `Carregando ${pdfFile}...`);
       st.doc = await pdfjsLib.getDocument(pdfFile).promise;
       st.total = st.doc.numPages;
-      const configuredPageStart = Math.max(1, getLayoutLimit(selectedLayout, 'pageStart') || 1);
+      const configuredPageStart = Math.max(1, getReaderLimit('pageStart') || 1);
       const configuredPageEnd = Math.max(
         configuredPageStart,
-        getLayoutLimit(selectedLayout, 'pageEnd') || configuredPageStart,
+        getReaderLimit('pageEnd') || configuredPageStart,
         getMaxScenePage()
       );
       st.pageMin = Math.min(configuredPageStart, st.total);
@@ -589,23 +842,146 @@
       els.pageJumpStatus.textContent = `Página ${els.pageScrubber.value} de ${st.total}`;
     });
     els.pageScrubber.addEventListener('change', () => goToPage(els.pageScrubber.value));
-    els.zoom.addEventListener('input', ()=> { st.zoom = Number(els.zoom.value); renderPage(st.page); });
+    syncZoomControl();
+    updateMediaButtons();
     els.back.addEventListener('click', ()=> { window.location.href = './ghost.html'; });
-    els.mute.addEventListener('click', ()=> {
-      st.muted = !st.muted; updateMuteButton();
-      if(st.muted){ st.activeAudios.forEach((audio)=> fade(audio, audio.volume || .55, 0, 400)); setTimeout(()=>{ st.activeAudios.forEach((audio)=>audio.pause()); }, 450); }
-      else { st.currentSceneAudioKey = ''; const scene = getScene(st.page); setSceneAudio(scene).catch(()=>{}); }
+    els.mediaToggle.addEventListener('click', () => {
+      const collapsed = els.topBar.classList.toggle('media-collapsed');
+      els.mediaToggle.setAttribute('aria-expanded', String(!collapsed));
+      els.mediaToggle.setAttribute('aria-label', collapsed ? 'Mostrar barra de música' : 'Ocultar barra de música');
+      els.mediaToggle.title = collapsed ? 'Mostrar barra de música' : 'Ocultar barra de música';
+    });
+    els.mediaPlay.addEventListener('click', async () => {
+      const audio = getPrimaryAudio();
+      if (!audio) return;
+      st.mediaPaused = !st.mediaPaused;
+      if (st.audioCtx?.state === 'suspended') await st.audioCtx.resume();
+      if (st.mediaPaused) {
+        st.activeAudios.forEach((item) => item.pause());
+      } else {
+        await Promise.all(st.activeAudios.map((item) => item.play().catch(() => {})));
+      }
+      updateMediaButtons();
+    });
+    els.mediaRestart.addEventListener('click', async () => {
+      st.activeAudios.forEach((audio) => { audio.currentTime = 0; });
+      if (st.mediaPaused) return updateMediaProgress();
+      await Promise.all(st.activeAudios.map((audio) => audio.play().catch(() => {})));
+      updateMediaButtons();
+    });
+    els.mediaMute.addEventListener('click', () => {
+      st.muted = !st.muted;
+      applyMediaVolume();
+    });
+    els.mediaVolume.addEventListener('input', (event) => {
+      st.volume = Number(event.target.value);
+      st.muted = st.volume <= 0;
+      applyMediaVolume();
+    });
+    els.mediaProgress.addEventListener('input', (event) => {
+      const audio = getPrimaryAudio();
+      if (!audio?.duration) return;
+      const targetTime = (Number(event.target.value) / 1000) * audio.duration;
+      st.activeAudios.forEach((item) => { if (Number.isFinite(item.duration)) item.currentTime = Math.min(targetTime, item.duration); });
+      updateMediaProgress();
+    });
+    els.mediaDownload.addEventListener('click', (event) => {
+      if (!getPrimaryAudio()) event.preventDefault();
     });
 
     let suppressCanvasClick = false;
+    const activePointers = new Map();
+    let pointerStartX = 0;
+    let pointerStartY = 0;
+    let lastPanPoint = null;
+    let pinchState = null;
+
+    function getPointerCenter(points){
+      return {
+        x: (points[0].clientX + points[1].clientX) / 2,
+        y: (points[0].clientY + points[1].clientY) / 2
+      };
+    }
+    function getPointerDistance(points){
+      return Math.hypot(points[0].clientX - points[1].clientX, points[0].clientY - points[1].clientY);
+    }
+
+    const viewer = getViewer();
+    viewer.addEventListener('wheel', (event) => {
+      if (!st.doc) return;
+      event.preventDefault();
+      const factor = Math.exp(-event.deltaY * 0.0025);
+      setZoom(st.zoom * factor, event.clientX, event.clientY);
+    }, { passive:false });
+
+    viewer.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      if (!event.target.closest('.viewer')) return;
+
+      activePointers.set(event.pointerId, { clientX:event.clientX, clientY:event.clientY });
+      viewer.setPointerCapture?.(event.pointerId);
+      pointerStartX = event.clientX;
+      pointerStartY = event.clientY;
+
+      if (activePointers.size === 1) {
+        lastPanPoint = { x:event.clientX, y:event.clientY };
+        viewer.classList.add('is-panning');
+      }
+      if (activePointers.size === 2) {
+        const points = [...activePointers.values()];
+        pinchState = { distance:getPointerDistance(points), zoom:st.zoom };
+        suppressCanvasClick = true;
+      }
+    });
+    viewer.addEventListener('pointermove', (event) => {
+      if (!activePointers.has(event.pointerId)) return;
+      activePointers.set(event.pointerId, { clientX:event.clientX, clientY:event.clientY });
+
+      if (activePointers.size === 2 && pinchState) {
+        event.preventDefault();
+        const points = [...activePointers.values()];
+        const distance = getPointerDistance(points);
+        const center = getPointerCenter(points);
+        if (pinchState.distance > 0) setZoom(pinchState.zoom * (distance / pinchState.distance), center.x, center.y);
+        return;
+      }
+
+      if (activePointers.size === 1 && lastPanPoint) {
+        const dx = event.clientX - lastPanPoint.x;
+        const dy = event.clientY - lastPanPoint.y;
+        const moved = Math.hypot(event.clientX - pointerStartX, event.clientY - pointerStartY);
+
+        if (hasScrollablePage()) {
+          event.preventDefault();
+          viewer.scrollLeft -= dx;
+          viewer.scrollTop -= dy;
+        }
+        if (moved > 6) suppressCanvasClick = true;
+        lastPanPoint = { x:event.clientX, y:event.clientY };
+      }
+    }, { passive:false });
+    function clearPointer(event){
+      activePointers.delete(event.pointerId);
+      if (activePointers.size < 2) pinchState = null;
+      if (activePointers.size === 1) {
+        const [remainingPoint] = activePointers.values();
+        lastPanPoint = { x:remainingPoint.clientX, y:remainingPoint.clientY };
+      }
+      if (activePointers.size === 0) {
+        lastPanPoint = null;
+        viewer.classList.remove('is-panning');
+      }
+    }
+    viewer.addEventListener('pointerup', clearPointer);
+    viewer.addEventListener('pointercancel', clearPointer);
+
     els.canvas.addEventListener('click', (event) => {
       if (suppressCanvasClick) { suppressCanvasClick = false; return; }
       const bounds = els.canvas.getBoundingClientRect();
       goToPage(event.clientX - bounds.left > bounds.width / 2 ? st.page + 1 : st.page - 1);
     });
-    let pointerStartX = 0;
-    els.canvas.addEventListener('pointerdown', (event) => { pointerStartX = event.clientX; });
     els.canvas.addEventListener('pointerup', (event) => {
+      if (pinchState || hasScrollablePage()) return;
       const delta = event.clientX - pointerStartX;
       if (Math.abs(delta) > 48) {
         suppressCanvasClick = true;
@@ -614,7 +990,7 @@
     });
 
     window.addEventListener('keydown',(e)=>{ if(e.key==='ArrowRight') goToPage(st.page + 1); if(e.key==='ArrowLeft') goToPage(st.page - 1); if(e.key.toLowerCase()==='m') els.mute.click(); });
-    let t; window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(()=> st.doc && renderPage(st.page), 180); });
+    let t; window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(()=> { syncZoomControl(); if (st.doc) renderPage(st.page); }, 180); });
   </script>
 </body>
 </html>
