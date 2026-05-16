@@ -89,7 +89,7 @@
       user-select: none;
       touch-action:none;
     }
-    canvas:active { cursor: grabbing; }
+    canvas:active, .viewer.is-panning canvas { cursor: grabbing; }
     .footer { padding:10px 18px; border-top:1px solid var(--border); background:var(--panel); font-size:13px; color:var(--muted); display:flex; justify-content:space-between; gap:12px; }
     .page-nav {
       display:grid;
@@ -252,7 +252,7 @@
       <label class="page-jump" for="pageScrubber">
         <strong id="pageJumpStatus">Página 1 de 1</strong>
         <input id="pageScrubber" type="range" min="1" max="1" step="1" value="1" aria-label="Arrastar para escolher a página">
-        <span class="tap-hint">Role o mouse para zoom no ponto do cursor, use pinça no toque, arraste a página ampliada ou clique nas laterais para navegar.</span>
+        <span class="tap-hint">Role o mouse para zoom, clique e puxe o PDF para arrastar, use pinça/toque no celular ou clique nas laterais para navegar.</span>
       </label>
       <button id="nextBtn" class="page-nav-btn" type="button" aria-label="Próxima página">
         <span>Próxima</span>
@@ -270,8 +270,8 @@
       <h2 class="start-title">Antes de começar</h2>
       <p class="start-description">A leitura agora usa um único modo adaptativo para celular, tablet e computador. A trilha é iniciada junto do início da leitura.</p>
       <div class="start-tips" aria-label="Controles de leitura">
-        <span><i class="fas fa-computer-mouse"></i> No PC, role o mouse sobre o PDF para aproximar ou afastar mirando no ponto desejado.</span>
-        <span><i class="fas fa-hand-pointer"></i> No celular, faça pinça com dois dedos para controlar o zoom e arraste quando a página estiver ampliada.</span>
+        <span><i class="fas fa-computer-mouse"></i> No PC, role o mouse sobre o PDF para aproximar/afastar e clique + arraste para puxar a página.</span>
+        <span><i class="fas fa-hand-pointer"></i> No celular, faça pinça com dois dedos para controlar o zoom e arraste com um dedo para mover a página ampliada.</span>
       </div>
       <button id="startBtn" class="start-main-btn" type="button">Começar leitura</button>
     </div>
@@ -658,11 +658,17 @@
     }, { passive:false });
 
     viewer.addEventListener('pointerdown', (event) => {
-      if (event.pointerType === 'mouse') return;
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      if (!event.target.closest('.viewer')) return;
+
       activePointers.set(event.pointerId, { clientX:event.clientX, clientY:event.clientY });
       viewer.setPointerCapture?.(event.pointerId);
+      pointerStartX = event.clientX;
+      pointerStartY = event.clientY;
+
       if (activePointers.size === 1) {
         lastPanPoint = { x:event.clientX, y:event.clientY };
+        viewer.classList.add('is-panning');
       }
       if (activePointers.size === 2) {
         const points = [...activePointers.values()];
@@ -671,7 +677,7 @@
       }
     });
     viewer.addEventListener('pointermove', (event) => {
-      if (event.pointerType === 'mouse' || !activePointers.has(event.pointerId)) return;
+      if (!activePointers.has(event.pointerId)) return;
       activePointers.set(event.pointerId, { clientX:event.clientX, clientY:event.clientY });
 
       if (activePointers.size === 2 && pinchState) {
@@ -683,20 +689,31 @@
         return;
       }
 
-      if (activePointers.size === 1 && lastPanPoint && hasScrollablePage()) {
-        event.preventDefault();
+      if (activePointers.size === 1 && lastPanPoint) {
         const dx = event.clientX - lastPanPoint.x;
         const dy = event.clientY - lastPanPoint.y;
-        viewer.scrollLeft -= dx;
-        viewer.scrollTop -= dy;
-        if (Math.hypot(event.clientX - pointerStartX, event.clientY - pointerStartY) > 8) suppressCanvasClick = true;
+        const moved = Math.hypot(event.clientX - pointerStartX, event.clientY - pointerStartY);
+
+        if (hasScrollablePage()) {
+          event.preventDefault();
+          viewer.scrollLeft -= dx;
+          viewer.scrollTop -= dy;
+        }
+        if (moved > 6) suppressCanvasClick = true;
         lastPanPoint = { x:event.clientX, y:event.clientY };
       }
     }, { passive:false });
     function clearPointer(event){
       activePointers.delete(event.pointerId);
       if (activePointers.size < 2) pinchState = null;
-      if (activePointers.size === 0) lastPanPoint = null;
+      if (activePointers.size === 1) {
+        const [remainingPoint] = activePointers.values();
+        lastPanPoint = { x:remainingPoint.clientX, y:remainingPoint.clientY };
+      }
+      if (activePointers.size === 0) {
+        lastPanPoint = null;
+        viewer.classList.remove('is-panning');
+      }
     }
     viewer.addEventListener('pointerup', clearPointer);
     viewer.addEventListener('pointercancel', clearPointer);
@@ -706,13 +723,8 @@
       const bounds = els.canvas.getBoundingClientRect();
       goToPage(event.clientX - bounds.left > bounds.width / 2 ? st.page + 1 : st.page - 1);
     });
-    els.canvas.addEventListener('pointerdown', (event) => {
-      if (event.pointerType !== 'mouse' && activePointers.size > 1) return;
-      pointerStartX = event.clientX;
-      pointerStartY = event.clientY;
-    });
     els.canvas.addEventListener('pointerup', (event) => {
-      if (event.pointerType !== 'mouse' && (pinchState || hasScrollablePage())) return;
+      if (pinchState || hasScrollablePage()) return;
       const delta = event.clientX - pointerStartX;
       if (Math.abs(delta) > 48) {
         suppressCanvasClick = true;
