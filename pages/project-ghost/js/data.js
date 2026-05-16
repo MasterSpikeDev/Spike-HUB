@@ -261,19 +261,10 @@ const chaptersData = {
                     file: "prologo/prologo-base.pdf",
                     reader: {
                         title: "Prólogo",
-                        pageStart: {
-                            desktop: 1,
-                            mobile: 1
-                        },
-                        pageEnd: {
-                            desktop: 30,
-                            mobile: 30
-                        },
+                        pageStart: 1,
+                        pageEnd: 30,
                         googleDocsUrl: "https://docs.google.com/document/d/1J3BpHaeWOi7-Dz8iaLW-i4VxXWLOK3kwb8EN9WZpRaQ/edit?usp=sharing",
-                        pdf: {
-                            desktop: "prologo/prologo-pc.pdf",
-                            mobile: "prologo/prologo-mobile.pdf"
-                        },
+                        pdf: "prologo/prologo-modo-leitura.pdf",
                         scenes: [
                             {
                                 id: "capa",

@@ -30,10 +30,13 @@
     .bg-image { background-size:cover; background-position:center; background-repeat:no-repeat; }
     .bg-video { display:none; }
     .overlay { position:fixed; inset:0; z-index:2; background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.68)); }
-    .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr auto; height:100%; }
+    .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr auto auto; height:100%; }
     .bar { display:flex; gap:10px; align-items:center; justify-content:space-between; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); }
     .controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    button, select, input[type=range] { border:1px solid var(--border); background:var(--panel); color:var(--text); border-radius:999px; padding:8px 12px; }
+    .control-btn, select, input[type=range] { border:1px solid var(--border); background:var(--panel); color:var(--text); border-radius:999px; padding:8px 12px; }
+    .control-btn { display:inline-flex; align-items:center; gap:8px; cursor:pointer; transition:transform .18s ease, border-color .18s ease, background .18s ease; }
+    .control-btn:hover { transform:translateY(-1px); border-color:var(--accent-soft); background:rgba(255,255,255,.08); }
+    .control-btn.icon-only { width:42px; height:42px; justify-content:center; padding:0; font-size:1rem; }
     .viewer { display:flex; align-items:stretch; justify-content:center; padding:0 8px; min-height:0; position: relative; }
     .viewer-stage {
       width: min(1480px, 100%);
@@ -58,6 +61,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      touch-action: pan-y;
     }
     canvas {
       max-width: 100%;
@@ -65,30 +69,45 @@
       border-radius: 12px;
       box-shadow: 0 18px 60px rgba(0,0,0,.4);
       background: #ececef;
-    }
-    .footer { padding:10px 18px; border-top:1px solid var(--border); background:var(--panel); font-size:13px; color:var(--muted); display:flex; justify-content:space-between; }
-    .side-nav-btn {
-      width: 56px;
-      height: 56px;
-      border-radius: 999px;
-      background: color-mix(in srgb, var(--panel) 78%, var(--accent) 22%);
-      border: none;
-      color: var(--text);
-      font-size: 24px;
-      display: grid;
-      place-items: center;
-      box-shadow: 0 10px 24px rgba(0,0,0,.4);
       cursor: pointer;
-      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 10;
+      user-select: none;
     }
-    .side-nav-btn.prev { left: -72px; }
-    .side-nav-btn.next { right: -72px; }
-    .side-nav-btn:hover { transform: translateY(-50%) scale(1.06); box-shadow: 0 14px 30px rgba(0,0,0,.52); }
-    .side-nav-btn:disabled { opacity: .35; cursor: not-allowed; transform: translateY(-50%); }
+    .footer { padding:10px 18px; border-top:1px solid var(--border); background:var(--panel); font-size:13px; color:var(--muted); display:flex; justify-content:space-between; gap:12px; }
+    .page-nav {
+      display:grid;
+      grid-template-columns:auto minmax(180px, 640px) auto;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      padding:12px 18px;
+      border-top:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(11,11,16,.72), rgba(8,8,12,.9));
+      backdrop-filter: blur(10px);
+      box-shadow: 0 -12px 28px rgba(0,0,0,.28);
+    }
+    .page-nav-btn {
+      min-width:136px;
+      min-height:44px;
+      border:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(135deg, rgba(255,58,58,.22), rgba(255,255,255,.045));
+      color:var(--text);
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      font-weight:800;
+      letter-spacing:.01em;
+      cursor:pointer;
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, opacity .18s ease;
+    }
+    .page-nav-btn:hover { transform:translateY(-2px); border-color:var(--accent-soft); box-shadow:0 10px 22px rgba(0,0,0,.34); }
+    .page-nav-btn:disabled { opacity:.38; cursor:not-allowed; transform:none; box-shadow:none; }
+    .page-jump { display:grid; gap:6px; color:var(--muted); font-size:12px; text-align:center; }
+    .page-jump strong { color:var(--text); font-size:13px; }
+    .page-jump input[type=range] { width:min(56vw, 640px); accent-color:var(--accent); cursor:grab; padding:0; background:transparent; border:none; }
+    .page-jump input[type=range]:active { cursor:grabbing; }
+    .tap-hint { color:var(--muted); font-size:12px; }
     .start {
       position: fixed;
       inset: 0;
@@ -188,12 +207,15 @@
     }
     #loading { position:fixed; z-index:15; left:50%; top:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,.8); padding:10px 14px; border-radius:10px; border:1px solid var(--border); display:none; }
     @media (max-width: 900px) {
-      .bar{flex-direction:column; align-items:flex-start;}
-      .footer{flex-direction:column; gap:8px;}
+      .bar{flex-direction:column; align-items:flex-start; padding:10px 12px;}
+      .controls { width:100%; justify-content:space-between; }
+      .footer{flex-direction:column; gap:8px; padding:8px 12px;}
       .viewer-stage { width: 100%; }
-      .side-nav-btn { width:48px; height:48px; font-size:20px; }
-      .side-nav-btn.prev { left: -56px; }
-      .side-nav-btn.next { right: -56px; }
+      .page-nav { grid-template-columns:1fr 1fr; gap:10px; padding:10px 12px; }
+      .page-jump { grid-column:1 / -1; grid-row:1; }
+      .page-nav-btn { min-width:0; width:100%; min-height:46px; }
+      .page-jump input[type=range] { width:100%; }
+      .tap-hint { display:none; }
       .layout-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -213,8 +235,11 @@
     <header class="bar">
       <strong id="chapterTitle">Project Ghost — Reader</strong>
       <div class="controls">
-        <button id="muteBtn" type="button">Mutar</button>
-        <button id="backBtn" type="button">Voltar</button>
+        <button id="muteBtn" class="control-btn" type="button" aria-label="Desativar som" title="Som ligado">
+          <i id="muteIcon" class="fas fa-volume-high" aria-hidden="true"></i>
+          <span id="muteLabel">Som ligado</span>
+        </button>
+        <button id="backBtn" class="control-btn" type="button"><i class="fas fa-arrow-left" aria-hidden="true"></i> Voltar</button>
         <label>Zoom <input id="zoom" type="range" min="0.8" max="2" step="0.05" value="1"></label>
       </div>
     </header>
@@ -222,13 +247,26 @@
       <div class="viewer-stage">
         <div class="page-host">
           <div class="page-frame">
-            <button id="prevBtn" class="side-nav-btn prev" type="button" aria-label="Página anterior">←</button>
-            <canvas id="pdfCanvas"></canvas>
-            <button id="nextBtn" class="side-nav-btn next" type="button" aria-label="Próxima página">→</button>
+            <canvas id="pdfCanvas" aria-label="Página do PDF. Clique na metade direita para avançar ou na metade esquerda para voltar."></canvas>
           </div>
         </div>
       </div>
     </main>
+    <nav class="page-nav" aria-label="Navegação de páginas">
+      <button id="prevBtn" class="page-nav-btn" type="button" aria-label="Página anterior">
+        <i class="fas fa-chevron-left" aria-hidden="true"></i>
+        <span>Anterior</span>
+      </button>
+      <label class="page-jump" for="pageScrubber">
+        <strong id="pageJumpStatus">Página 1 de 1</strong>
+        <input id="pageScrubber" type="range" min="1" max="1" step="1" value="1" aria-label="Arrastar para escolher a página">
+        <span class="tap-hint">Arraste para qualquer página, use ←/→ no teclado, ou clique/toque nas laterais do PDF.</span>
+      </label>
+      <button id="nextBtn" class="page-nav-btn" type="button" aria-label="Próxima página">
+        <span>Próxima</span>
+        <i class="fas fa-chevron-right" aria-hidden="true"></i>
+      </button>
+    </nav>
     <footer class="footer">
       <span id="pageStatus">Página 1 / 1</span>
       <span id="sceneStatus">Cena: --</span>
@@ -264,12 +302,17 @@
     const payload = JSON.parse(sessionStorage.getItem('pg_reader_chapter') || '{}');
     const fallbackReader = {
       title: payload.title || 'Capítulo', pageStart: 1, pageEnd: 999,
-      pdf: { desktop: `./posts/volume${payload.volume || 1}/${payload.file || 'prologo.pdf'}`, mobile: `./posts/volume${payload.volume || 1}/${payload.file || 'prologo.pdf'}` },
+      pdf: `./posts/volume${payload.volume || 1}/${payload.file || 'prologo.pdf'}`,
       scenes: [{ id:'default', label:'Cena principal', description:'Leitura', from:1, to:999, background:'assets/images/website/background_main3.png', audio:'assets/audio/clock_ambience.mp3' }]
     };
     const reader = payload.reader || fallbackReader;
-    if (reader.pdf?.desktop && !reader.pdf.desktop.startsWith('./')) reader.pdf.desktop = `./posts/volume${payload.volume || 1}/${reader.pdf.desktop}`;
-    if (reader.pdf?.mobile && !reader.pdf.mobile.startsWith('./')) reader.pdf.mobile = `./posts/volume${payload.volume || 1}/${reader.pdf.mobile}`;
+    function resolveReaderPdf(pdfConfig) {
+      const selected = typeof pdfConfig === 'string'
+        ? pdfConfig
+        : (pdfConfig?.file || pdfConfig?.src || pdfConfig?.desktop || pdfConfig?.mobile || payload.file || 'prologo.pdf');
+      return selected.startsWith('./') ? selected : `./posts/volume${payload.volume || 1}/${selected}`;
+    }
+    const readerPdf = resolveReaderPdf(reader.pdf);
 
     const st = {
       doc:null,
@@ -278,6 +321,8 @@
       zoom:1,
       layout:payload.layout || 'auto',
       muted:false,
+      isRendering:false,
+      pendingPage:null,
       bgActiveLayer:null,
       bgInactiveLayer:null,
       currentScene:null,
@@ -288,8 +333,8 @@
     };
     const els = {
       start: document.getElementById('start'), startBtn: document.getElementById('startBtn'), chapterTitle:document.getElementById('chapterTitle'),
-      prev:document.getElementById('prevBtn'), next:document.getElementById('nextBtn'), mute:document.getElementById('muteBtn'), back:document.getElementById('backBtn'),
-      zoom:document.getElementById('zoom'), canvas:document.getElementById('pdfCanvas'), pageStatus:document.getElementById('pageStatus'), sceneStatus:document.getElementById('sceneStatus'),
+      prev:document.getElementById('prevBtn'), next:document.getElementById('nextBtn'), mute:document.getElementById('muteBtn'), muteIcon:document.getElementById('muteIcon'), muteLabel:document.getElementById('muteLabel'), back:document.getElementById('backBtn'),
+      zoom:document.getElementById('zoom'), canvas:document.getElementById('pdfCanvas'), pageStatus:document.getElementById('pageStatus'), pageJumpStatus:document.getElementById('pageJumpStatus'), pageScrubber:document.getElementById('pageScrubber'), sceneStatus:document.getElementById('sceneStatus'),
       bgA:document.getElementById('bgA'), bgB:document.getElementById('bgB'), loading:document.getElementById('loading'), audioHost:document.getElementById('audioHost')
     };
     const ctx = els.canvas.getContext('2d', { alpha:false });
@@ -314,7 +359,24 @@
 
     function loading(on,msg){ els.loading.style.display = on ? 'block' : 'none'; if(msg) els.loading.textContent=msg; }
     function getScene(page){ return (reader.scenes || []).find(s => page >= s.from && page <= s.to) || (reader.scenes || [])[0]; }
-    function updateMeta(scene){ els.pageStatus.textContent = `Página ${st.page} / ${st.total}`; els.sceneStatus.textContent = `Cena: ${scene?.label || '--'} • páginas ${scene?.from || 1}-${scene?.to || st.total}`; }
+    function updateMeta(scene){
+      const pageText = `Página ${st.page} / ${st.total}`;
+      els.pageStatus.textContent = pageText;
+      els.pageJumpStatus.textContent = `Página ${st.page} de ${st.total}`;
+      els.pageScrubber.value = String(st.page);
+      els.sceneStatus.textContent = `Cena: ${scene?.label || '--'} • páginas ${scene?.from || 1}-${scene?.to || st.total}`;
+    }
+    function updateMuteButton(){
+      els.muteIcon.className = st.muted ? 'fas fa-volume-xmark' : 'fas fa-volume-high';
+      els.muteLabel.textContent = st.muted ? 'Som desligado' : 'Som ligado';
+      els.mute.setAttribute('aria-label', st.muted ? 'Ativar som' : 'Desativar som');
+      els.mute.title = st.muted ? 'Som desligado' : 'Som ligado';
+    }
+    function goToPage(pageNo){
+      const target = Math.min(Math.max(st.pageMin, Number(pageNo) || st.pageMin), st.pageMax);
+      if (target === st.page && !st.isRendering) return;
+      renderPage(target);
+    }
     function getLayoutLimit(layout, key) {
       const limitsByLayout = reader.pageLimits?.[layout] || reader.pageRange?.[layout] || null;
       if (limitsByLayout && Number.isFinite(Number(limitsByLayout[key]))) return Number(limitsByLayout[key]);
@@ -453,23 +515,44 @@
       await Promise.all(previousAudios.map((audio) => fadeOutAndStop(audio, 900)));
     }
 
-    async function renderPage(pageNo){ if(!st.doc) return; loading(true,`Renderizando página ${pageNo}...`);
-      const pg = await st.doc.getPage(pageNo); const base = pg.getViewport({scale:1}); const vw = window.innerWidth - 90; const vh = window.innerHeight - 210;
-      const fit = Math.min(vw/base.width, vh/base.height); const scale = Math.max(0.2, fit * st.zoom); const vp = pg.getViewport({scale});
-      const pixel = window.devicePixelRatio || 1; els.canvas.width = Math.floor(vp.width * pixel); els.canvas.height = Math.floor(vp.height * pixel);
-      els.canvas.style.width = `${vp.width}px`; els.canvas.style.height = `${vp.height}px`; ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,els.canvas.width,els.canvas.height);
-      await pg.render({ canvasContext:ctx, viewport:vp, transform: pixel!==1 ? [pixel,0,0,pixel,0,0] : null }).promise;
+    async function renderPage(pageNo){
+      if(!st.doc) return;
+      const targetPage = Math.min(Math.max(st.pageMin, Number(pageNo) || st.pageMin), st.pageMax);
+      if (st.isRendering) { st.pendingPage = targetPage; return; }
+      st.isRendering = true;
+      loading(true,`Renderizando página ${targetPage}...`);
+      try {
+        const pg = await st.doc.getPage(targetPage); const base = pg.getViewport({scale:1});
+        const navHeight = document.querySelector('.page-nav')?.offsetHeight || 0;
+        const barHeight = document.querySelector('.bar')?.offsetHeight || 0;
+        const footerHeight = document.querySelector('.footer')?.offsetHeight || 0;
+        const vw = window.innerWidth - 24; const vh = window.innerHeight - barHeight - navHeight - footerHeight - 28;
+        const fit = Math.min(vw/base.width, vh/base.height); const scale = Math.max(0.2, fit * st.zoom); const vp = pg.getViewport({scale});
+        const pixel = window.devicePixelRatio || 1; els.canvas.width = Math.floor(vp.width * pixel); els.canvas.height = Math.floor(vp.height * pixel);
+        els.canvas.style.width = `${vp.width}px`; els.canvas.style.height = `${vp.height}px`; ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,els.canvas.width,els.canvas.height);
+        await pg.render({ canvasContext:ctx, viewport:vp, transform: pixel!==1 ? [pixel,0,0,pixel,0,0] : null }).promise;
 
-      const scene = getScene(pageNo); if(scene && st.currentScene !== scene.id){ await setSceneBackground(scene); applySceneTheme(scene); try{ await setSceneAudio(scene); } catch { console.warn('Áudio bloqueado ou arquivo ausente.'); }
-        st.currentScene = scene.id; }
-      st.page = pageNo; updateMeta(scene); loading(false); sessionStorage.setItem('pg_reader_page', String(st.page));
-      els.prev.disabled = st.page <= st.pageMin;
-      els.next.disabled = st.page >= st.pageMax;
+        const scene = getScene(targetPage); if(scene && st.currentScene !== scene.id){ await setSceneBackground(scene); applySceneTheme(scene); try{ await setSceneAudio(scene); } catch { console.warn('Áudio bloqueado ou arquivo ausente.'); }
+          st.currentScene = scene.id; }
+        st.page = targetPage; updateMeta(scene); sessionStorage.setItem('pg_reader_page', String(st.page));
+        els.prev.disabled = st.page <= st.pageMin;
+        els.next.disabled = st.page >= st.pageMax;
+      } finally {
+        loading(false);
+        st.isRendering = false;
+        if (st.pendingPage && st.pendingPage !== st.page) {
+          const queuedPage = st.pendingPage;
+          st.pendingPage = null;
+          renderPage(queuedPage);
+        } else {
+          st.pendingPage = null;
+        }
+      }
     }
 
     async function loadAndStart(){
       st.layout = selectedLayout;
-      const pdfFile = selectedLayout === 'mobile' ? reader.pdf.mobile : reader.pdf.desktop;
+      const pdfFile = readerPdf;
       loading(true, `Carregando ${pdfFile}...`);
       st.doc = await pdfjsLib.getDocument(pdfFile).promise;
       st.total = st.doc.numPages;
@@ -481,6 +564,8 @@
       );
       st.pageMin = Math.min(configuredPageStart, st.total);
       st.pageMax = Math.min(configuredPageEnd, st.total);
+      els.pageScrubber.min = String(st.pageMin);
+      els.pageScrubber.max = String(st.pageMax);
 
       const savedPage = Number(sessionStorage.getItem('pg_reader_page'));
       st.page = Math.min(Math.max(st.pageMin, savedPage || st.pageMin), st.pageMax);
@@ -498,17 +583,37 @@
     }
 
     els.startBtn.addEventListener('click', loadAndStart);
-    els.prev.addEventListener('click', ()=> renderPage(Math.max(st.pageMin, st.page - 1)));
-    els.next.addEventListener('click', ()=> renderPage(Math.min(st.pageMax, st.page + 1)));
+    els.prev.addEventListener('click', ()=> goToPage(st.page - 1));
+    els.next.addEventListener('click', ()=> goToPage(st.page + 1));
+    els.pageScrubber.addEventListener('input', () => {
+      els.pageJumpStatus.textContent = `Página ${els.pageScrubber.value} de ${st.total}`;
+    });
+    els.pageScrubber.addEventListener('change', () => goToPage(els.pageScrubber.value));
     els.zoom.addEventListener('input', ()=> { st.zoom = Number(els.zoom.value); renderPage(st.page); });
     els.back.addEventListener('click', ()=> { window.location.href = './ghost.html'; });
     els.mute.addEventListener('click', ()=> {
-      st.muted = !st.muted; els.mute.textContent = st.muted ? 'Desmutar' : 'Mutar';
+      st.muted = !st.muted; updateMuteButton();
       if(st.muted){ st.activeAudios.forEach((audio)=> fade(audio, audio.volume || .55, 0, 400)); setTimeout(()=>{ st.activeAudios.forEach((audio)=>audio.pause()); }, 450); }
-      else { const scene = getScene(st.page); setSceneAudio(scene).catch(()=>{}); }
+      else { st.currentSceneAudioKey = ''; const scene = getScene(st.page); setSceneAudio(scene).catch(()=>{}); }
     });
 
-    window.addEventListener('keydown',(e)=>{ if(e.key==='ArrowRight') els.next.click(); if(e.key==='ArrowLeft') els.prev.click(); if(e.key.toLowerCase()==='m') els.mute.click(); });
+    let suppressCanvasClick = false;
+    els.canvas.addEventListener('click', (event) => {
+      if (suppressCanvasClick) { suppressCanvasClick = false; return; }
+      const bounds = els.canvas.getBoundingClientRect();
+      goToPage(event.clientX - bounds.left > bounds.width / 2 ? st.page + 1 : st.page - 1);
+    });
+    let pointerStartX = 0;
+    els.canvas.addEventListener('pointerdown', (event) => { pointerStartX = event.clientX; });
+    els.canvas.addEventListener('pointerup', (event) => {
+      const delta = event.clientX - pointerStartX;
+      if (Math.abs(delta) > 48) {
+        suppressCanvasClick = true;
+        goToPage(delta < 0 ? st.page + 1 : st.page - 1);
+      }
+    });
+
+    window.addEventListener('keydown',(e)=>{ if(e.key==='ArrowRight') goToPage(st.page + 1); if(e.key==='ArrowLeft') goToPage(st.page - 1); if(e.key.toLowerCase()==='m') els.mute.click(); });
     let t; window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(()=> st.doc && renderPage(st.page), 180); });
   </script>
 </body>
