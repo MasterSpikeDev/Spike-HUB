@@ -31,14 +31,85 @@
     .bg-video { display:none; }
     .overlay { position:fixed; inset:0; z-index:2; background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.68)); }
     .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr auto auto; height:100%; }
-    .bar { display:flex; gap:10px; align-items:center; justify-content:space-between; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); }
-    .controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .bar { display:grid; grid-template-columns:1fr auto; gap:10px 14px; align-items:center; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); overflow:hidden; transition:grid-template-rows .28s ease, padding .28s ease; }
+    .controls { display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
     .control-btn, select, input[type=range] { border:1px solid var(--border); background:var(--panel); color:var(--text); border-radius:999px; padding:8px 12px; }
-    .zoom-control { display:flex; align-items:center; gap:8px; min-width:min(320px, 100%); white-space:nowrap; }
-    .zoom-control input[type=range] { width:clamp(120px, 18vw, 260px); flex:1 1 120px; accent-color:var(--accent); }
     .control-btn { display:inline-flex; align-items:center; gap:8px; cursor:pointer; transition:transform .18s ease, border-color .18s ease, background .18s ease; }
     .control-btn:hover { transform:translateY(-1px); border-color:var(--accent-soft); background:rgba(255,255,255,.08); }
     .control-btn.icon-only { width:42px; height:42px; justify-content:center; padding:0; font-size:1rem; }
+    .media-player {
+      grid-column:1 / -1;
+      display:grid;
+      grid-template-columns:auto minmax(180px, 1fr) auto;
+      gap:12px;
+      align-items:center;
+      max-height:150px;
+      opacity:1;
+      transform:translateY(0);
+      overflow:hidden;
+      transition:max-height .34s ease, opacity .24s ease, transform .34s ease, margin .34s ease;
+    }
+    .bar.media-collapsed .media-player { max-height:0; opacity:0; transform:translateY(-110%); margin-top:-10px; pointer-events:none; }
+    .bar.media-collapsed #mediaToggleIcon { transform:rotate(180deg); }
+    #mediaToggleIcon { transition:transform .25s ease; }
+    .media-cover-wrap { position:relative; width:58px; height:58px; flex:0 0 auto; }
+    .media-cover {
+      width:100%;
+      height:100%;
+      border-radius:14px;
+      object-fit:cover;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.13);
+      box-shadow:0 0 calc(10px + var(--beat, 0) * 24px) rgba(255,58,58,.28);
+      transform:scale(calc(1 + var(--beat, 0) * .045));
+      transition:transform .08s linear, box-shadow .08s linear;
+    }
+    .media-cover-wrap::after {
+      content:'';
+      position:absolute;
+      inset:-5px;
+      border-radius:18px;
+      border:1px solid rgba(255,58,58,calc(.18 + var(--beat, 0) * .4));
+      opacity:calc(.35 + var(--beat, 0) * .55);
+      pointer-events:none;
+    }
+    .media-info { display:grid; gap:7px; min-width:0; }
+    .media-title-row { display:flex; align-items:baseline; justify-content:space-between; gap:10px; min-width:0; }
+    .media-title { font-weight:800; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .media-subtitle { color:var(--muted); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .media-time { color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .media-progress-row { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:8px; }
+    .media-progress, .media-volume { accent-color:var(--accent); cursor:pointer; padding:0; background:transparent; border:none; }
+    .media-progress { width:100%; min-width:120px; }
+    .media-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
+    .media-icon-btn {
+      width:38px;
+      height:38px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.055);
+      color:var(--text);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      text-decoration:none;
+      transition:transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .media-icon-btn:hover { transform:translateY(-1px); border-color:var(--accent-soft); background:rgba(255,255,255,.1); }
+    .media-icon-btn.disabled { opacity:.42; pointer-events:none; }
+    .media-play { width:44px; height:44px; background:linear-gradient(135deg, rgba(255,58,58,.85), rgba(255,255,255,.12)); }
+    .media-volume { width:96px; }
+    .visualizer { display:flex; align-items:end; gap:3px; height:28px; min-width:42px; }
+    .visualizer span {
+      display:block;
+      width:4px;
+      height:calc(6px + var(--level, .2) * 22px);
+      border-radius:999px;
+      background:linear-gradient(180deg, #fff, var(--accent));
+      box-shadow:0 0 12px rgba(255,58,58,.35);
+      transition:height .08s linear;
+    }
     .viewer {
       display:flex;
       align-items:flex-start;
@@ -198,10 +269,11 @@
     }
     #loading { position:fixed; z-index:15; left:50%; top:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,.8); padding:10px 14px; border-radius:10px; border:1px solid var(--border); display:none; }
     @media (max-width: 900px) {
-      .bar{flex-direction:column; align-items:flex-start; padding:10px 12px;}
-      .controls { width:100%; justify-content:space-between; }
-      .zoom-control { min-width:100%; }
-      .zoom-control input[type=range] { width:100%; }
+      .bar{grid-template-columns:1fr auto; padding:10px 12px;}
+      .controls { justify-content:flex-end; }
+      .media-player { grid-template-columns:auto 1fr; gap:10px; }
+      .media-actions { grid-column:1 / -1; justify-content:space-between; }
+      .media-volume { width:min(26vw, 110px); }
       .footer{flex-direction:column; gap:8px; padding:8px 12px;}
       .viewer { padding:6px; }
       .page-nav { grid-template-columns:1fr 1fr; gap:10px; padding:10px 12px; }
@@ -224,16 +296,39 @@
   <div class="overlay"></div>
   <div id="loading">Carregando...</div>
   <div class="reader">
-    <header class="bar">
+    <header id="topBar" class="bar">
       <strong id="chapterTitle">Project Ghost — Reader</strong>
       <div class="controls">
-        <button id="muteBtn" class="control-btn" type="button" aria-label="Desativar som" title="Som ligado">
-          <i id="muteIcon" class="fas fa-volume-high" aria-hidden="true"></i>
-          <span id="muteLabel">Som ligado</span>
-        </button>
         <button id="backBtn" class="control-btn" type="button"><i class="fas fa-arrow-left" aria-hidden="true"></i> Voltar</button>
-        <label class="zoom-control">Zoom <input id="zoom" type="range" min="0.75" max="3" step="0.05" value="1"></label>
+        <button id="mediaToggle" class="control-btn icon-only" type="button" aria-expanded="true" aria-label="Ocultar barra de música" title="Ocultar barra de música">
+          <i id="mediaToggleIcon" class="fas fa-chevron-up" aria-hidden="true"></i>
+        </button>
       </div>
+      <section id="mediaPlayer" class="media-player" aria-label="Barra de música">
+        <div class="media-cover-wrap"><img id="mediaCover" class="media-cover" alt="Capa da música" src="assets/images/website/logo.png"></div>
+        <div class="media-info">
+          <div class="media-title-row">
+            <div>
+              <div id="mediaTitle" class="media-title">Sem música tocando</div>
+              <div id="mediaSubtitle" class="media-subtitle">A trilha da cena aparece aqui.</div>
+            </div>
+            <span id="mediaDurationText" class="media-time">0:00</span>
+          </div>
+          <div class="media-progress-row">
+            <span id="mediaCurrentText" class="media-time">0:00</span>
+            <input id="mediaProgress" class="media-progress" type="range" min="0" max="1000" step="1" value="0" aria-label="Progresso da música">
+            <span id="mediaRemainingText" class="media-time">-0:00</span>
+          </div>
+        </div>
+        <div class="media-actions">
+          <button id="mediaRestart" class="media-icon-btn" type="button" aria-label="Voltar para o início da música" title="Voltar música"><i class="fas fa-backward-step" aria-hidden="true"></i></button>
+          <button id="mediaPlay" class="media-icon-btn media-play" type="button" aria-label="Pausar música" title="Pausar música"><i id="mediaPlayIcon" class="fas fa-pause" aria-hidden="true"></i></button>
+          <button id="mediaMute" class="media-icon-btn" type="button" aria-label="Mutar música" title="Mutar"><i id="mediaMuteIcon" class="fas fa-volume-high" aria-hidden="true"></i></button>
+          <input id="mediaVolume" class="media-volume" type="range" min="0" max="1" step="0.01" value="0.55" aria-label="Volume da música">
+          <a id="mediaDownload" class="media-icon-btn" href="#" download aria-label="Baixar música" title="Baixar música"><i class="fas fa-download" aria-hidden="true"></i></a>
+          <div id="visualizer" class="visualizer" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+      </section>
     </header>
     <main class="viewer">
       <div class="viewer-stage">
@@ -309,6 +404,12 @@
       minZoom:0.65,
       maxZoom:4,
       muted:false,
+      mediaPaused:false,
+      volume:0.55,
+      mediaRaf:null,
+      analyser:null,
+      analyserData:null,
+      audioCtx:null,
       isRendering:false,
       pendingPage:null,
       pendingZoomAnchor:null,
@@ -321,9 +422,10 @@
       pageMax: 1
     };
     const els = {
-      start: document.getElementById('start'), startBtn: document.getElementById('startBtn'), chapterTitle:document.getElementById('chapterTitle'),
-      prev:document.getElementById('prevBtn'), next:document.getElementById('nextBtn'), mute:document.getElementById('muteBtn'), muteIcon:document.getElementById('muteIcon'), muteLabel:document.getElementById('muteLabel'), back:document.getElementById('backBtn'),
-      zoom:document.getElementById('zoom'), canvas:document.getElementById('pdfCanvas'), pageStatus:document.getElementById('pageStatus'), pageJumpStatus:document.getElementById('pageJumpStatus'), pageScrubber:document.getElementById('pageScrubber'), sceneStatus:document.getElementById('sceneStatus'),
+      topBar:document.getElementById('topBar'), start: document.getElementById('start'), startBtn: document.getElementById('startBtn'), chapterTitle:document.getElementById('chapterTitle'),
+      prev:document.getElementById('prevBtn'), next:document.getElementById('nextBtn'), back:document.getElementById('backBtn'), mediaToggle:document.getElementById('mediaToggle'), mediaToggleIcon:document.getElementById('mediaToggleIcon'),
+      mediaPlayer:document.getElementById('mediaPlayer'), mediaCover:document.getElementById('mediaCover'), mediaTitle:document.getElementById('mediaTitle'), mediaSubtitle:document.getElementById('mediaSubtitle'), mediaCurrentText:document.getElementById('mediaCurrentText'), mediaDurationText:document.getElementById('mediaDurationText'), mediaRemainingText:document.getElementById('mediaRemainingText'), mediaProgress:document.getElementById('mediaProgress'), mediaRestart:document.getElementById('mediaRestart'), mediaPlay:document.getElementById('mediaPlay'), mediaPlayIcon:document.getElementById('mediaPlayIcon'), mediaMute:document.getElementById('mediaMute'), mediaMuteIcon:document.getElementById('mediaMuteIcon'), mediaVolume:document.getElementById('mediaVolume'), mediaDownload:document.getElementById('mediaDownload'), visualizer:document.getElementById('visualizer'),
+      canvas:document.getElementById('pdfCanvas'), pageStatus:document.getElementById('pageStatus'), pageJumpStatus:document.getElementById('pageJumpStatus'), pageScrubber:document.getElementById('pageScrubber'), sceneStatus:document.getElementById('sceneStatus'),
       bgA:document.getElementById('bgA'), bgB:document.getElementById('bgB'), loading:document.getElementById('loading'), audioHost:document.getElementById('audioHost')
     };
     const ctx = els.canvas.getContext('2d', { alpha:false });
@@ -341,11 +443,16 @@
       els.pageScrubber.value = String(st.page);
       els.sceneStatus.textContent = `Cena: ${scene?.label || '--'} • páginas ${scene?.from || 1}-${scene?.to || st.total}`;
     }
-    function updateMuteButton(){
-      els.muteIcon.className = st.muted ? 'fas fa-volume-xmark' : 'fas fa-volume-high';
-      els.muteLabel.textContent = st.muted ? 'Som desligado' : 'Som ligado';
-      els.mute.setAttribute('aria-label', st.muted ? 'Ativar som' : 'Desativar som');
-      els.mute.title = st.muted ? 'Som desligado' : 'Som ligado';
+    function updateMediaButtons(){
+      const audio = getPrimaryAudio();
+      const isPaused = st.mediaPaused || !audio || audio.paused;
+      els.mediaPlayIcon.className = isPaused ? 'fas fa-play' : 'fas fa-pause';
+      els.mediaPlay.setAttribute('aria-label', isPaused ? 'Tocar música' : 'Pausar música');
+      els.mediaPlay.title = isPaused ? 'Tocar música' : 'Pausar música';
+      els.mediaMuteIcon.className = st.muted || st.volume <= 0 ? 'fas fa-volume-xmark' : 'fas fa-volume-high';
+      els.mediaMute.setAttribute('aria-label', st.muted ? 'Ativar som' : 'Mutar música');
+      els.mediaMute.title = st.muted ? 'Ativar som' : 'Mutar';
+      els.mediaVolume.value = String(st.muted ? 0 : st.volume);
     }
     function goToPage(pageNo){
       const target = Math.min(Math.max(st.pageMin, Number(pageNo) || st.pageMin), st.pageMax);
@@ -444,6 +551,116 @@
       [st.bgActiveLayer, st.bgInactiveLayer] = [st.bgInactiveLayer, st.bgActiveLayer];
     }
 
+    function getPrimaryAudio(){ return st.activeAudios[0] || null; }
+    function formatTime(seconds){
+      if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+    function getMediaTitle(src){
+      const clean = String(src || '').split('?')[0].split('/').pop() || '';
+      const name = clean.replace(/\.[^.]+$/, '').replace(/[._-]+/g, ' ').trim();
+      return name ? name.replace(/\b\w/g, (letter) => letter.toUpperCase()) : 'Sem música tocando';
+    }
+    function getSceneArtwork(scene){
+      const configured = scene?.cover || scene?.artwork || scene?.image || scene?.musicImage || scene?.thumbnail;
+      const selected = normalizeSceneMedia(configured)[0] || normalizeSceneMedia(scene?.background).find((item) => resolveBackgroundType(item) === 'image');
+      return selected || 'assets/images/website/logo.png';
+    }
+    function applyMediaVolume(){
+      st.activeAudios.forEach((audio) => {
+        audio.muted = st.muted;
+        audio.volume = st.muted ? 0 : st.volume;
+      });
+      updateMediaButtons();
+    }
+    function updateMediaMetadata(scene){
+      const audio = getPrimaryAudio();
+      const src = audio?.getAttribute('data-src') || normalizeSceneMedia(scene?.audio)[0] || '';
+      els.mediaTitle.textContent = scene?.musicTitle || scene?.audioTitle || getMediaTitle(src);
+      els.mediaSubtitle.textContent = src ? `${scene?.label || 'Cena'} • ${src.split('/').pop()}` : 'Nenhuma trilha para esta cena.';
+      els.mediaCover.src = getSceneArtwork(scene);
+      els.mediaDownload.href = src || '#';
+      els.mediaDownload.toggleAttribute('download', Boolean(src));
+      els.mediaDownload.classList.toggle('disabled', !src);
+      updateMediaButtons();
+      updateMediaProgress();
+      setupAnalyser(audio);
+      startMediaAnimation();
+    }
+    function updateMediaProgress(){
+      const audio = getPrimaryAudio();
+      const duration = audio?.duration || 0;
+      const current = audio?.currentTime || 0;
+      const progress = duration ? Math.round((current / duration) * 1000) : 0;
+      els.mediaProgress.value = String(progress);
+      els.mediaCurrentText.textContent = formatTime(current);
+      els.mediaDurationText.textContent = formatTime(duration);
+      els.mediaRemainingText.textContent = `-${formatTime(Math.max(duration - current, 0))}`;
+    }
+    function ensureAudioContext(){
+      if (st.audioCtx) return st.audioCtx;
+      const AudioContextRef = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextRef) return null;
+      st.audioCtx = new AudioContextRef();
+      return st.audioCtx;
+    }
+    function setupAnalyser(audio){
+      if (!audio) {
+        st.analyser = null;
+        st.analyserData = null;
+        return;
+      }
+      try {
+        const ctx = ensureAudioContext();
+        if (!ctx) return;
+        if (!audio._pgMediaSource) audio._pgMediaSource = ctx.createMediaElementSource(audio);
+        if (!audio._pgAnalyser) {
+          audio._pgAnalyser = ctx.createAnalyser();
+          audio._pgAnalyser.fftSize = 64;
+          audio._pgMediaSource.connect(audio._pgAnalyser);
+          audio._pgAnalyser.connect(ctx.destination);
+        }
+        st.analyser = audio._pgAnalyser;
+        st.analyserData = new Uint8Array(st.analyser.frequencyBinCount);
+      } catch {
+        st.analyser = null;
+        st.analyserData = null;
+      }
+    }
+    function animateVisualizer(){
+      const bars = [...els.visualizer.querySelectorAll('span')];
+      let beat = 0;
+      if (st.analyser && st.analyserData) {
+        st.analyser.getByteFrequencyData(st.analyserData);
+        bars.forEach((bar, index) => {
+          const value = st.analyserData[index * 3] || 0;
+          const level = value / 255;
+          beat += level;
+          bar.style.setProperty('--level', String(Math.max(level, 0.08)));
+        });
+        beat = beat / Math.max(bars.length, 1);
+      } else {
+        const audio = getPrimaryAudio();
+        const t = audio?.currentTime || performance.now() / 1000;
+        bars.forEach((bar, index) => {
+          const level = Math.abs(Math.sin(t * (2.2 + index * .4))) * (audio && !audio.paused && !st.muted ? .75 : .12);
+          beat += level;
+          bar.style.setProperty('--level', String(Math.max(level, 0.08)));
+        });
+        beat = beat / Math.max(bars.length, 1);
+      }
+      els.mediaPlayer.style.setProperty('--beat', String(Math.min(beat, 1)));
+      els.mediaCover.style.setProperty('--beat', String(Math.min(beat, 1)));
+      updateMediaProgress();
+      st.mediaRaf = requestAnimationFrame(animateVisualizer);
+    }
+    function startMediaAnimation(){
+      if (st.mediaRaf) cancelAnimationFrame(st.mediaRaf);
+      st.mediaRaf = requestAnimationFrame(animateVisualizer);
+    }
+
     function fade(audio,from,to,d=700){ const t0=performance.now(); const run=(t)=>{ const p=Math.min(1,(t-t0)/d); audio.volume=Math.max(0,Math.min(1,from+(to-from)*p)); if(p<1) requestAnimationFrame(run); }; requestAnimationFrame(run); }
     async function fadeOutAndStop(audio, duration = 500) {
       const startVolume = Number.isFinite(audio.volume) ? audio.volume : 0.55;
@@ -462,34 +679,43 @@
       audio.setAttribute('data-src', src);
       audio.src = src;
       audio.volume = 0;
+      audio.muted = st.muted;
       els.audioHost.appendChild(audio);
       return audio;
     }
     async function setSceneAudio(scene){
       const sceneAudioList = normalizeSceneMedia(scene?.audio);
       const sceneAudioKey = sceneAudioList.join('|');
-      if (sceneAudioKey === st.currentSceneAudioKey) return;
+      if (sceneAudioKey === st.currentSceneAudioKey) {
+        updateMediaMetadata(scene);
+        return;
+      }
 
       const previousAudios = [...st.activeAudios];
       st.activeAudios = [];
       st.currentSceneAudioKey = sceneAudioKey;
 
-      if (st.muted || sceneAudioList.length === 0) {
+      if (sceneAudioList.length === 0) {
+        updateMediaMetadata(scene);
         await Promise.all(previousAudios.map((audio) => fadeOutAndStop(audio, 450)));
         return;
       }
 
       const nextAudios = sceneAudioList.map((src) => createSceneAudio(src));
       st.activeAudios = nextAudios;
+      updateMediaMetadata(scene);
 
       await Promise.all(nextAudios.map(async (audio) => {
+        audio.muted = st.muted;
         try {
-          await audio.play();
-          fade(audio, 0, 0.55, 1200);
+          if (!st.mediaPaused) await audio.play();
+          fade(audio, 0, st.muted ? 0 : st.volume, 1200);
         } catch {}
       }));
       await Promise.all(previousAudios.map((audio) => fadeOutAndStop(audio, 900)));
+      updateMediaButtons();
     }
+
 
 
     function clamp(value, min, max){
@@ -516,11 +742,7 @@
       });
     }
     function syncZoomControl(){
-      els.zoom.min = String(st.minZoom);
-      els.zoom.max = String(st.maxZoom);
-      els.zoom.value = String(st.zoom);
-      els.zoom.setAttribute('aria-valuetext', `${Math.round(st.zoom * 100)}%`);
-      els.zoom.title = `Zoom ${Math.round(st.zoom * 100)}%`;
+      // O zoom agora é controlado por scroll/pinça; mantido para sincronizar futuras UIs sem quebrar o fluxo.
     }
     function setZoom(nextZoom, clientX = window.innerWidth / 2, clientY = window.innerHeight / 2){
       if (!st.doc) return;
@@ -621,15 +843,50 @@
     });
     els.pageScrubber.addEventListener('change', () => goToPage(els.pageScrubber.value));
     syncZoomControl();
-    els.zoom.addEventListener('input', (event)=> {
-      const rect = els.canvas.getBoundingClientRect();
-      setZoom(Number(event.target.value), rect.left + rect.width / 2, rect.top + rect.height / 2);
-    });
+    updateMediaButtons();
     els.back.addEventListener('click', ()=> { window.location.href = './ghost.html'; });
-    els.mute.addEventListener('click', ()=> {
-      st.muted = !st.muted; updateMuteButton();
-      if(st.muted){ st.activeAudios.forEach((audio)=> fade(audio, audio.volume || .55, 0, 400)); setTimeout(()=>{ st.activeAudios.forEach((audio)=>audio.pause()); }, 450); }
-      else { st.currentSceneAudioKey = ''; const scene = getScene(st.page); setSceneAudio(scene).catch(()=>{}); }
+    els.mediaToggle.addEventListener('click', () => {
+      const collapsed = els.topBar.classList.toggle('media-collapsed');
+      els.mediaToggle.setAttribute('aria-expanded', String(!collapsed));
+      els.mediaToggle.setAttribute('aria-label', collapsed ? 'Mostrar barra de música' : 'Ocultar barra de música');
+      els.mediaToggle.title = collapsed ? 'Mostrar barra de música' : 'Ocultar barra de música';
+    });
+    els.mediaPlay.addEventListener('click', async () => {
+      const audio = getPrimaryAudio();
+      if (!audio) return;
+      st.mediaPaused = !st.mediaPaused;
+      if (st.audioCtx?.state === 'suspended') await st.audioCtx.resume();
+      if (st.mediaPaused) {
+        st.activeAudios.forEach((item) => item.pause());
+      } else {
+        await Promise.all(st.activeAudios.map((item) => item.play().catch(() => {})));
+      }
+      updateMediaButtons();
+    });
+    els.mediaRestart.addEventListener('click', async () => {
+      st.activeAudios.forEach((audio) => { audio.currentTime = 0; });
+      if (st.mediaPaused) return updateMediaProgress();
+      await Promise.all(st.activeAudios.map((audio) => audio.play().catch(() => {})));
+      updateMediaButtons();
+    });
+    els.mediaMute.addEventListener('click', () => {
+      st.muted = !st.muted;
+      applyMediaVolume();
+    });
+    els.mediaVolume.addEventListener('input', (event) => {
+      st.volume = Number(event.target.value);
+      st.muted = st.volume <= 0;
+      applyMediaVolume();
+    });
+    els.mediaProgress.addEventListener('input', (event) => {
+      const audio = getPrimaryAudio();
+      if (!audio?.duration) return;
+      const targetTime = (Number(event.target.value) / 1000) * audio.duration;
+      st.activeAudios.forEach((item) => { if (Number.isFinite(item.duration)) item.currentTime = Math.min(targetTime, item.duration); });
+      updateMediaProgress();
+    });
+    els.mediaDownload.addEventListener('click', (event) => {
+      if (!getPrimaryAudio()) event.preventDefault();
     });
 
     let suppressCanvasClick = false;
