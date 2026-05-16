@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Ghost — Reader Imersivo PDF.js</title>
+  <style>
+    :root {
+      --ui-bg: rgba(10, 10, 14, 0.72);
+      --ui-border: rgba(255, 255, 255, 0.08);
+      --ui-text: #f3f3f3;
+      --ui-muted: #b9b9c9;
+      --accent: #d13b3b;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      --transition-speed: 900ms;
+      --canvas-bg: #e7e7ea;
+      --page-radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #07070b;
+      color: var(--ui-text);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    body {
+      position: relative;
+    }
+
+    .bg-layer,
+    .bg-layer-next {
+      position: fixed;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: opacity var(--transition-speed) ease;
+      will-change: opacity, transform;
+      transform: scale(1.03);
+    }
+
+    .bg-layer {
+      z-index: 0;
+      opacity: 1;
+    }
+
+    .bg-layer-next {
+      z-index: 1;
+      opacity: 0;
+    }
+
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      background:
+        radial-gradient(circle at center, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.38) 55%, rgba(0, 0, 0, 0.72) 100%),
+        linear-gradient(180deg, rgba(3, 3, 5, 0.48) 0%, rgba(3, 3, 5, 0.66) 100%);
+      pointer-events: none;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      opacity: 0.06;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.20) 0 1px, transparent 1px),
+        radial-gradient(circle at 80% 40%, rgba(255,255,255,0.16) 0 1px, transparent 1px),
+        radial-gradient(circle at 50% 70%, rgba(255,255,255,0.12) 0 1px, transparent 1px);
+      background-size: 180px 180px, 210px 210px, 240px 240px;
+      mix-blend-mode: soft-light;
+    }
+
+    .reader-shell {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 20px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.52), rgba(0,0,0,0.12));
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--ui-muted);
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button,
+    .pill,
+    input[type="range"] {
+      border: 1px solid var(--ui-border);
+      background: var(--ui-bg);
+      color: var(--ui-text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+      backdrop-filter: blur(10px);
+    }
+
+    button:hover,
+    .pill:hover {
+      transform: translateY(-1px);
+      background: rgba(18, 18, 24, 0.86);
+      border-color: rgba(255,255,255,0.14);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .content {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(18px, 1fr) minmax(0, 1200px) minmax(18px, 1fr);
+      align-items: stretch;
+    }
+
+    .side-zone {
+      position: relative;
+      min-width: 0;
+    }
+
+    .ambient-card {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(8, 8, 10, 0.55);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+    }
+
+    .ambient-card h2 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      color: #fff;
+      letter-spacing: 0.03em;
+    }
+
+    .ambient-card p {
+      margin: 0;
+      color: var(--ui-muted);
+      line-height: 1.45;
+      font-size: 12px;
+    }
+
+    .viewer-wrap {
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 0 24px;
+    }
+
+    .viewer-frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+    }
+
+    .page-stage {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .page-shell {
+      max-width: 100%;
+      max-height: 100%;
+      background: transparent;
+      border-radius: var(--page-radius);
+      overflow: hidden;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: var(--page-radius);
+      background: var(--canvas-bg);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.32);
+      opacity: 0;
+      transform: scale(0.985);
+      transition: opacity 320ms ease, transform 320ms ease;
+    }
+
+    canvas.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+      color: #ececf2;
+      font-size: 14px;
+      line-height: 1.6;
+      background: rgba(8, 8, 11, 0.20);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 200ms ease;
+    }
+
+    .loading.show {
+      opacity: 1;
+    }
+
+    .bottom-bar {
+      flex: 0 0 auto;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 12px 20px 16px;
+      background: linear-gradient(0deg, rgba(0,0,0,0.44), rgba(0,0,0,0.08));
+      border-top: 1px solid rgba(255,255,255,0.04);
+      backdrop-filter: blur(8px);
+    }
+
+    .page-status {
+      color: var(--ui-muted);
+      font-size: 13px;
+      min-width: 220px;
+    }
+
+    .scene-progress {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .scene-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(170, 38, 38, 0.95), rgba(242, 108, 81, 0.95));
+      transition: width 220ms ease;
+    }
+
+    .scene-meta {
+      color: var(--ui-muted);
+      font-size: 12px;
+      text-align: right;
+      min-width: 220px;
+    }
+
+    .start-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(3, 3, 7, 0.72);
+      backdrop-filter: blur(14px);
+      transition: opacity 400ms ease, visibility 400ms ease;
+    }
+
+    .start-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .start-card {
+      width: min(760px, 100%);
+      border-radius: 28px;
+      padding: 28px;
+      background: linear-gradient(180deg, rgba(13,13,17,0.96), rgba(18,18,24,0.88));
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 30px 90px rgba(0,0,0,0.52);
+    }
+
+    .start-card h2 {
+      margin: 0 0 10px;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+
+    .start-card p {
+      margin: 0 0 10px;
+      color: var(--ui-muted);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .config-list {
+      margin-top: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .config-item {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .config-item strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .config-item code {
+      color: #ffd5d5;
+      font-size: 12px;
+      word-break: break-word;
+    }
+
+    .start-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .danger {
+      background: linear-gradient(180deg, rgba(143, 24, 24, 0.95), rgba(108, 12, 12, 0.95));
+      border-color: rgba(255,255,255,0.10);
+    }
+
+    .ghost {
+      background: rgba(255,255,255,0.03);
+    }
+
+    .helper-note {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #9f9fb0;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 60;
+      max-width: 360px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(11, 11, 15, 0.86);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #f4f4f6;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 240ms ease, transform 240ms ease;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .range-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(10, 10, 14, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .range-wrap span {
+      font-size: 12px;
+      color: var(--ui-muted);
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      width: 120px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 980px) {
+      .content {
+        grid-template-columns: 10px minmax(0, 1fr) 10px;
+      }
+
+      .ambient-card {
+        display: none;
+      }
+
+      .bottom-bar {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .page-status,
+      .scene-meta {
+        min-width: 0;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .topbar {
+        padding: 12px;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .controls {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .viewer-wrap {
+        padding: 10px 0 14px;
+      }
+
+      .viewer-frame {
+        border-radius: 18px;
+        padding: 14px;
+      }
+
+      .start-card {
+        padding: 20px;
+        border-radius: 22px;
+      }
+
+      .start-card h2 {
+        font-size: 22px;
+      }
+
+      .range-wrap {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      input[type="range"] {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="bgCurrent" class="bg-layer"></div>
+  <div id="bgNext" class="bg-layer-next"></div>
+  <div class="bg-overlay"></div>
+  <div class="noise"></div>
+
+  <div class="reader-shell">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Project Ghost — Reader Imersivo</h1>
+        <p>PDF.js renderizando 1 página por vez, com fundo e trilha automáticos.</p>
+      </div>
+
+      <div class="controls">
+        <button id="prevPageBtn" type="button">← Anterior</button>
+        <button id="nextPageBtn" type="button">Próxima →</button>
+        <button id="startAudioBtn" type="button">Ativar áudio</button>
+        <button id="toggleMuteBtn" type="button">Mutar</button>
+        <button id="openPdfBtn" type="button">Abrir PDF</button>
+        <div class="range-wrap">
+          <span>Zoom</span>
+          <input id="zoomRange" type="range" min="0.8" max="2" step="0.05" value="1" />
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <aside class="side-zone">
+        <div class="ambient-card">
+          <h2 id="ambientTitle">Aguardando cena</h2>
+          <p id="ambientDescription">Ao trocar a página, o ambiente visual e sonoro muda sozinho.</p>
+        </div>
+      </aside>
+
+      <section class="viewer-wrap">
+        <div class="viewer-frame">
+          <div class="page-stage">
+            <div class="page-shell">
+              <canvas id="pdfCanvas"></canvas>
+            </div>
+            <div id="loadingOverlay" class="loading">Carregando PDF e renderizando página...</div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-zone"></aside>
+    </main>
+
+    <footer class="bottom-bar">
+      <div class="page-status" id="pageStatus">Página atual: 1 / 1</div>
+      <div class="scene-progress">
+        <div class="scene-progress-fill" id="progressFill"></div>
+      </div>
+      <div class="scene-meta" id="sceneMeta">Cena: introdução</div>
+    </footer>
+  </div>
+
+  <div id="startScreen" class="start-screen">
+    <div class="start-card">
+      <h2>Como usar esta versão</h2>
+      <p>Agora este HTML usa PDF.js e renderiza uma página por vez no centro. Isso significa que o próprio site controla a página atual, então o fundo e a música mudam automaticamente.</p>
+      <p>Você só precisa colocar os arquivos certos nos caminhos configurados em <code>CONFIG</code>.</p>
+
+      <div class="config-list">
+        <div class="config-item">
+          <strong>1) PDFs</strong>
+          Ajuste <code>CONFIG.pdf.desktop</code> e <code>CONFIG.pdf.mobile</code> com os nomes dos seus arquivos.
+        </div>
+        <div class="config-item">
+          <strong>2) Fundos</strong>
+          Em cada item de <code>CONFIG.scenes</code>, ajuste <code>background</code> para a imagem daquela cena.
+        </div>
+        <div class="config-item">
+          <strong>3) Músicas</strong>
+          Em cada item de <code>CONFIG.scenes</code>, ajuste <code>audio</code> para a trilha ou ambiente em loop daquela cena.
+        </div>
+        <div class="config-item">
+          <strong>4) PDF.js</strong>
+          Este HTML já puxa o PDF.js por CDN. Para publicar online, basta manter internet na página ou depois trocar para arquivos locais do pdf.js.
+        </div>
+      </div>
+
+      <div class="start-actions">
+        <button id="enterReaderBtn" class="danger" type="button">Entrar no reader</button>
+      </div>
+
+      <div class="helper-note">
+        Estrutura sugerida: index.html, PDFs, assets/bg e assets/audio dentro do mesmo projeto.
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <audio id="audioA" loop preload="auto"></audio>
+  <audio id="audioB" loop preload="auto"></audio>
+
+  <script type="module">
+    import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
+
+    const CONFIG = {
+      pdf: {
+        desktop: "prologo-desktop.pdf",
+        mobile: "prologo-mobile.pdf"
+      },
+      initialPage: 1,
+      fallbackTotalPages: 20,
+      fadeDurationMs: 1400,
+      targetVolume: 0.55,
+      mobileBreakpoint: 768,
+      initialZoom: 1,
+      scenes: [
+        {
+          id: "clock_dream",
+          label: "Sonho do relógio",
+          description: "Vazio, escuridão, fumaça e sensação de tempo suspenso.",
+          from: 1,
+          to: 5,
+          background: "assets/bg/clock_void.jpg",
+          audio: "assets/audio/clock_ambience.mp3"
+        }
+      ]
+    };
+
+    const state = {
+      currentPage: CONFIG.initialPage,
+      totalPages: CONFIG.fallbackTotalPages,
+      currentSceneId: null,
+      activeAudio: null,
+      inactiveAudio: null,
+      audioReady: false,
+      isMuted: false,
+      selectedPdf: null,
+      pdfDoc: null,
+      renderTask: null,
+      zoom: CONFIG.initialZoom,
+      rendering: false
+    };
+
+    const els = {
+      bgCurrent: document.getElementById("bgCurrent"),
+      bgNext: document.getElementById("bgNext"),
+      ambientTitle: document.getElementById("ambientTitle"),
+      ambientDescription: document.getElementById("ambientDescription"),
+      pageStatus: document.getElementById("pageStatus"),
+      progressFill: document.getElementById("progressFill"),
+      sceneMeta: document.getElementById("sceneMeta"),
+      startScreen: document.getElementById("startScreen"),
+      enterReaderBtn: document.getElementById("enterReaderBtn"),
+      startAudioBtn: document.getElementById("startAudioBtn"),
+      toggleMuteBtn: document.getElementById("toggleMuteBtn"),
+      prevPageBtn: document.getElementById("prevPageBtn"),
+      nextPageBtn: document.getElementById("nextPageBtn"),
+      openPdfBtn: document.getElementById("openPdfBtn"),
+      zoomRange: document.getElementById("zoomRange"),
+      toast: document.getElementById("toast"),
+      audioA: document.getElementById("audioA"),
+      audioB: document.getElementById("audioB"),
+      pdfCanvas: document.getElementById("pdfCanvas"),
+      loadingOverlay: document.getElementById("loadingOverlay")
+    };
+
+    state.activeAudio = els.audioA;
+    state.inactiveAudio = els.audioB;
+
+    const canvasContext = els.pdfCanvas.getContext("2d", { alpha: false });
+
+    function isMobileDevice() {
+      return window.innerWidth <= CONFIG.mobileBreakpoint;
+    }
+
+    function getPdfForDevice() {
+      return isMobileDevice() ? CONFIG.pdf.mobile : CONFIG.pdf.desktop;
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => {
+        els.toast.classList.remove("show");
+      }, 2400);
+    }
+
+    function showLoading(message = "Carregando...") {
+      els.loadingOverlay.textContent = message;
+      els.loadingOverlay.classList.add("show");
+      els.pdfCanvas.classList.remove("visible");
+    }
+
+    function hideLoading() {
+      els.loadingOverlay.classList.remove("show");
+      els.pdfCanvas.classList.add("visible");
+    }
+
+    function getSceneByPage(page) {
+      return CONFIG.scenes.find(scene => page >= scene.from && page <= scene.to) || CONFIG.scenes[0];
+    }
+
+    function updateProgress() {
+      const percent = Math.max(0, Math.min(100, (state.currentPage / Math.max(1, state.totalPages)) * 100));
+      els.progressFill.style.width = percent + "%";
+    }
+
+    function updateButtons() {
+      els.prevPageBtn.disabled = state.currentPage <= 1 || state.rendering;
+      els.nextPageBtn.disabled = state.currentPage >= state.totalPages || state.rendering;
+    }
+
+    function updateSceneText(scene) {
+      els.ambientTitle.textContent = scene.label;
+      els.ambientDescription.textContent = scene.description;
+      els.pageStatus.textContent = `Página atual: ${state.currentPage} / ${state.totalPages}`;
+      els.sceneMeta.textContent = `Cena: ${scene.label} · páginas ${scene.from}–${scene.to}`;
+      updateProgress();
+      updateButtons();
+    }
+
+    function setBackground(scene) {
+      const nextUrl = `url('${scene.background}')`;
+      const currentStyle = els.bgCurrent.style.backgroundImage;
+
+      if (!currentStyle || currentStyle === nextUrl) {
+        els.bgCurrent.style.backgroundImage = nextUrl;
+        return;
+      }
+
+      els.bgNext.style.backgroundImage = nextUrl;
+      els.bgNext.style.opacity = "1";
+
+      window.setTimeout(() => {
+        els.bgCurrent.style.backgroundImage = nextUrl;
+        els.bgNext.style.opacity = "0";
+      }, CONFIG.fadeDurationMs * 0.55);
+    }
+
+    async function prepareAudio() {
+      try {
+        state.audioReady = true;
+        els.audioA.volume = 0;
+        els.audioB.volume = 0;
+        await els.audioA.play().catch(() => {});
+        els.audioA.pause();
+        els.audioA.currentTime = 0;
+        showToast("Áudio ativado.");
+      } catch {
+        showToast("O navegador bloqueou o áudio até interação do usuário.");
+      }
+    }
+
+    function swapAudioChannels() {
+      const oldActive = state.activeAudio;
+      state.activeAudio = state.inactiveAudio;
+      state.inactiveAudio = oldActive;
+    }
+
+    function fadeVolume(audio, from, to, durationMs) {
+      const start = performance.now();
+      function tick(now) {
+        const progress = Math.min(1, (now - start) / durationMs);
+        audio.volume = Math.max(0, Math.min(1, from + (to - from) * progress));
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    async function setSceneAudio(scene) {
+      if (!state.audioReady || state.isMuted) return;
+
+      const activeSrc = state.activeAudio.getAttribute("data-scene-audio") || "";
+      if (activeSrc === scene.audio) return;
+
+      const incoming = state.inactiveAudio;
+      const outgoing = state.activeAudio;
+
+      incoming.pause();
+      incoming.src = scene.audio;
+      incoming.setAttribute("data-scene-audio", scene.audio);
+      incoming.currentTime = 0;
+      incoming.volume = 0;
+
+      try {
+        await incoming.play();
+      } catch {
+        showToast("Clique em 'Ativar áudio' para liberar a trilha.");
+        return;
+      }
+
+      fadeVolume(incoming, 0, CONFIG.targetVolume, CONFIG.fadeDurationMs);
+      fadeVolume(outgoing, outgoing.volume || CONFIG.targetVolume, 0, CONFIG.fadeDurationMs);
+
+      window.setTimeout(() => {
+        outgoing.pause();
+        outgoing.currentTime = 0;
+      }, CONFIG.fadeDurationMs + 80);
+
+      swapAudioChannels();
+    }
+
+    async function applySceneForPage(page) {
+      state.currentPage = Math.max(1, Math.min(state.totalPages, page));
+      const scene = getSceneByPage(state.currentPage);
+      updateSceneText(scene);
+
+      if (state.currentSceneId !== scene.id) {
+        setBackground(scene);
+        await setSceneAudio(scene);
+        state.currentSceneId = scene.id;
+      }
+
+      localStorage.setItem("pg_reader_page", String(state.currentPage));
+    }
+
+    async function loadPdf() {
+      state.selectedPdf = getPdfForDevice();
+      showLoading(`Carregando PDF: ${state.selectedPdf}`);
+
+      try {
+        const loadingTask = pdfjsLib.getDocument(state.selectedPdf);
+        state.pdfDoc = await loadingTask.promise;
+        state.totalPages = state.pdfDoc.numPages;
+        state.currentPage = Math.min(state.currentPage, state.totalPages);
+        showToast(`PDF carregado: ${state.selectedPdf}`);
+      } catch (error) {
+        console.error(error);
+        showLoading("Erro ao carregar PDF. Verifique o nome do arquivo e o caminho em CONFIG.pdf.");
+        showToast("Erro ao carregar PDF.");
+        return;
+      }
+
+      await renderPage(state.currentPage);
+    }
+
+    async function renderPage(pageNumber) {
+      if (!state.pdfDoc) return;
+      state.rendering = true;
+      updateButtons();
+      showLoading(`Renderizando página ${pageNumber}...`);
+
+      try {
+        if (state.renderTask) {
+          try { state.renderTask.cancel(); } catch {}
+        }
+
+        const page = await state.pdfDoc.getPage(pageNumber);
+        const unscaledViewport = page.getViewport({ scale: 1 });
+        const container = document.querySelector(".page-stage");
+        const availableWidth = container.clientWidth - 10;
+        const availableHeight = container.clientHeight - 10;
+        const fitScale = Math.min(
+          availableWidth / unscaledViewport.width,
+          availableHeight / unscaledViewport.height
+        );
+
+        const finalScale = fitScale * state.zoom;
+        const viewport = page.getViewport({ scale: finalScale });
+        const outputScale = window.devicePixelRatio || 1;
+
+        els.pdfCanvas.width = Math.floor(viewport.width * outputScale);
+        els.pdfCanvas.height = Math.floor(viewport.height * outputScale);
+        els.pdfCanvas.style.width = `${viewport.width}px`;
+        els.pdfCanvas.style.height = `${viewport.height}px`;
+
+        const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+        const renderContext = { canvasContext, viewport, transform };
+
+        canvasContext.setTransform(1, 0, 0, 1, 0, 0);
+        canvasContext.clearRect(0, 0, els.pdfCanvas.width, els.pdfCanvas.height);
+
+        state.renderTask = page.render(renderContext);
+        await state.renderTask.promise;
+
+        await applySceneForPage(pageNumber);
+        hideLoading();
+      } catch (error) {
+        if (error?.name !== "RenderingCancelledException") {
+          console.error(error);
+          showLoading("Erro ao renderizar a página.");
+          showToast("Erro ao renderizar a página.");
+        }
+      } finally {
+        state.rendering = false;
+        updateButtons();
+      }
+    }
+
+    async function goToPage(page) {
+      const targetPage = Math.max(1, Math.min(state.totalPages, page));
+      state.currentPage = targetPage;
+      await renderPage(targetPage);
+    }
+
+    function toggleMute() {
+      state.isMuted = !state.isMuted;
+      els.toggleMuteBtn.textContent = state.isMuted ? "Desmutar" : "Mutar";
+
+      if (state.isMuted) {
+        fadeVolume(state.activeAudio, state.activeAudio.volume || CONFIG.targetVolume, 0, 500);
+        fadeVolume(state.inactiveAudio, state.inactiveAudio.volume || 0, 0, 500);
+        window.setTimeout(() => {
+          state.activeAudio.pause();
+          state.inactiveAudio.pause();
+        }, 520);
+      } else {
+        const scene = getSceneByPage(state.currentPage);
+        setSceneAudio(scene);
+      }
+    }
+
+    function openPdfInNewTab() {
+      if (!state.selectedPdf) return;
+      window.open(`${state.selectedPdf}#page=${state.currentPage}`, "_blank");
+    }
+
+    function restoreLastPage() {
+      const saved = Number(localStorage.getItem("pg_reader_page"));
+      if (Number.isFinite(saved) && saved >= 1) state.currentPage = saved;
+    }
+
+    async function enterReader() {
+      els.startScreen.classList.add("hidden");
+      await loadPdf();
+    }
+
+    els.enterReaderBtn.addEventListener("click", enterReader);
+    els.startAudioBtn.addEventListener("click", async () => {
+      await prepareAudio();
+      const scene = getSceneByPage(state.currentPage);
+      setSceneAudio(scene);
+    });
+    els.toggleMuteBtn.addEventListener("click", toggleMute);
+    els.prevPageBtn.addEventListener("click", () => goToPage(state.currentPage - 1));
+    els.nextPageBtn.addEventListener("click", () => goToPage(state.currentPage + 1));
+    els.openPdfBtn.addEventListener("click", openPdfInNewTab);
+
+    els.zoomRange.addEventListener("input", async (event) => {
+      state.zoom = Number(event.target.value);
+      if (state.pdfDoc) await renderPage(state.currentPage);
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight") goToPage(state.currentPage + 1);
+      if (event.key === "ArrowLeft") goToPage(state.currentPage - 1);
+      if (event.key.toLowerCase() === "m") toggleMute();
+    });
+
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(async () => {
+        const newPdf = getPdfForDevice();
+        if (newPdf !== state.selectedPdf) {
+          await loadPdf();
+        } else if (state.pdfDoc) {
+          await renderPage(state.currentPage);
+        }
+      }, 180);
+    });
+
+    restoreLastPage();
+  </script>
+</body>
+</html>
