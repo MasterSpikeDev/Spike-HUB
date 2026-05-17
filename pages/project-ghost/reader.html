@@ -347,8 +347,8 @@
       page:reader.pageStart || 1,
       total:1,
       zoom:1,
-      minZoom:0.65,
-      maxZoom:4,
+      minZoom:0.25,
+      maxZoom:8,
       muted:false,
       mediaPaused:false,
       volume:0.55,
@@ -691,8 +691,11 @@
       const viewer = getViewer();
       const viewerStyles = viewer ? getComputedStyle(viewer) : null;
       const horizontalPadding = viewerStyles ? parseFloat(viewerStyles.paddingLeft) + parseFloat(viewerStyles.paddingRight) : 16;
+      const verticalPadding = viewerStyles ? parseFloat(viewerStyles.paddingTop) + parseFloat(viewerStyles.paddingBottom) : 16;
       const vw = Math.max(1, (viewer?.clientWidth || window.innerWidth) - horizontalPadding - 10);
-      return Math.max(0.2, (vw / pageViewport.width) * st.zoom);
+      const vh = Math.max(1, (viewer?.clientHeight || window.innerHeight) - verticalPadding - 10);
+      const fitWholePage = Math.min(vw / pageViewport.width, vh / pageViewport.height);
+      return Math.max(0.08, fitWholePage * st.zoom);
     }
     async function setCurrentSceneForPage(pageNo){
       const target = Math.min(Math.max(st.pageMin, Number(pageNo) || st.pageMin), st.pageMax);
