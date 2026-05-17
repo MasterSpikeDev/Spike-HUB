@@ -30,7 +30,7 @@
     .bg-image { background-size:cover; background-position:center; background-repeat:no-repeat; }
     .bg-video { display:none; }
     .overlay { position:fixed; inset:0; z-index:2; background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.68)); }
-    .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr auto auto; height:100%; }
+    .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr auto; height:100%; }
     .bar { display:grid; grid-template-columns:1fr auto; gap:10px 14px; align-items:center; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); overflow:hidden; transition:grid-template-rows .28s ease, padding .28s ease; }
     .controls { display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
     .control-btn, select, input[type=range] { border:1px solid var(--border); background:var(--panel); color:var(--text); border-radius:999px; padding:8px 12px; }
@@ -113,39 +113,34 @@
     .viewer {
       display:flex;
       align-items:flex-start;
-      justify-content:flex-start;
-      padding:8px;
+      justify-content:center;
+      padding:18px 8px;
       min-height:0;
       position: relative;
       overflow:auto;
       overscroll-behavior:contain;
-      touch-action:none;
+      touch-action:pan-x pan-y pinch-zoom;
+      scrollbar-color: var(--accent) rgba(255,255,255,.08);
     }
     .viewer-stage {
-      width: max-content;
-      height: max-content;
-      min-width: 100%;
-      min-height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width:100%;
+      min-height:100%;
+      display:flex;
+      justify-content:center;
     }
     .page-host {
-      width: max-content;
-      height: max-content;
-      min-width: 100%;
-      min-height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:18px;
+      position:relative;
     }
     .page-frame {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      touch-action:none;
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
       flex:0 0 auto;
     }
     canvas {
@@ -153,50 +148,24 @@
       flex:0 0 auto;
       max-width:none;
       max-height:none;
-      border-radius: 12px;
-      box-shadow: 0 18px 60px rgba(0,0,0,.4);
-      background: #ececef;
-      cursor: grab;
-      user-select: none;
-      touch-action:none;
+      border-radius:12px;
+      box-shadow:0 18px 60px rgba(0,0,0,.4);
+      background:#ececef;
+      user-select:none;
     }
-    canvas:active, .viewer.is-panning canvas { cursor: grabbing; }
-    .footer { padding:10px 18px; border-top:1px solid var(--border); background:var(--panel); font-size:13px; color:var(--muted); display:flex; justify-content:space-between; gap:12px; }
-    .page-nav {
-      display:grid;
-      grid-template-columns:auto minmax(180px, 640px) auto;
-      align-items:center;
-      justify-content:center;
-      gap:14px;
-      padding:12px 18px;
-      border-top:1px solid var(--border);
-      background:linear-gradient(180deg, rgba(11,11,16,.72), rgba(8,8,12,.9));
-      backdrop-filter: blur(10px);
-      box-shadow: 0 -12px 28px rgba(0,0,0,.28);
-    }
-    .page-nav-btn {
-      min-width:136px;
-      min-height:44px;
-      border:1px solid rgba(255,255,255,.12);
-      background:linear-gradient(135deg, rgba(255,58,58,.22), rgba(255,255,255,.045));
-      color:var(--text);
+    .pdf-page-number {
+      position:absolute;
+      right:12px;
+      bottom:12px;
+      padding:5px 9px;
       border-radius:999px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      font-weight:800;
-      letter-spacing:.01em;
-      cursor:pointer;
-      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, opacity .18s ease;
+      background:rgba(0,0,0,.58);
+      color:#fff;
+      font-size:12px;
+      line-height:1;
+      pointer-events:none;
     }
-    .page-nav-btn:hover { transform:translateY(-2px); border-color:var(--accent-soft); box-shadow:0 10px 22px rgba(0,0,0,.34); }
-    .page-nav-btn:disabled { opacity:.38; cursor:not-allowed; transform:none; box-shadow:none; }
-    .page-jump { display:grid; gap:6px; color:var(--muted); font-size:12px; text-align:center; }
-    .page-jump strong { color:var(--text); font-size:13px; }
-    .page-jump input[type=range] { width:min(56vw, 640px); accent-color:var(--accent); cursor:grab; padding:0; background:transparent; border:none; }
-    .page-jump input[type=range]:active { cursor:grabbing; }
-    .tap-hint { color:var(--muted); font-size:12px; }
+    .footer { padding:10px 18px; border-top:1px solid var(--border); background:var(--panel); font-size:13px; color:var(--muted); display:flex; justify-content:space-between; gap:12px; }
     .start {
       position: fixed;
       inset: 0;
@@ -275,12 +244,8 @@
       .media-actions { grid-column:1 / -1; justify-content:space-between; }
       .media-volume { width:min(26vw, 110px); }
       .footer{flex-direction:column; gap:8px; padding:8px 12px;}
-      .viewer { padding:6px; }
-      .page-nav { grid-template-columns:1fr 1fr; gap:10px; padding:10px 12px; }
-      .page-jump { grid-column:1 / -1; grid-row:1; }
-      .page-nav-btn { min-width:0; width:100%; min-height:46px; }
-      .page-jump input[type=range] { width:100%; }
-      .tap-hint { display:none; }
+      .viewer { padding:12px 6px; }
+      .page-host { gap:12px; }
     }
   </style>
 </head>
@@ -332,28 +297,9 @@
     </header>
     <main class="viewer">
       <div class="viewer-stage">
-        <div class="page-host">
-          <div class="page-frame">
-            <canvas id="pdfCanvas" aria-label="Página do PDF. Clique na metade direita para avançar ou na metade esquerda para voltar."></canvas>
-          </div>
-        </div>
+        <div id="pageHost" class="page-host" aria-label="Todas as páginas do PDF"></div>
       </div>
     </main>
-    <nav class="page-nav" aria-label="Navegação de páginas">
-      <button id="prevBtn" class="page-nav-btn" type="button" aria-label="Página anterior">
-        <i class="fas fa-chevron-left" aria-hidden="true"></i>
-        <span>Anterior</span>
-      </button>
-      <label class="page-jump" for="pageScrubber">
-        <strong id="pageJumpStatus">Página 1 de 1</strong>
-        <input id="pageScrubber" type="range" min="1" max="1" step="1" value="1" aria-label="Arrastar para escolher a página">
-        <span class="tap-hint">Role o mouse para zoom, clique e puxe o PDF para arrastar, use pinça/toque no celular ou clique nas laterais para navegar.</span>
-      </label>
-      <button id="nextBtn" class="page-nav-btn" type="button" aria-label="Próxima página">
-        <span>Próxima</span>
-        <i class="fas fa-chevron-right" aria-hidden="true"></i>
-      </button>
-    </nav>
     <footer class="footer">
       <span id="pageStatus">Página 1 / 1</span>
       <span id="sceneStatus">Cena: --</span>
@@ -363,10 +309,10 @@
   <div id="start" class="start">
     <div class="card">
       <h2 class="start-title">Antes de começar</h2>
-      <p class="start-description">A leitura agora usa um único modo adaptativo para celular, tablet e computador. A trilha é iniciada junto do início da leitura.</p>
+      <p class="start-description">A leitura agora carrega o PDF completo, com todas as páginas em sequência. A trilha é iniciada junto do início da leitura.</p>
       <div class="start-tips" aria-label="Controles de leitura">
-        <span><i class="fas fa-computer-mouse"></i> No PC, role o mouse sobre o PDF para aproximar/afastar e clique + arraste para puxar a página.</span>
-        <span><i class="fas fa-hand-pointer"></i> No celular, faça pinça com dois dedos para controlar o zoom e arraste com um dedo para mover a página ampliada.</span>
+        <span><i class="fas fa-computer-mouse"></i> No PC, role para baixo para passar pelas páginas. Use Ctrl + rolagem se quiser aproximar ou afastar.</span>
+        <span><i class="fas fa-hand-pointer"></i> No celular, arraste para baixo para continuar a leitura e use pinça com dois dedos para aproximar ou afastar.</span>
       </div>
       <button id="startBtn" class="start-main-btn" type="button">Começar leitura</button>
     </div>
@@ -401,8 +347,8 @@
       page:reader.pageStart || 1,
       total:1,
       zoom:1,
-      minZoom:0.65,
-      maxZoom:4,
+      minZoom:0.25,
+      maxZoom:8,
       muted:false,
       mediaPaused:false,
       volume:0.55,
@@ -411,8 +357,8 @@
       analyserData:null,
       audioCtx:null,
       isRendering:false,
-      pendingPage:null,
-      pendingZoomAnchor:null,
+      renderToken:0,
+      queuedZoom:null,
       bgActiveLayer:null,
       bgInactiveLayer:null,
       currentScene:null,
@@ -423,12 +369,11 @@
     };
     const els = {
       topBar:document.getElementById('topBar'), start: document.getElementById('start'), startBtn: document.getElementById('startBtn'), chapterTitle:document.getElementById('chapterTitle'),
-      prev:document.getElementById('prevBtn'), next:document.getElementById('nextBtn'), back:document.getElementById('backBtn'), mediaToggle:document.getElementById('mediaToggle'), mediaToggleIcon:document.getElementById('mediaToggleIcon'),
+      back:document.getElementById('backBtn'), mediaToggle:document.getElementById('mediaToggle'), mediaToggleIcon:document.getElementById('mediaToggleIcon'),
       mediaPlayer:document.getElementById('mediaPlayer'), mediaCover:document.getElementById('mediaCover'), mediaTitle:document.getElementById('mediaTitle'), mediaSubtitle:document.getElementById('mediaSubtitle'), mediaCurrentText:document.getElementById('mediaCurrentText'), mediaDurationText:document.getElementById('mediaDurationText'), mediaRemainingText:document.getElementById('mediaRemainingText'), mediaProgress:document.getElementById('mediaProgress'), mediaRestart:document.getElementById('mediaRestart'), mediaPlay:document.getElementById('mediaPlay'), mediaPlayIcon:document.getElementById('mediaPlayIcon'), mediaMute:document.getElementById('mediaMute'), mediaMuteIcon:document.getElementById('mediaMuteIcon'), mediaVolume:document.getElementById('mediaVolume'), mediaDownload:document.getElementById('mediaDownload'), visualizer:document.getElementById('visualizer'),
-      canvas:document.getElementById('pdfCanvas'), pageStatus:document.getElementById('pageStatus'), pageJumpStatus:document.getElementById('pageJumpStatus'), pageScrubber:document.getElementById('pageScrubber'), sceneStatus:document.getElementById('sceneStatus'),
+      pageHost:document.getElementById('pageHost'), pageStatus:document.getElementById('pageStatus'), sceneStatus:document.getElementById('sceneStatus'),
       bgA:document.getElementById('bgA'), bgB:document.getElementById('bgB'), loading:document.getElementById('loading'), audioHost:document.getElementById('audioHost')
     };
-    const ctx = els.canvas.getContext('2d', { alpha:false });
     st.bgActiveLayer = els.bgA;
     st.bgInactiveLayer = els.bgB;
 
@@ -437,10 +382,7 @@
     function loading(on,msg){ els.loading.style.display = on ? 'block' : 'none'; if(msg) els.loading.textContent=msg; }
     function getScene(page){ return (reader.scenes || []).find(s => page >= s.from && page <= s.to) || (reader.scenes || [])[0]; }
     function updateMeta(scene){
-      const pageText = `Página ${st.page} / ${st.total}`;
-      els.pageStatus.textContent = pageText;
-      els.pageJumpStatus.textContent = `Página ${st.page} de ${st.total}`;
-      els.pageScrubber.value = String(st.page);
+      els.pageStatus.textContent = `Página ${st.page} / ${st.total}`;
       els.sceneStatus.textContent = `Cena: ${scene?.label || '--'} • páginas ${scene?.from || 1}-${scene?.to || st.total}`;
     }
     function updateMediaButtons(){
@@ -454,26 +396,11 @@
       els.mediaMute.title = st.muted ? 'Ativar som' : 'Mutar';
       els.mediaVolume.value = String(st.muted ? 0 : st.volume);
     }
-    function goToPage(pageNo){
+    function scrollToPage(pageNo){
       const target = Math.min(Math.max(st.pageMin, Number(pageNo) || st.pageMin), st.pageMax);
-      if (target === st.page && !st.isRendering) return;
-      renderPage(target);
-    }
-    function getReaderLimit(key) {
-      const value = reader[key];
-      if (Number.isFinite(Number(value))) return Number(value);
-      if (value && typeof value === 'object') {
-        const preferred = value.auto ?? value.unified ?? value.default;
-        if (Number.isFinite(Number(preferred))) return Number(preferred);
-        const firstNumeric = Object.values(value).find((item) => Number.isFinite(Number(item)));
-        if (firstNumeric != null) return Number(firstNumeric);
-      }
-      return undefined;
-    }
-    function getMaxScenePage() {
-      const scenes = Array.isArray(reader.scenes) ? reader.scenes : [];
-      if (!scenes.length) return 1;
-      return scenes.reduce((maxPage, scene) => Math.max(maxPage, Number(scene?.to) || 1), 1);
+      const frame = els.pageHost.querySelector(`[data-page="${target}"]`);
+      if (!frame) return;
+      frame.scrollIntoView({ behavior:'smooth', block:'start' });
     }
     function applySceneTheme(scene){
       const theme = scene?.theme || {};
@@ -722,12 +649,18 @@
       return Math.min(Math.max(value, min), max);
     }
     function getViewer(){ return document.querySelector('.viewer'); }
+    function getCurrentPageCanvas(){
+      return els.pageHost.querySelector(`[data-page="${st.page}"] canvas`) || els.pageHost.querySelector('canvas');
+    }
     function getZoomAnchor(clientX, clientY){
-      const rect = els.canvas.getBoundingClientRect();
+      const canvas = getCurrentPageCanvas();
+      if (!canvas) return null;
+      const rect = canvas.getBoundingClientRect();
       if (!rect.width || !rect.height) return null;
       return {
         clientX,
         clientY,
+        page: Number(canvas.closest('[data-page]')?.dataset.page) || st.page,
         xRatio: clamp((clientX - rect.left) / rect.width, 0, 1),
         yRatio: clamp((clientY - rect.top) / rect.height, 0, 1)
       };
@@ -736,70 +669,122 @@
       const viewer = getViewer();
       if (!viewer || !anchor) return;
       requestAnimationFrame(() => {
-        const rect = els.canvas.getBoundingClientRect();
+        const canvas = els.pageHost.querySelector(`[data-page="${anchor.page}"] canvas`);
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
         viewer.scrollLeft += (rect.left + rect.width * anchor.xRatio) - anchor.clientX;
         viewer.scrollTop += (rect.top + rect.height * anchor.yRatio) - anchor.clientY;
       });
     }
     function syncZoomControl(){
-      // O zoom agora é controlado por scroll/pinça; mantido para sincronizar futuras UIs sem quebrar o fluxo.
+      // O zoom agora é secundário: a leitura principal usa rolagem vertical contínua.
     }
     function setZoom(nextZoom, clientX = window.innerWidth / 2, clientY = window.innerHeight / 2){
       if (!st.doc) return;
       const clampedZoom = Math.round(clamp(nextZoom, st.minZoom, st.maxZoom) * 100) / 100;
-      if (Math.abs(clampedZoom - st.zoom) < 0.001) return;
       const anchor = getZoomAnchor(clientX, clientY);
-      st.zoom = clampedZoom;
-      syncZoomControl();
-      renderPage(st.page, anchor);
-    }
-    function hasScrollablePage(){
-      const viewer = getViewer();
-      if (!viewer) return false;
-      return viewer.scrollWidth > viewer.clientWidth + 2 || viewer.scrollHeight > viewer.clientHeight + 2;
-    }
-
-    async function renderPage(pageNo, zoomAnchor = null){
-      if(!st.doc) return;
-      const targetPage = Math.min(Math.max(st.pageMin, Number(pageNo) || st.pageMin), st.pageMax);
       if (st.isRendering) {
-        st.pendingPage = targetPage;
-        st.pendingZoomAnchor = zoomAnchor;
+        st.queuedZoom = { zoom:clampedZoom, anchor };
         return;
       }
+      if (Math.abs(clampedZoom - st.zoom) < 0.001) return;
+      st.zoom = clampedZoom;
+      syncZoomControl();
+      renderAllPages(anchor);
+    }
+    function getPageFitScale(pageViewport){
+      const viewer = getViewer();
+      const viewerStyles = viewer ? getComputedStyle(viewer) : null;
+      const horizontalPadding = viewerStyles ? parseFloat(viewerStyles.paddingLeft) + parseFloat(viewerStyles.paddingRight) : 16;
+      const verticalPadding = viewerStyles ? parseFloat(viewerStyles.paddingTop) + parseFloat(viewerStyles.paddingBottom) : 16;
+      const vw = Math.max(1, (viewer?.clientWidth || window.innerWidth) - horizontalPadding - 10);
+      const vh = Math.max(1, (viewer?.clientHeight || window.innerHeight) - verticalPadding - 10);
+      const fitWholePage = Math.min(vw / pageViewport.width, vh / pageViewport.height);
+      return Math.max(0.08, fitWholePage * st.zoom);
+    }
+    async function setCurrentSceneForPage(pageNo){
+      const target = Math.min(Math.max(st.pageMin, Number(pageNo) || st.pageMin), st.pageMax);
+      const scene = getScene(target);
+      st.page = target;
+      updateMeta(scene);
+      sessionStorage.setItem('pg_reader_page', String(st.page));
+      if (scene && st.currentScene !== scene.id) {
+        await setSceneBackground(scene);
+        applySceneTheme(scene);
+        try { await setSceneAudio(scene); } catch { console.warn('Áudio bloqueado ou arquivo ausente.'); }
+        st.currentScene = scene.id;
+      }
+    }
+    function updateCurrentPageFromScroll(){
+      const viewer = getViewer();
+      if (!viewer) return;
+      const viewerRect = viewer.getBoundingClientRect();
+      const focusY = viewerRect.top + viewerRect.height * 0.38;
+      let nearestPage = st.page;
+      let nearestDistance = Infinity;
+      els.pageHost.querySelectorAll('[data-page]').forEach((frame) => {
+        const rect = frame.getBoundingClientRect();
+        const distance = focusY < rect.top ? rect.top - focusY : focusY > rect.bottom ? focusY - rect.bottom : 0;
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestPage = Number(frame.dataset.page) || nearestPage;
+        }
+      });
+      if (nearestPage !== st.page) setCurrentSceneForPage(nearestPage);
+    }
+    async function renderPdfPage(pageNo, token){
+      const page = await st.doc.getPage(pageNo);
+      if (token !== st.renderToken) return;
+      const base = page.getViewport({ scale:1 });
+      const scale = getPageFitScale(base);
+      const viewport = page.getViewport({ scale });
+      const pixel = window.devicePixelRatio || 1;
+      const frame = document.createElement('div');
+      frame.className = 'page-frame';
+      frame.dataset.page = String(pageNo);
+      const canvas = document.createElement('canvas');
+      canvas.className = 'pdf-page-canvas';
+      canvas.setAttribute('aria-label', `Página ${pageNo} do PDF`);
+      canvas.width = Math.floor(viewport.width * pixel);
+      canvas.height = Math.floor(viewport.height * pixel);
+      canvas.style.width = `${viewport.width}px`;
+      canvas.style.height = `${viewport.height}px`;
+      const badge = document.createElement('span');
+      badge.className = 'pdf-page-number';
+      badge.textContent = `${pageNo}`;
+      frame.append(canvas, badge);
+      els.pageHost.appendChild(frame);
+      const context = canvas.getContext('2d', { alpha:false });
+      await page.render({ canvasContext:context, viewport, transform: pixel !== 1 ? [pixel, 0, 0, pixel, 0, 0] : null }).promise;
+    }
+    async function renderAllPages(zoomAnchor = null){
+      if (!st.doc) return;
+      const token = st.renderToken + 1;
+      st.renderToken = token;
       st.isRendering = true;
-      loading(true,`Renderizando página ${targetPage}...`);
+      els.pageHost.replaceChildren();
       try {
-        const pg = await st.doc.getPage(targetPage); const base = pg.getViewport({scale:1});
-        const viewer = document.querySelector('.viewer');
-        const viewerStyles = viewer ? getComputedStyle(viewer) : null;
-        const horizontalPadding = viewerStyles ? parseFloat(viewerStyles.paddingLeft) + parseFloat(viewerStyles.paddingRight) : 16;
-        const verticalPadding = viewerStyles ? parseFloat(viewerStyles.paddingTop) + parseFloat(viewerStyles.paddingBottom) : 16;
-        const vw = Math.max(1, (viewer?.clientWidth || window.innerWidth) - horizontalPadding);
-        const vh = Math.max(1, (viewer?.clientHeight || window.innerHeight) - verticalPadding);
-        const fit = Math.min(vw/base.width, vh/base.height); const scale = Math.max(0.2, fit * st.zoom); const vp = pg.getViewport({scale});
-        const pixel = window.devicePixelRatio || 1; els.canvas.width = Math.floor(vp.width * pixel); els.canvas.height = Math.floor(vp.height * pixel);
-        els.canvas.style.width = `${vp.width}px`; els.canvas.style.height = `${vp.height}px`; ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,els.canvas.width,els.canvas.height);
-        await pg.render({ canvasContext:ctx, viewport:vp, transform: pixel!==1 ? [pixel,0,0,pixel,0,0] : null }).promise;
+        for (let pageNo = st.pageMin; pageNo <= st.pageMax; pageNo += 1) {
+          loading(true, `Renderizando página ${pageNo} de ${st.pageMax}...`);
+          await renderPdfPage(pageNo, token);
+          if (token !== st.renderToken) return;
+        }
         restoreZoomAnchor(zoomAnchor);
-
-        const scene = getScene(targetPage); if(scene && st.currentScene !== scene.id){ await setSceneBackground(scene); applySceneTheme(scene); try{ await setSceneAudio(scene); } catch { console.warn('Áudio bloqueado ou arquivo ausente.'); }
-          st.currentScene = scene.id; }
-        st.page = targetPage; updateMeta(scene); sessionStorage.setItem('pg_reader_page', String(st.page));
-        els.prev.disabled = st.page <= st.pageMin;
-        els.next.disabled = st.page >= st.pageMax;
+        await setCurrentSceneForPage(st.page);
+        requestAnimationFrame(updateCurrentPageFromScroll);
       } finally {
-        loading(false);
-        st.isRendering = false;
-        if (st.pendingPage) {
-          const queuedPage = st.pendingPage;
-          const queuedAnchor = st.pendingZoomAnchor;
-          st.pendingPage = null;
-          st.pendingZoomAnchor = null;
-          renderPage(queuedPage, queuedAnchor);
-        } else {
-          st.pendingPage = null;
-          st.pendingZoomAnchor = null;
+        if (token === st.renderToken) {
+          st.isRendering = false;
+          loading(false);
+          if (st.queuedZoom) {
+            const queuedZoom = st.queuedZoom;
+            st.queuedZoom = null;
+            if (Math.abs(queuedZoom.zoom - st.zoom) >= 0.001) {
+              st.zoom = queuedZoom.zoom;
+              syncZoomControl();
+              renderAllPages(queuedZoom.anchor);
+            }
+          }
         }
       }
     }
@@ -809,17 +794,8 @@
       loading(true, `Carregando ${pdfFile}...`);
       st.doc = await pdfjsLib.getDocument(pdfFile).promise;
       st.total = st.doc.numPages;
-      const configuredPageStart = Math.max(1, getReaderLimit('pageStart') || 1);
-      const configuredPageEnd = Math.max(
-        configuredPageStart,
-        getReaderLimit('pageEnd') || configuredPageStart,
-        getMaxScenePage()
-      );
-      st.pageMin = Math.min(configuredPageStart, st.total);
-      st.pageMax = Math.min(configuredPageEnd, st.total);
-      els.pageScrubber.min = String(st.pageMin);
-      els.pageScrubber.max = String(st.pageMax);
-
+      st.pageMin = 1;
+      st.pageMax = st.total;
       const savedPage = Number(sessionStorage.getItem('pg_reader_page'));
       st.page = Math.min(Math.max(st.pageMin, savedPage || st.pageMin), st.pageMax);
       els.start.style.display='none';
@@ -832,16 +808,11 @@
         primer.remove();
       }
 
-      await renderPage(st.page);
+      await renderAllPages();
+      scrollToPage(st.page);
     }
 
     els.startBtn.addEventListener('click', loadAndStart);
-    els.prev.addEventListener('click', ()=> goToPage(st.page - 1));
-    els.next.addEventListener('click', ()=> goToPage(st.page + 1));
-    els.pageScrubber.addEventListener('input', () => {
-      els.pageJumpStatus.textContent = `Página ${els.pageScrubber.value} de ${st.total}`;
-    });
-    els.pageScrubber.addEventListener('change', () => goToPage(els.pageScrubber.value));
     syncZoomControl();
     updateMediaButtons();
     els.back.addEventListener('click', ()=> { window.location.href = './ghost.html'; });
@@ -889,108 +860,50 @@
       if (!getPrimaryAudio()) event.preventDefault();
     });
 
-    let suppressCanvasClick = false;
-    const activePointers = new Map();
-    let pointerStartX = 0;
-    let pointerStartY = 0;
-    let lastPanPoint = null;
-    let pinchState = null;
-
-    function getPointerCenter(points){
-      return {
-        x: (points[0].clientX + points[1].clientX) / 2,
-        y: (points[0].clientY + points[1].clientY) / 2
-      };
-    }
-    function getPointerDistance(points){
-      return Math.hypot(points[0].clientX - points[1].clientX, points[0].clientY - points[1].clientY);
-    }
-
     const viewer = getViewer();
+    let scrollMetaTimer = null;
+    viewer.addEventListener('scroll', () => {
+      clearTimeout(scrollMetaTimer);
+      scrollMetaTimer = setTimeout(updateCurrentPageFromScroll, 60);
+    }, { passive:true });
     viewer.addEventListener('wheel', (event) => {
-      if (!st.doc) return;
+      if (!st.doc || !(event.ctrlKey || event.metaKey)) return;
       event.preventDefault();
       const factor = Math.exp(-event.deltaY * 0.0025);
       setZoom(st.zoom * factor, event.clientX, event.clientY);
     }, { passive:false });
 
-    viewer.addEventListener('pointerdown', (event) => {
-      if (event.pointerType === 'mouse' && event.button !== 0) return;
-      if (!event.target.closest('.viewer')) return;
-
-      activePointers.set(event.pointerId, { clientX:event.clientX, clientY:event.clientY });
-      viewer.setPointerCapture?.(event.pointerId);
-      pointerStartX = event.clientX;
-      pointerStartY = event.clientY;
-
-      if (activePointers.size === 1) {
-        lastPanPoint = { x:event.clientX, y:event.clientY };
-        viewer.classList.add('is-panning');
-      }
-      if (activePointers.size === 2) {
-        const points = [...activePointers.values()];
-        pinchState = { distance:getPointerDistance(points), zoom:st.zoom };
-        suppressCanvasClick = true;
-      }
-    });
-    viewer.addEventListener('pointermove', (event) => {
-      if (!activePointers.has(event.pointerId)) return;
-      activePointers.set(event.pointerId, { clientX:event.clientX, clientY:event.clientY });
-
-      if (activePointers.size === 2 && pinchState) {
-        event.preventDefault();
-        const points = [...activePointers.values()];
-        const distance = getPointerDistance(points);
-        const center = getPointerCenter(points);
-        if (pinchState.distance > 0) setZoom(pinchState.zoom * (distance / pinchState.distance), center.x, center.y);
-        return;
-      }
-
-      if (activePointers.size === 1 && lastPanPoint) {
-        const dx = event.clientX - lastPanPoint.x;
-        const dy = event.clientY - lastPanPoint.y;
-        const moved = Math.hypot(event.clientX - pointerStartX, event.clientY - pointerStartY);
-
-        if (hasScrollablePage()) {
-          event.preventDefault();
-          viewer.scrollLeft -= dx;
-          viewer.scrollTop -= dy;
-        }
-        if (moved > 6) suppressCanvasClick = true;
-        lastPanPoint = { x:event.clientX, y:event.clientY };
-      }
-    }, { passive:false });
-    function clearPointer(event){
-      activePointers.delete(event.pointerId);
-      if (activePointers.size < 2) pinchState = null;
-      if (activePointers.size === 1) {
-        const [remainingPoint] = activePointers.values();
-        lastPanPoint = { x:remainingPoint.clientX, y:remainingPoint.clientY };
-      }
-      if (activePointers.size === 0) {
-        lastPanPoint = null;
-        viewer.classList.remove('is-panning');
-      }
+    let pinchState = null;
+    function getTouchCenter(touches){
+      return {
+        x: (touches[0].clientX + touches[1].clientX) / 2,
+        y: (touches[0].clientY + touches[1].clientY) / 2
+      };
     }
-    viewer.addEventListener('pointerup', clearPointer);
-    viewer.addEventListener('pointercancel', clearPointer);
+    function getTouchDistance(touches){
+      return Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
+    }
+    viewer.addEventListener('touchstart', (event) => {
+      if (!st.doc || event.touches.length !== 2) return;
+      pinchState = {
+        distance:getTouchDistance(event.touches),
+        zoom:st.queuedZoom?.zoom || st.zoom
+      };
+    }, { passive:true });
+    viewer.addEventListener('touchmove', (event) => {
+      if (!st.doc || event.touches.length !== 2 || !pinchState) return;
+      event.preventDefault();
+      const distance = getTouchDistance(event.touches);
+      const center = getTouchCenter(event.touches);
+      if (pinchState.distance > 0) setZoom(pinchState.zoom * (distance / pinchState.distance), center.x, center.y);
+    }, { passive:false });
+    viewer.addEventListener('touchend', (event) => {
+      if (event.touches.length < 2) pinchState = null;
+    }, { passive:true });
+    viewer.addEventListener('touchcancel', () => { pinchState = null; }, { passive:true });
 
-    els.canvas.addEventListener('click', (event) => {
-      if (suppressCanvasClick) { suppressCanvasClick = false; return; }
-      const bounds = els.canvas.getBoundingClientRect();
-      goToPage(event.clientX - bounds.left > bounds.width / 2 ? st.page + 1 : st.page - 1);
-    });
-    els.canvas.addEventListener('pointerup', (event) => {
-      if (pinchState || hasScrollablePage()) return;
-      const delta = event.clientX - pointerStartX;
-      if (Math.abs(delta) > 48) {
-        suppressCanvasClick = true;
-        goToPage(delta < 0 ? st.page + 1 : st.page - 1);
-      }
-    });
-
-    window.addEventListener('keydown',(e)=>{ if(e.key==='ArrowRight') goToPage(st.page + 1); if(e.key==='ArrowLeft') goToPage(st.page - 1); if(e.key.toLowerCase()==='m') els.mute.click(); });
-    let t; window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(()=> { syncZoomControl(); if (st.doc) renderPage(st.page); }, 180); });
+    window.addEventListener('keydown',(e)=>{ if(e.key==='Home') scrollToPage(st.pageMin); if(e.key==='End') scrollToPage(st.pageMax); if(e.key.toLowerCase()==='m') els.mediaMute.click(); });
+    let t; window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(()=> { syncZoomControl(); if (st.doc) renderAllPages(getZoomAnchor(window.innerWidth / 2, window.innerHeight / 2)); }, 180); });
   </script>
 </body>
 </html>
