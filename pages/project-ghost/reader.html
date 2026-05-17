@@ -800,21 +800,33 @@
         const page = await st.doc.getPage(pageNo);
         if (token !== st.renderToken) return;
         const base = page.getViewport({ scale:1 });
-        const viewport = page.getViewport({ scale:getBasePageFitScale(base) });
+        const pageWidth = Number(st.defaultPageSize?.width || frame.dataset.baseWidth || base.width);
+        const pageHeight = Number(st.defaultPageSize?.height || frame.dataset.baseHeight || base.height);
+        const contentScale = Math.min(pageWidth / base.width, pageHeight / base.height);
+        const viewport = page.getViewport({ scale:contentScale });
+        const offsetX = (pageWidth - viewport.width) / 2;
+        const offsetY = (pageHeight - viewport.height) / 2;
         const pixel = window.devicePixelRatio || 1;
-        frame.dataset.baseWidth = String(viewport.width);
-        frame.dataset.baseHeight = String(viewport.height);
+        frame.dataset.baseWidth = String(pageWidth);
+        frame.dataset.baseHeight = String(pageHeight);
         frame.querySelector('canvas')?.remove();
         const canvas = document.createElement('canvas');
         canvas.className = 'pdf-page-canvas';
         canvas.setAttribute('aria-label', `Página ${pageNo} do PDF`);
-        canvas.width = Math.floor(viewport.width * pixel);
-        canvas.height = Math.floor(viewport.height * pixel);
+        canvas.width = Math.floor(pageWidth * pixel);
+        canvas.height = Math.floor(pageHeight * pixel);
         const badge = frame.querySelector('.pdf-page-number');
         frame.insertBefore(canvas, badge || null);
         setFrameDisplaySize(frame);
         const context = canvas.getContext('2d', { alpha:false });
-        await page.render({ canvasContext:context, viewport, transform: pixel !== 1 ? [pixel, 0, 0, pixel, 0, 0] : null }).promise;
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.fillStyle = '#ececef';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        await page.render({
+          canvasContext:context,
+          viewport,
+          transform:[pixel, 0, 0, pixel, offsetX * pixel, offsetY * pixel]
+        }).promise;
         if (token !== st.renderToken) return;
         frame.classList.add('is-rendered');
         st.renderedPages.add(pageNo);
