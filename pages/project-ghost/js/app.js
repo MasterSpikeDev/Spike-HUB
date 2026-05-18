@@ -634,7 +634,7 @@ function renderMusic() {
 function renderChapters() {
     const modalLerBody = document.getElementById('modal-ler-body');
     modalLerBody.innerHTML = `
-        <div class="selection-title">Selecione o Volume:</div>
+        <div class="selection-title">Selecione a obra:</div>
         <div class="volume-selection" id="volume-selection"></div>
         
         <div class="selection-title" style="margin-top: 30px;">Selecione o Capítulo:</div>
@@ -650,7 +650,7 @@ function renderChapters() {
         btn.className = `volume-btn ${volume.available ? '' : 'disabled'}`;
         btn.setAttribute('data-volume', volume.volume);
         btn.innerHTML = `
-            Volume ${volume.volume}
+            ${volume.title || `Volume ${volume.volume}`}
             ${!volume.available ? '<br><small>(Em breve)</small>' : ''}
         `;
         
