@@ -5,13 +5,21 @@ export const chaptersData = {
     volumes: [
         {
             volume: 1,
-            title: "Prólogo",
+            title: "PROJECT GHOST",
             available: true,
-            chapters: [prologoChapter]
+            chapters: [
+                prologoChapter
+            ]
         },
         {
-            volume: "receitas",
+            volume: 2,
             title: "Livro de Receitas",
+            available: false,
+            chapters: []
+        },
+        {
+            volume: 3,
+            title: "Art Book",
             available: false,
             chapters: []
         }
