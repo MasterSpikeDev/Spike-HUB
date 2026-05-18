@@ -428,12 +428,19 @@
     function isNoneValue(value){
       return typeof value === 'string' && value.trim().toLowerCase() === 'none';
     }
+    function getMediaSrc(value){
+      if (value && typeof value === 'object') return String(value.src || value.file || value.url || '').trim();
+      return String(value || '').trim();
+    }
+    function getMediaConfigList(value){
+      const list = Array.isArray(value) ? value : [value];
+      return list.filter((item) => {
+        const src = getMediaSrc(item);
+        return src && !isNoneValue(src);
+      });
+    }
     function normalizeSceneMedia(value){
-      if (Array.isArray(value)) return value.map((item) => String(item || '').trim()).filter((item) => item && !isNoneValue(item));
-      if (value == null) return [];
-      const one = String(value).trim();
-      if (!one || isNoneValue(one)) return [];
-      return [one];
+      return getMediaConfigList(value).map(getMediaSrc);
     }
     function resolveBackgroundType(path){
       const cleanPath = String(path || '').split('?')[0].toLowerCase();
@@ -505,7 +512,8 @@
       return name ? name.replace(/\b\w/g, (letter) => letter.toUpperCase()) : 'Sem música tocando';
     }
     function getSceneArtwork(scene){
-      const configured = scene?.cover || scene?.artwork || scene?.image || scene?.musicImage || scene?.thumbnail;
+      const audioConfig = getMediaConfigList(scene?.audio)[0];
+      const configured = audioConfig?.icon || audioConfig?.cover || audioConfig?.thumbnail || scene?.cover || scene?.artwork || scene?.image || scene?.musicImage || scene?.thumbnail;
       const selected = normalizeSceneMedia(configured)[0] || normalizeSceneMedia(scene?.background).find((item) => resolveBackgroundType(item) === 'image');
       return selected || 'assets/images/website/logo.png';
     }
@@ -518,9 +526,10 @@
     }
     function updateMediaMetadata(scene){
       const audio = getPrimaryAudio();
-      const src = audio?.getAttribute('data-src') || normalizeSceneMedia(scene?.audio)[0] || '';
-      els.mediaTitle.textContent = scene?.musicTitle || scene?.audioTitle || getMediaTitle(src);
-      els.mediaSubtitle.textContent = src ? `${scene?.label || 'Cena'} • ${src.split('/').pop()}` : 'Nenhuma trilha para esta cena.';
+      const audioConfig = getMediaConfigList(scene?.audio)[0];
+      const src = audio?.getAttribute('data-src') || getMediaSrc(audioConfig) || '';
+      els.mediaTitle.textContent = audioConfig?.title || audioConfig?.name || scene?.musicTitle || scene?.audioTitle || getMediaTitle(src);
+      els.mediaSubtitle.textContent = src ? `${audioConfig?.description || scene?.label || 'Cena'} • ${src.split('/').pop()}` : 'Nenhuma trilha para esta cena.';
       els.mediaCover.src = getSceneArtwork(scene);
       els.mediaDownload.href = src || '#';
       els.mediaDownload.toggleAttribute('download', Boolean(src));

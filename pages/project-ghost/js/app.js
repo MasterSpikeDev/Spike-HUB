@@ -1,3 +1,5 @@
+import { characters, artworks, chaptersData, musicTracks } from "./data.js";
+
 // Elementos dos modais
 const modalLer = document.getElementById('modal-ler');
 const modalPersonagens = document.getElementById('modal-personagens');
@@ -608,7 +610,7 @@ function renderMusic() {
         card.className = 'music-card';
         card.setAttribute('data-url', track.url);
         card.innerHTML = `
-            <div class="music-thumb" style="background-image: url('${track.thumbnail}');">
+            <div class="music-thumb" style="background-image: url('${track.thumbnail || track.icon}');">
                 <div class="music-play">
                     <i class="fas fa-play"></i>
                 </div>
