@@ -374,6 +374,7 @@
       renderingPages:new Set(),
       renderAhead:3,
       defaultPageSize:null,
+      layoutWidth:0,
       bgActiveLayer:null,
       bgInactiveLayer:null,
       currentScene:null,
@@ -720,12 +721,17 @@
       syncZoomControl();
       applyZoomToRenderedPages(anchor);
     }
-    function getBasePageFitScale(pageViewport){
+    function getViewerUsableWidth(){
       const viewer = getViewer();
       const viewerStyles = viewer ? getComputedStyle(viewer) : null;
       const horizontalPadding = viewerStyles ? parseFloat(viewerStyles.paddingLeft) + parseFloat(viewerStyles.paddingRight) : 16;
+      return Math.max(1, (viewer?.clientWidth || window.innerWidth) - horizontalPadding - 10);
+    }
+    function getBasePageFitScale(pageViewport){
+      const viewer = getViewer();
+      const viewerStyles = viewer ? getComputedStyle(viewer) : null;
       const verticalPadding = viewerStyles ? parseFloat(viewerStyles.paddingTop) + parseFloat(viewerStyles.paddingBottom) : 16;
-      const vw = Math.max(1, (viewer?.clientWidth || window.innerWidth) - horizontalPadding - 10);
+      const vw = getViewerUsableWidth();
       const vh = Math.max(1, (viewer?.clientHeight || window.innerHeight) - verticalPadding - 10);
       const fitWholePage = Math.min(vw / pageViewport.width, vh / pageViewport.height);
       return Math.max(0.08, fitWholePage);
@@ -750,6 +756,7 @@
       const firstBase = firstPage.getViewport({ scale:1 });
       const firstViewport = firstPage.getViewport({ scale:getBasePageFitScale(firstBase) });
       st.defaultPageSize = { width:firstViewport.width, height:firstViewport.height };
+      st.layoutWidth = getViewerUsableWidth();
       els.pageHost.replaceChildren();
       for (let pageNo = st.pageMin; pageNo <= st.pageMax; pageNo += 1) {
         els.pageHost.appendChild(createPageFrame(pageNo));
@@ -971,7 +978,23 @@
     viewer.addEventListener('touchcancel', () => { pinchState = null; }, { passive:true });
 
     window.addEventListener('keydown',(e)=>{ if(e.key==='Home') scrollToPage(st.pageMin); if(e.key==='End') scrollToPage(st.pageMax); if(e.key.toLowerCase()==='m') els.mediaMute.click(); });
-    let t; window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(async ()=> { if (!st.doc) return; const anchor = getZoomAnchor(window.innerWidth / 2, window.innerHeight / 2); syncZoomControl(); resetRenderedPages(); await setupPageFrames(); await ensureRenderedWindow(st.page, true); applyZoomToRenderedPages(anchor); }, 180); });
+    let t; window.addEventListener('resize',()=>{
+      clearTimeout(t);
+      t=setTimeout(async ()=> {
+        if (!st.doc) return;
+        const anchor = getZoomAnchor(window.innerWidth / 2, window.innerHeight / 2);
+        const nextLayoutWidth = getViewerUsableWidth();
+        syncZoomControl();
+        if (st.layoutWidth && Math.abs(nextLayoutWidth - st.layoutWidth) < 2) {
+          applyZoomToRenderedPages(anchor);
+          return;
+        }
+        resetRenderedPages();
+        await setupPageFrames();
+        await ensureRenderedWindow(st.page, true);
+        applyZoomToRenderedPages(anchor);
+      }, 180);
+    });
   </script>
 </body>
 </html>
