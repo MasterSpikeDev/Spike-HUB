@@ -73,6 +73,55 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+.big-button,
+.cta-button,
+.volume-btn,
+.chapter-btn,
+.read-btn,
+.reading-method-btn,
+.close-modal,
+.character-card,
+.gallery-item,
+.music-card {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+button:focus,
+a:focus,
+.big-button:focus,
+.cta-button:focus,
+.volume-btn:focus,
+.chapter-btn:focus,
+.read-btn:focus,
+.reading-method-btn:focus,
+.close-modal:focus,
+.character-card:focus,
+.gallery-item:focus,
+.music-card:focus {
+    outline: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+.big-button:focus-visible,
+.cta-button:focus-visible,
+.volume-btn:focus-visible,
+.chapter-btn:focus-visible,
+.read-btn:focus-visible,
+.reading-method-btn:focus-visible,
+.close-modal:focus-visible,
+.character-card:focus-visible,
+.gallery-item:focus-visible,
+.music-card:focus-visible {
+    outline: 2px solid rgba(255, 77, 77, 0.85);
+    outline-offset: 3px;
 }
 
 body {
