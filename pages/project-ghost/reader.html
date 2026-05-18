@@ -30,8 +30,10 @@
     .bg-image { background-size:cover; background-position:center; background-repeat:no-repeat; }
     .bg-video { display:none; }
     .overlay { position:fixed; inset:0; z-index:2; background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.68)); }
-    .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr auto; height:100%; }
+    .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr; height:100%; }
     .bar { display:grid; grid-template-columns:1fr auto; gap:10px 14px; align-items:center; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); overflow:hidden; transition:grid-template-rows .28s ease, padding .28s ease; }
+    .reader-heading { display:flex; flex-direction:column; gap:4px; min-width:0; }
+    .top-page-status { color:var(--muted); font-size:13px; line-height:1.2; }
     .controls { display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
     .control-btn, select, input[type=range] { border:1px solid var(--border); background:var(--panel); color:var(--text); border-radius:999px; padding:8px 12px; }
     .control-btn { display:inline-flex; align-items:center; gap:8px; cursor:pointer; transition:transform .18s ease, border-color .18s ease, background .18s ease; }
@@ -178,7 +180,6 @@
       line-height:1;
       pointer-events:none;
     }
-    .footer { padding:10px 18px; border-top:1px solid var(--border); background:var(--panel); font-size:13px; color:var(--muted); display:flex; justify-content:space-between; gap:12px; }
     .start {
       position: fixed;
       inset: 0;
@@ -256,7 +257,6 @@
       .media-player { grid-template-columns:auto 1fr; gap:10px; }
       .media-actions { grid-column:1 / -1; justify-content:space-between; }
       .media-volume { width:min(26vw, 110px); }
-      .footer{flex-direction:column; gap:8px; padding:8px 12px;}
       .viewer { padding:12px 6px; }
       .page-host { gap:12px; }
     }
@@ -275,7 +275,10 @@
   <div id="loading">Carregando...</div>
   <div class="reader">
     <header id="topBar" class="bar">
-      <strong id="chapterTitle">Project Ghost — Reader</strong>
+      <div class="reader-heading">
+        <strong id="chapterTitle">Project Ghost — Reader</strong>
+        <span id="pageStatus" class="top-page-status" aria-live="polite">Página 1 / 1</span>
+      </div>
       <div class="controls">
         <button id="backBtn" class="control-btn" type="button"><i class="fas fa-arrow-left" aria-hidden="true"></i> Voltar</button>
         <button id="mediaToggle" class="control-btn icon-only" type="button" aria-expanded="true" aria-label="Ocultar barra de música" title="Ocultar barra de música">
@@ -313,10 +316,6 @@
         <div id="pageHost" class="page-host" aria-label="Todas as páginas do PDF"></div>
       </div>
     </main>
-    <footer class="footer">
-      <span id="pageStatus">Página 1 / 1</span>
-      <span id="sceneStatus">Cena: --</span>
-    </footer>
   </div>
 
   <div id="start" class="start">
@@ -335,9 +334,31 @@
 
   <script type="module">
     import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";
+    import { chaptersData } from "./js/data.js";
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
 
-    const payload = JSON.parse(sessionStorage.getItem('pg_reader_chapter') || '{}');
+    function getStoredReaderPayload(){
+      try { return JSON.parse(sessionStorage.getItem('pg_reader_chapter') || '{}'); } catch { return {}; }
+    }
+    function getUrlReaderPayload(){
+      const params = new URLSearchParams(window.location.search);
+      const volumeParam = params.get('volume');
+      const chapterParam = params.get('chapter');
+      if (!volumeParam || !chapterParam) return {};
+      const volume = chaptersData.volumes.find((item) => String(item.volume) === String(volumeParam));
+      const chapter = volume?.chapters.find((item) => item.chapter === chapterParam);
+      if (!chapter) return {};
+      return {
+        volume: volume.volume,
+        chapter: chapter.chapter,
+        file: chapter.file,
+        title: chapter.title,
+        reader: chapter.reader
+      };
+    }
+    const urlPayload = getUrlReaderPayload();
+    const storedPayload = getStoredReaderPayload();
+    const payload = urlPayload.reader ? urlPayload : storedPayload;
     const fallbackReader = {
       title: payload.title || 'Capítulo', pageStart: 1, pageEnd: 999,
       pdf: `./posts/volume${payload.volume || 1}/${payload.file || 'prologo.pdf'}`,
@@ -370,6 +391,8 @@
       analyserData:null,
       audioCtx:null,
       renderToken:0,
+      renderQuality:2,
+      maxCanvasPixelRatio:4,
       renderedPages:new Set(),
       renderingPages:new Set(),
       renderAhead:3,
@@ -387,7 +410,7 @@
       topBar:document.getElementById('topBar'), start: document.getElementById('start'), startBtn: document.getElementById('startBtn'), chapterTitle:document.getElementById('chapterTitle'),
       back:document.getElementById('backBtn'), mediaToggle:document.getElementById('mediaToggle'), mediaToggleIcon:document.getElementById('mediaToggleIcon'),
       mediaPlayer:document.getElementById('mediaPlayer'), mediaCover:document.getElementById('mediaCover'), mediaTitle:document.getElementById('mediaTitle'), mediaSubtitle:document.getElementById('mediaSubtitle'), mediaCurrentText:document.getElementById('mediaCurrentText'), mediaDurationText:document.getElementById('mediaDurationText'), mediaRemainingText:document.getElementById('mediaRemainingText'), mediaProgress:document.getElementById('mediaProgress'), mediaRestart:document.getElementById('mediaRestart'), mediaPlay:document.getElementById('mediaPlay'), mediaPlayIcon:document.getElementById('mediaPlayIcon'), mediaMute:document.getElementById('mediaMute'), mediaMuteIcon:document.getElementById('mediaMuteIcon'), mediaVolume:document.getElementById('mediaVolume'), mediaDownload:document.getElementById('mediaDownload'), visualizer:document.getElementById('visualizer'),
-      pageHost:document.getElementById('pageHost'), pageStatus:document.getElementById('pageStatus'), sceneStatus:document.getElementById('sceneStatus'),
+      pageHost:document.getElementById('pageHost'), pageStatus:document.getElementById('pageStatus'),
       bgA:document.getElementById('bgA'), bgB:document.getElementById('bgB'), loading:document.getElementById('loading'), audioHost:document.getElementById('audioHost')
     };
     st.bgActiveLayer = els.bgA;
@@ -397,9 +420,8 @@
 
     function loading(on,msg){ els.loading.style.display = on ? 'block' : 'none'; if(msg) els.loading.textContent=msg; }
     function getScene(page){ return (reader.scenes || []).find(s => page >= s.from && page <= s.to) || (reader.scenes || [])[0]; }
-    function updateMeta(scene){
+    function updateMeta(){
       els.pageStatus.textContent = `Página ${st.page} / ${st.total}`;
-      els.sceneStatus.textContent = `Cena: ${scene?.label || '--'} • páginas ${scene?.from || 1}-${scene?.to || st.total}`;
     }
     function updateMediaButtons(){
       const audio = getPrimaryAudio();
@@ -430,12 +452,19 @@
     function isNoneValue(value){
       return typeof value === 'string' && value.trim().toLowerCase() === 'none';
     }
+    function getMediaSrc(value){
+      if (value && typeof value === 'object') return String(value.src || value.file || value.url || '').trim();
+      return String(value || '').trim();
+    }
+    function getMediaConfigList(value){
+      const list = Array.isArray(value) ? value : [value];
+      return list.filter((item) => {
+        const src = getMediaSrc(item);
+        return src && !isNoneValue(src);
+      });
+    }
     function normalizeSceneMedia(value){
-      if (Array.isArray(value)) return value.map((item) => String(item || '').trim()).filter((item) => item && !isNoneValue(item));
-      if (value == null) return [];
-      const one = String(value).trim();
-      if (!one || isNoneValue(one)) return [];
-      return [one];
+      return getMediaConfigList(value).map(getMediaSrc);
     }
     function resolveBackgroundType(path){
       const cleanPath = String(path || '').split('?')[0].toLowerCase();
@@ -507,7 +536,8 @@
       return name ? name.replace(/\b\w/g, (letter) => letter.toUpperCase()) : 'Sem música tocando';
     }
     function getSceneArtwork(scene){
-      const configured = scene?.cover || scene?.artwork || scene?.image || scene?.musicImage || scene?.thumbnail;
+      const audioConfig = getMediaConfigList(scene?.audio)[0];
+      const configured = audioConfig?.icon || audioConfig?.cover || audioConfig?.thumbnail || scene?.cover || scene?.artwork || scene?.image || scene?.musicImage || scene?.thumbnail;
       const selected = normalizeSceneMedia(configured)[0] || normalizeSceneMedia(scene?.background).find((item) => resolveBackgroundType(item) === 'image');
       return selected || 'assets/images/website/logo.png';
     }
@@ -520,9 +550,10 @@
     }
     function updateMediaMetadata(scene){
       const audio = getPrimaryAudio();
-      const src = audio?.getAttribute('data-src') || normalizeSceneMedia(scene?.audio)[0] || '';
-      els.mediaTitle.textContent = scene?.musicTitle || scene?.audioTitle || getMediaTitle(src);
-      els.mediaSubtitle.textContent = src ? `${scene?.label || 'Cena'} • ${src.split('/').pop()}` : 'Nenhuma trilha para esta cena.';
+      const audioConfig = getMediaConfigList(scene?.audio)[0];
+      const src = audio?.getAttribute('data-src') || getMediaSrc(audioConfig) || '';
+      els.mediaTitle.textContent = audioConfig?.title || audioConfig?.name || scene?.musicTitle || scene?.audioTitle || getMediaTitle(src);
+      els.mediaSubtitle.textContent = src ? `${audioConfig?.description || scene?.label || 'Cena'} • ${src.split('/').pop()}` : 'Nenhuma trilha para esta cena.';
       els.mediaCover.src = getSceneArtwork(scene);
       els.mediaDownload.href = src || '#';
       els.mediaDownload.toggleAttribute('download', Boolean(src));
@@ -813,7 +844,7 @@
         const viewport = page.getViewport({ scale:contentScale });
         const offsetX = (pageWidth - viewport.width) / 2;
         const offsetY = (pageHeight - viewport.height) / 2;
-        const pixel = window.devicePixelRatio || 1;
+        const pixel = Math.min((window.devicePixelRatio || 1) * st.renderQuality, st.maxCanvasPixelRatio);
         frame.dataset.baseWidth = String(pageWidth);
         frame.dataset.baseHeight = String(pageHeight);
         frame.querySelector('canvas')?.remove();

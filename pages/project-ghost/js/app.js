@@ -1,3 +1,5 @@
+import { characters, artworks, chaptersData, musicTracks } from "./data.js";
+
 // Elementos dos modais
 const modalLer = document.getElementById('modal-ler');
 const modalPersonagens = document.getElementById('modal-personagens');
@@ -608,7 +610,7 @@ function renderMusic() {
         card.className = 'music-card';
         card.setAttribute('data-url', track.url);
         card.innerHTML = `
-            <div class="music-thumb" style="background-image: url('${track.thumbnail}');">
+            <div class="music-thumb" style="background-image: url('${track.thumbnail || track.icon}');">
                 <div class="music-play">
                     <i class="fas fa-play"></i>
                 </div>
@@ -632,7 +634,7 @@ function renderMusic() {
 function renderChapters() {
     const modalLerBody = document.getElementById('modal-ler-body');
     modalLerBody.innerHTML = `
-        <div class="selection-title">Selecione o Volume:</div>
+        <div class="selection-title">Selecione a obra:</div>
         <div class="volume-selection" id="volume-selection"></div>
         
         <div class="selection-title" style="margin-top: 30px;">Selecione o Capítulo:</div>
@@ -648,7 +650,7 @@ function renderChapters() {
         btn.className = `volume-btn ${volume.available ? '' : 'disabled'}`;
         btn.setAttribute('data-volume', volume.volume);
         btn.innerHTML = `
-            Volume ${volume.volume}
+            ${volume.title || `Volume ${volume.volume}`}
             ${!volume.available ? '<br><small>(Em breve)</small>' : ''}
         `;
         
@@ -689,7 +691,7 @@ function openReadMethodModal() {
 
     const pdfPath = `./posts/volume${selectedVolume}/${selectedFile}`;
     const googleDocsUrl = chapterReader.googleDocsUrl || '';
-    const immersivePath = './reader.html';
+    const immersivePath = `./reader.html?volume=${encodeURIComponent(selectedVolume)}&chapter=${encodeURIComponent(selectedChapter)}`;
 
     const openPdfBtn = document.getElementById('open-raw-pdf-btn');
     const openGoogleDocsBtn = document.getElementById('open-google-docs-btn');
@@ -713,11 +715,19 @@ function openReadMethodModal() {
     };
 
     openImmersiveReaderBtn.onclick = () => {
+        const chapterPayload = {
+            volume: selectedVolume,
+            chapter: selectedChapter,
+            file: selectedFile,
+            title: selectedChapterData?.title || selectedChapter,
+            reader: selectedChapterData?.reader || {}
+        };
+        sessionStorage.setItem('pg_reader_chapter', JSON.stringify(chapterPayload));
         sessionStorage.setItem('pg_reader_autostart_audio', '1');
         playFireSound('open');
         closeModal(methodModal);
         closeModal(document.getElementById('modal-ler'));
-        window.location.href = immersivePath;
+        window.location.assign(immersivePath);
     };
 
     openModal(methodModal);
