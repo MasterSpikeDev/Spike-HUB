@@ -334,9 +334,31 @@
 
   <script type="module">
     import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";
+    import { chaptersData } from "./js/data.js";
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
 
-    const payload = JSON.parse(sessionStorage.getItem('pg_reader_chapter') || '{}');
+    function getStoredReaderPayload(){
+      try { return JSON.parse(sessionStorage.getItem('pg_reader_chapter') || '{}'); } catch { return {}; }
+    }
+    function getUrlReaderPayload(){
+      const params = new URLSearchParams(window.location.search);
+      const volumeParam = params.get('volume');
+      const chapterParam = params.get('chapter');
+      if (!volumeParam || !chapterParam) return {};
+      const volume = chaptersData.volumes.find((item) => String(item.volume) === String(volumeParam));
+      const chapter = volume?.chapters.find((item) => item.chapter === chapterParam);
+      if (!chapter) return {};
+      return {
+        volume: volume.volume,
+        chapter: chapter.chapter,
+        file: chapter.file,
+        title: chapter.title,
+        reader: chapter.reader
+      };
+    }
+    const urlPayload = getUrlReaderPayload();
+    const storedPayload = getStoredReaderPayload();
+    const payload = urlPayload.reader ? urlPayload : storedPayload;
     const fallbackReader = {
       title: payload.title || 'Capítulo', pageStart: 1, pageEnd: 999,
       pdf: `./posts/volume${payload.volume || 1}/${payload.file || 'prologo.pdf'}`,
@@ -369,6 +391,8 @@
       analyserData:null,
       audioCtx:null,
       renderToken:0,
+      renderQuality:2,
+      maxCanvasPixelRatio:4,
       renderedPages:new Set(),
       renderingPages:new Set(),
       renderAhead:3,
@@ -820,7 +844,7 @@
         const viewport = page.getViewport({ scale:contentScale });
         const offsetX = (pageWidth - viewport.width) / 2;
         const offsetY = (pageHeight - viewport.height) / 2;
-        const pixel = window.devicePixelRatio || 1;
+        const pixel = Math.min((window.devicePixelRatio || 1) * st.renderQuality, st.maxCanvasPixelRatio);
         frame.dataset.baseWidth = String(pageWidth);
         frame.dataset.baseHeight = String(pageHeight);
         frame.querySelector('canvas')?.remove();
