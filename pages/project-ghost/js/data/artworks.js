@@ -3,7 +3,7 @@ export const artworks = [
         id: 9,
         title: "Dupla principal",
         artType: "arte oficial",
-        image: "assets/images/arts/artes/12.png",
+        image: "assets/images/arts/artes-publicadas/arte-oficial/dupla-principal.png",
         description: "Haruki Takamatsu e Fumiko Emi, arte completa",
         year: "2026",
         artist: "Official Art - Visual Direction / Samuel Victor",
