@@ -7,6 +7,12 @@ const modalArtes = document.getElementById('modal-artes');
 const modalMusicas = document.getElementById('modal-musicas');
 const modalImage = document.getElementById('modal-image');
 const modalCharacter = document.getElementById('modal-character');
+const expandedImage = document.getElementById('expanded-image');
+const imageContainer = document.getElementById('image-expanded-container');
+const imageDownloadBtn = document.getElementById('image-download-btn');
+const zoomInBtn = document.getElementById('image-zoom-in');
+const zoomOutBtn = document.getElementById('image-zoom-out');
+const zoomResetBtn = document.getElementById('image-zoom-reset');
 
 let selectedVolume = null;
 let selectedChapter = null;
@@ -15,6 +21,8 @@ let selectedChapterData = null;
 let selectedArtworkType = 'all';
 let selectedArtworkSearch = '';
 let fireAudioCtx = null;
+let imageZoom = 1;
+let pinchStartDistance = null;
 
 const artTypeLabels = {
     all: 'Todas',
@@ -563,22 +571,10 @@ function renderArtworks() {
 
         galleryGrid.appendChild(item);
 
-        const img = new Image();
-        img.src = art.image;
-        img.onload = function() {
+        setTimeout(() => {
             const loadingDiv = item.querySelector('.image-loading');
-            if (loadingDiv) {
-                loadingDiv.style.display = 'none';
-            }
-        };
-        img.onerror = function() {
-            console.error(`Erro ao carregar imagem: ${art.image}`);
-            const imgDiv = item.querySelector('.gallery-img');
-            if (imgDiv) {
-                imgDiv.style.backgroundImage = "url('assets/images/placeholder.png')";
-                imgDiv.style.backgroundSize = 'cover';
-            }
-        };
+            if (loadingDiv) loadingDiv.style.display = 'none';
+        }, 300);
 
         item.addEventListener('click', function() {
             const imageUrl = this.dataset.image;
@@ -1250,11 +1246,17 @@ setTimeout(initStarChartAnimations, 300);
 // ABRIR MODAL DE IMAGEM - COMPLETAMENTE REFEITO
 function openImageModal(imageUrl, title, description, year, artist) {
     const modal = document.getElementById('modal-image');
-    const expandedImage = document.getElementById('expanded-image');
-    
+    closeModal(document.getElementById('modal-artes'));
+
     // Atualizar a imagem
+    expandedImage.src = '';
     expandedImage.src = imageUrl;
     expandedImage.alt = title;
+    expandedImage.loading = 'eager';
+    expandedImage.decoding = 'sync';
+    resetImageZoom();
+    imageDownloadBtn.href = imageUrl;
+    imageDownloadBtn.setAttribute('download', `${title.replace(/[^a-z0-9-_]+/gi, '_')}.png`);
     
     // Remover info anterior se existir
     const existingInfo = modal.querySelector('.image-details');
@@ -1281,6 +1283,23 @@ function openImageModal(imageUrl, title, description, year, artist) {
     
     // Abrir o modal
     openModal(modal);
+}
+
+function applyImageZoom() {
+    if (!expandedImage) return;
+    expandedImage.style.transform = `scale(${imageZoom})`;
+    expandedImage.style.cursor = imageZoom > 1 ? 'grab' : 'default';
+    if (zoomResetBtn) zoomResetBtn.textContent = `${Math.round(imageZoom * 100)}%`;
+}
+
+function setImageZoom(nextZoom) {
+    imageZoom = Math.max(1, Math.min(4, nextZoom));
+    applyImageZoom();
+}
+
+function resetImageZoom() {
+    imageZoom = 1;
+    applyImageZoom();
 }
 
 // Inicializar quando o DOM estiver pronto
@@ -1348,3 +1367,35 @@ document.querySelectorAll(".modal-content").forEach(modal => {
         e.stopPropagation(); // impede que o clique feche o modal
     });
 });
+
+if (zoomInBtn && zoomOutBtn && zoomResetBtn && imageContainer) {
+    zoomInBtn.addEventListener('click', () => setImageZoom(imageZoom + 0.2));
+    zoomOutBtn.addEventListener('click', () => setImageZoom(imageZoom - 0.2));
+    zoomResetBtn.addEventListener('click', resetImageZoom);
+
+    imageContainer.addEventListener('wheel', (event) => {
+        event.preventDefault();
+        const delta = event.deltaY < 0 ? 0.1 : -0.1;
+        setImageZoom(imageZoom + delta);
+    }, { passive: false });
+
+    imageContainer.addEventListener('touchstart', (event) => {
+        if (event.touches.length !== 2) return;
+        const [a, b] = event.touches;
+        pinchStartDistance = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+    }, { passive: true });
+
+    imageContainer.addEventListener('touchmove', (event) => {
+        if (event.touches.length !== 2 || !pinchStartDistance) return;
+        event.preventDefault();
+        const [a, b] = event.touches;
+        const distance = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+        const ratio = distance / pinchStartDistance;
+        setImageZoom(imageZoom * ratio);
+        pinchStartDistance = distance;
+    }, { passive: false });
+
+    imageContainer.addEventListener('touchend', () => {
+        pinchStartDistance = null;
+    });
+}
