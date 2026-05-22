@@ -1812,7 +1812,6 @@ nav a:hover::after {
     left: 0;
     right: 0;
     z-index: 100;
-    animation: slideUpImage 1s ease 1s both;
     transition: transform 0.3s ease;
 }
 

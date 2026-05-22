@@ -1332,13 +1332,9 @@ function setImageUiCollapsed(collapsed) {
     isImageUiCollapsed = collapsed;
     modalImage.classList.toggle('ui-collapsed', collapsed);
     imageUiToggleBtn.title = collapsed ? 'Mostrar barras' : 'Ocultar barras';
-    imageUiToggleBtn.innerHTML = collapsed
-        ? '<i class="fas fa-chevron-down"></i>'
-        : '<i class="fas fa-chevron-up"></i>';
+    imageUiToggleBtn.innerHTML = '<i class="fas fa-chevron-up"></i>';
     imageUiToggleFloatingBtn.title = collapsed ? 'Mostrar barras' : 'Ocultar barras';
-    imageUiToggleFloatingBtn.innerHTML = collapsed
-        ? '<i class="fas fa-chevron-down"></i>'
-        : '<i class="fas fa-chevron-up"></i>';
+    imageUiToggleFloatingBtn.innerHTML = '<i class="fas fa-chevron-up"></i>';
 }
 
 function applyImageZoom() {
