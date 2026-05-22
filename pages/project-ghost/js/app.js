@@ -14,6 +14,7 @@ const zoomInBtn = document.getElementById('image-zoom-in');
 const zoomOutBtn = document.getElementById('image-zoom-out');
 const zoomResetBtn = document.getElementById('image-zoom-reset');
 const imageUiToggleBtn = document.getElementById('image-ui-toggle');
+const imageUiToggleFloatingBtn = document.getElementById('image-ui-toggle-floating');
 
 let selectedVolume = null;
 let selectedChapter = null;
@@ -25,6 +26,13 @@ let fireAudioCtx = null;
 let imageZoom = 1;
 let pinchStartDistance = null;
 let isImageUiCollapsed = false;
+let imageOffsetX = 0;
+let imageOffsetY = 0;
+let isDraggingImage = false;
+let dragStartX = 0;
+let dragStartY = 0;
+let pinchStartZoom = 1;
+let pinchStartCenter = null;
 
 const artTypeLabels = {
     all: 'Todas',
@@ -1320,29 +1328,44 @@ function openImageModal(imageUrl, title, description, year, artist) {
 }
 
 function setImageUiCollapsed(collapsed) {
-    if (!modalImage || !imageUiToggleBtn) return;
+    if (!modalImage || !imageUiToggleBtn || !imageUiToggleFloatingBtn) return;
     isImageUiCollapsed = collapsed;
     modalImage.classList.toggle('ui-collapsed', collapsed);
     imageUiToggleBtn.title = collapsed ? 'Mostrar barras' : 'Ocultar barras';
     imageUiToggleBtn.innerHTML = collapsed
         ? '<i class="fas fa-chevron-down"></i>'
         : '<i class="fas fa-chevron-up"></i>';
+    imageUiToggleFloatingBtn.title = collapsed ? 'Mostrar barras' : 'Ocultar barras';
+    imageUiToggleFloatingBtn.innerHTML = collapsed
+        ? '<i class="fas fa-chevron-down"></i>'
+        : '<i class="fas fa-chevron-up"></i>';
 }
 
 function applyImageZoom() {
     if (!expandedImage) return;
-    expandedImage.style.transform = `scale(${imageZoom})`;
-    expandedImage.style.cursor = imageZoom > 1 ? 'grab' : 'default';
+    expandedImage.style.transform = `translate(${imageOffsetX}px, ${imageOffsetY}px) scale(${imageZoom})`;
+    expandedImage.style.cursor = imageZoom > 1 ? (isDraggingImage ? 'grabbing' : 'grab') : 'default';
     if (zoomResetBtn) zoomResetBtn.textContent = `${Math.round(imageZoom * 100)}%`;
 }
 
-function setImageZoom(nextZoom) {
-    imageZoom = Math.max(1, Math.min(4, nextZoom));
+function setImageZoom(nextZoom, originX = null, originY = null) {
+    const previousZoom = imageZoom;
+    const clampedZoom = Math.max(1, Math.min(4, nextZoom));
+    if (Math.abs(clampedZoom - previousZoom) < 0.001) return;
+    if (originX !== null && originY !== null) {
+        const zoomRatio = clampedZoom / previousZoom;
+        imageOffsetX = originX - (originX - imageOffsetX) * zoomRatio;
+        imageOffsetY = originY - (originY - imageOffsetY) * zoomRatio;
+    }
+    imageZoom = clampedZoom;
     applyImageZoom();
 }
 
 function resetImageZoom() {
     imageZoom = 1;
+    imageOffsetX = 0;
+    imageOffsetY = 0;
+    isDraggingImage = false;
     applyImageZoom();
 }
 
@@ -1413,20 +1436,56 @@ document.querySelectorAll(".modal-content").forEach(modal => {
 });
 
 if (zoomInBtn && zoomOutBtn && zoomResetBtn && imageContainer) {
-    zoomInBtn.addEventListener('click', () => setImageZoom(imageZoom + 0.2));
-    zoomOutBtn.addEventListener('click', () => setImageZoom(imageZoom - 0.2));
+    zoomInBtn.addEventListener('click', () => setImageZoom(imageZoom + 0.2, 0, 0));
+    zoomOutBtn.addEventListener('click', () => setImageZoom(imageZoom - 0.2, 0, 0));
     zoomResetBtn.addEventListener('click', resetImageZoom);
 
     imageContainer.addEventListener('wheel', (event) => {
         event.preventDefault();
-        const delta = event.deltaY < 0 ? 0.1 : -0.1;
-        setImageZoom(imageZoom + delta);
+        const rect = imageContainer.getBoundingClientRect();
+        const originX = event.clientX - rect.left - rect.width / 2;
+        const originY = event.clientY - rect.top - rect.height / 2;
+        const factor = event.deltaY < 0 ? 1.1 : 0.9;
+        setImageZoom(imageZoom * factor, originX, originY);
     }, { passive: false });
+
+    imageContainer.addEventListener('pointerdown', (event) => {
+        if (event.pointerType === 'mouse' && event.button !== 0) return;
+        if (imageZoom <= 1) return;
+        event.preventDefault();
+        isDraggingImage = true;
+        dragStartX = event.clientX - imageOffsetX;
+        dragStartY = event.clientY - imageOffsetY;
+        applyImageZoom();
+    });
+
+    imageContainer.addEventListener('pointermove', (event) => {
+        if (!isDraggingImage) return;
+        event.preventDefault();
+        imageOffsetX = event.clientX - dragStartX;
+        imageOffsetY = event.clientY - dragStartY;
+        applyImageZoom();
+    });
+
+    const endDrag = () => {
+        if (!isDraggingImage) return;
+        isDraggingImage = false;
+        applyImageZoom();
+    };
+
+    imageContainer.addEventListener('pointerup', endDrag);
+    imageContainer.addEventListener('pointercancel', endDrag);
+    imageContainer.addEventListener('pointerleave', endDrag);
 
     imageContainer.addEventListener('touchstart', (event) => {
         if (event.touches.length !== 2) return;
         const [a, b] = event.touches;
         pinchStartDistance = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+        pinchStartZoom = imageZoom;
+        pinchStartCenter = {
+            x: (a.clientX + b.clientX) / 2,
+            y: (a.clientY + b.clientY) / 2
+        };
     }, { passive: true });
 
     imageContainer.addEventListener('touchmove', (event) => {
@@ -1434,18 +1493,35 @@ if (zoomInBtn && zoomOutBtn && zoomResetBtn && imageContainer) {
         event.preventDefault();
         const [a, b] = event.touches;
         const distance = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+        const centerX = (a.clientX + b.clientX) / 2;
+        const centerY = (a.clientY + b.clientY) / 2;
+        const rect = imageContainer.getBoundingClientRect();
+        const originX = centerX - rect.left - rect.width / 2;
+        const originY = centerY - rect.top - rect.height / 2;
         const ratio = distance / pinchStartDistance;
-        setImageZoom(imageZoom * ratio);
-        pinchStartDistance = distance;
+        setImageZoom(pinchStartZoom * ratio, originX, originY);
+        if (pinchStartCenter) {
+            imageOffsetX += centerX - pinchStartCenter.x;
+            imageOffsetY += centerY - pinchStartCenter.y;
+            pinchStartCenter = { x: centerX, y: centerY };
+            applyImageZoom();
+        }
     }, { passive: false });
 
     imageContainer.addEventListener('touchend', () => {
         pinchStartDistance = null;
+        pinchStartCenter = null;
     });
 }
 
 if (imageUiToggleBtn) {
     imageUiToggleBtn.addEventListener('click', () => {
+        setImageUiCollapsed(!isImageUiCollapsed);
+    });
+}
+
+if (imageUiToggleFloatingBtn) {
+    imageUiToggleFloatingBtn.addEventListener('click', () => {
         setImageUiCollapsed(!isImageUiCollapsed);
     });
 }
