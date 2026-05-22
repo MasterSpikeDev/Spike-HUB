@@ -7,6 +7,7 @@
     --light: #ff4d4d;
     --dark: #090000;
     --card-bg: #090000;
+    --hero-logo-glow-color: #ff2a2a;
 }
 
 
@@ -284,6 +285,29 @@ nav a:hover::after {
     max-width: 800px;
     position: relative;
     z-index: 2;
+}
+
+.hero-logo-glow {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: auto;
+    opacity: 0.8;
+    pointer-events: none;
+    z-index: 1;
+    filter:
+        brightness(0)
+        saturate(100%)
+        drop-shadow(0 0 20px var(--hero-logo-glow-color))
+        drop-shadow(0 0 40px var(--hero-logo-glow-color))
+        drop-shadow(0 0 70px var(--hero-logo-glow-color));
+    mix-blend-mode: screen;
+    animation: fadeIn 1.5s ease, logoGlowPulse 4s ease-in-out infinite;
 }
 
 .hero-logo {
@@ -1698,6 +1722,33 @@ nav a:hover::after {
     height: 70px;
 }
 
+.image-modal-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.image-action-btn {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    min-width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.25s ease;
+}
+
+.image-action-btn:hover {
+    background: rgba(255, 40, 40, 0.35);
+    border-color: rgba(255, 96, 96, 0.7);
+}
+
 #modal-image .modal-body {
     padding: 70px 0 0 0;
     display: flex;
@@ -1731,6 +1782,9 @@ nav a:hover::after {
     box-shadow: none;
     display: block;
     animation: imageReveal 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-origin: center center;
+    will-change: transform;
+    cursor: grab;
 }
 
 @keyframes imageReveal {
@@ -2010,7 +2064,8 @@ footer {
         min-height: 250px;
     }
     
-    .hero-logo {
+    .hero-logo,
+    .hero-logo-glow {
         max-width: 500px;
     }
     
@@ -2047,7 +2102,8 @@ footer {
         min-height: 60vh;
     }
     
-    .hero-logo {
+    .hero-logo,
+    .hero-logo-glow {
         max-width: 400px;
     }
     
@@ -2189,7 +2245,8 @@ footer {
 }
 
 @media (max-width: 480px) {
-    .hero-logo {
+    .hero-logo,
+    .hero-logo-glow {
         max-width: 300px;
     }
     
@@ -2351,6 +2408,36 @@ footer {
 
 .photo-frame:hover img {
     transform: scale(1.08);
+}
+
+.portrait-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.portrait-nav.prev { left: 8px; }
+.portrait-nav.next { right: 8px; }
+
+.portrait-counter {
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .photo-label {
@@ -3369,5 +3456,17 @@ header {
     .fire-spark,
     .fire-ambience {
         display: none !important;
+    }
+}
+
+
+@keyframes logoGlowPulse {
+    0%, 100% {
+        opacity: 0.65;
+        transform: translateY(0px) scale(1);
+    }
+    50% {
+        opacity: 0.95;
+        transform: translateY(-8px) scale(1.03);
     }
 }

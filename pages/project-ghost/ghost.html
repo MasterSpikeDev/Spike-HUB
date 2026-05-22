@@ -39,6 +39,7 @@
     background-position: center; 
     background-attachment: fixed;">
         <div class="hero-content">
+            <img src="assets/images/website/logo.png" alt="" class="hero-logo-glow" aria-hidden="true">
             <img src="assets/images/website/logo.png" alt="Project Ghost" class="hero-logo">
             <p>
                 Entre vivos e mortos, existe um abismo. E alguém finalmente o atravessou.
@@ -338,13 +339,26 @@
     </div>
 
     <div id="modal-image" class="modal">
-        <div class="modal-content" style="background: transparent; border: none; box-shadow: none; max-width: 90%;">
-            <div class="modal-header" style="background: transparent; justify-content: flex-end; border: none;">
-                <button class="close-modal"
-                    style="background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="image-modal-actions">
+                    <button id="image-zoom-out" class="image-action-btn" type="button" title="Diminuir zoom">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <button id="image-zoom-reset" class="image-action-btn" type="button" title="Resetar zoom">100%</button>
+                    <button id="image-zoom-in" class="image-action-btn" type="button" title="Aumentar zoom">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <a id="image-download-btn" class="image-action-btn" href="#" download title="Baixar arte">
+                        <i class="fas fa-download"></i>
+                    </a>
+                </div>
+                <button class="close-modal">&times;</button>
             </div>
-            <div class="modal-body" style="padding: 0; display: flex; justify-content: center; align-items: center;">
-                <img id="expanded-image" src="" style="max-width: 100%; max-height: 80vh; border-radius: 10px;">
+            <div class="modal-body">
+                <div class="image-expanded-container" id="image-expanded-container">
+                    <img id="expanded-image" src="">
+                </div>
             </div>
         </div>
     </div>

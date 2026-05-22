@@ -3,6 +3,11 @@ export const characters = {
         tag: "haruki",
         name: "Haruki Takamatsu",
         portrait: "assets/images/arts/ficha-personagem/1.png",
+        portraits: [
+            "assets/images/arts/ficha-personagem/1.png",
+            "assets/images/arts/artes/classico/haruki-classico.png",
+            "assets/images/arts/artes/concept-arts/haruki/haruki-traje-batalha-concept-art.png"
+        ],
         codename: "Ember Blade",
         spirit_user: "Sim",
 
@@ -61,6 +66,11 @@ export const characters = {
         tag: "fumiko",
         name: "Fumiko Emi",
         portrait: "assets/images/arts/ficha-personagem/2.png",
+        portraits: [
+            "assets/images/arts/ficha-personagem/2.png",
+            "assets/images/arts/artes/classico/fumiko-classica.png",
+            "assets/images/arts/artes/concept-arts/fumiko/fumiko-divisao fantasma-concept-art.png"
+        ],
 
         description:
             "Estudante exemplar e reservada, mas secretamente líder da ''Divisão Fantasma'', um grupo que investiga atividades espirituais e combate usuários de Spirit envolvidos em crimes. Seu Spirit manifesta um arco luminoso capaz de ferir apenas entidades espirituais, tornando-a um dos maiores perigos para criaturas do outro lado. Contra humanos, porém, é vulnerável — por isso Fumiko treina artes marciais, possui mira extraordinária e carrega a pistola de seu falecido irmão como símbolo e proteção.",
