@@ -7,6 +7,7 @@
     --light: #ff4d4d;
     --dark: #090000;
     --card-bg: #090000;
+    --hero-logo-glow-color: #ff2a2a;
 }
 
 
@@ -284,6 +285,29 @@ nav a:hover::after {
     max-width: 800px;
     position: relative;
     z-index: 2;
+}
+
+.hero-logo-glow {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: auto;
+    opacity: 0.8;
+    pointer-events: none;
+    z-index: 1;
+    filter:
+        brightness(0)
+        saturate(100%)
+        drop-shadow(0 0 20px var(--hero-logo-glow-color))
+        drop-shadow(0 0 40px var(--hero-logo-glow-color))
+        drop-shadow(0 0 70px var(--hero-logo-glow-color));
+    mix-blend-mode: screen;
+    animation: fadeIn 1.5s ease, logoGlowPulse 4s ease-in-out infinite;
 }
 
 .hero-logo {
@@ -2010,7 +2034,8 @@ footer {
         min-height: 250px;
     }
     
-    .hero-logo {
+    .hero-logo,
+    .hero-logo-glow {
         max-width: 500px;
     }
     
@@ -2047,7 +2072,8 @@ footer {
         min-height: 60vh;
     }
     
-    .hero-logo {
+    .hero-logo,
+    .hero-logo-glow {
         max-width: 400px;
     }
     
@@ -2189,7 +2215,8 @@ footer {
 }
 
 @media (max-width: 480px) {
-    .hero-logo {
+    .hero-logo,
+    .hero-logo-glow {
         max-width: 300px;
     }
     
@@ -3369,5 +3396,17 @@ header {
     .fire-spark,
     .fire-ambience {
         display: none !important;
+    }
+}
+
+
+@keyframes logoGlowPulse {
+    0%, 100% {
+        opacity: 0.65;
+        transform: translateY(0px) scale(1);
+    }
+    50% {
+        opacity: 0.95;
+        transform: translateY(-8px) scale(1.03);
     }
 }
