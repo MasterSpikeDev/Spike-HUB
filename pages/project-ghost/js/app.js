@@ -899,6 +899,9 @@ function openCharacterSheet(characterId) {
         }
 
         const characterGalleryItems = getCharacterGalleryItems(character);
+        const portraitGallery = Array.isArray(character.portraits) && character.portraits.length > 0
+            ? character.portraits
+            : [character.portrait];
 
         sheet.innerHTML = `
             <div class="character-sheet-header">
@@ -908,7 +911,12 @@ function openCharacterSheet(characterId) {
 
             <div class="character-photo-section">
                 <div class="photo-frame">
-                    <img src="${character.portrait}" alt="${character.name}">
+                    <img id="character-portrait-image" src="${portraitGallery[0]}" alt="${character.name}">
+                    ${portraitGallery.length > 1 ? `
+                        <button type="button" class="portrait-nav prev" data-portrait-nav="prev" aria-label="Retrato anterior">&#10094;</button>
+                        <button type="button" class="portrait-nav next" data-portrait-nav="next" aria-label="Próximo retrato">&#10095;</button>
+                        <div class="portrait-counter" id="portrait-counter">1 / ${portraitGallery.length}</div>
+                    ` : ''}
                 </div>
                 <div class="photo-label">IDENTIFICAÇÃO OFICIAL</div>
 
@@ -1070,6 +1078,29 @@ function openCharacterSheet(characterId) {
             sheet.style.opacity = '1';
             sheet.style.transform = 'translateY(0)';
         }, 100);
+
+        if (portraitGallery.length > 1) {
+            let currentPortraitIndex = 0;
+            const portraitImg = sheet.querySelector('#character-portrait-image');
+            const portraitCounter = sheet.querySelector('#portrait-counter');
+            const prevBtn = sheet.querySelector('[data-portrait-nav="prev"]');
+            const nextBtn = sheet.querySelector('[data-portrait-nav="next"]');
+
+            const updatePortrait = () => {
+                portraitImg.src = portraitGallery[currentPortraitIndex];
+                portraitCounter.textContent = `${currentPortraitIndex + 1} / ${portraitGallery.length}`;
+            };
+
+            prevBtn?.addEventListener('click', () => {
+                currentPortraitIndex = (currentPortraitIndex - 1 + portraitGallery.length) % portraitGallery.length;
+                updatePortrait();
+            });
+
+            nextBtn?.addEventListener('click', () => {
+                currentPortraitIndex = (currentPortraitIndex + 1) % portraitGallery.length;
+                updatePortrait();
+            });
+        }
     }
 }
 
