@@ -13,6 +13,7 @@ const imageDownloadBtn = document.getElementById('image-download-btn');
 const zoomInBtn = document.getElementById('image-zoom-in');
 const zoomOutBtn = document.getElementById('image-zoom-out');
 const zoomResetBtn = document.getElementById('image-zoom-reset');
+const imageUiToggleBtn = document.getElementById('image-ui-toggle');
 
 let selectedVolume = null;
 let selectedChapter = null;
@@ -23,6 +24,7 @@ let selectedArtworkSearch = '';
 let fireAudioCtx = null;
 let imageZoom = 1;
 let pinchStartDistance = null;
+let isImageUiCollapsed = false;
 
 const artTypeLabels = {
     all: 'Todas',
@@ -1286,6 +1288,7 @@ function openImageModal(imageUrl, title, description, year, artist) {
     expandedImage.loading = 'eager';
     expandedImage.decoding = 'sync';
     resetImageZoom();
+    setImageUiCollapsed(false);
     imageDownloadBtn.href = imageUrl;
     imageDownloadBtn.setAttribute('download', `${title.replace(/[^a-z0-9-_]+/gi, '_')}.png`);
     
@@ -1314,6 +1317,16 @@ function openImageModal(imageUrl, title, description, year, artist) {
     
     // Abrir o modal
     openModal(modal);
+}
+
+function setImageUiCollapsed(collapsed) {
+    if (!modalImage || !imageUiToggleBtn) return;
+    isImageUiCollapsed = collapsed;
+    modalImage.classList.toggle('ui-collapsed', collapsed);
+    imageUiToggleBtn.title = collapsed ? 'Mostrar barras' : 'Ocultar barras';
+    imageUiToggleBtn.innerHTML = collapsed
+        ? '<i class="fas fa-chevron-down"></i>'
+        : '<i class="fas fa-chevron-up"></i>';
 }
 
 function applyImageZoom() {
@@ -1428,5 +1441,11 @@ if (zoomInBtn && zoomOutBtn && zoomResetBtn && imageContainer) {
 
     imageContainer.addEventListener('touchend', () => {
         pinchStartDistance = null;
+    });
+}
+
+if (imageUiToggleBtn) {
+    imageUiToggleBtn.addEventListener('click', () => {
+        setImageUiCollapsed(!isImageUiCollapsed);
     });
 }
