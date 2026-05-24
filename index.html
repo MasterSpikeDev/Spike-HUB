@@ -594,6 +594,43 @@
       animation-delay: 1.8s;
     }
 
+    .about-actions {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+      opacity: 0;
+      animation: slideInRight 0.6s ease-out 1.1s forwards;
+    }
+
+    .about-chip {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: linear-gradient(125deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+      color: var(--text);
+      text-decoration: none;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .about-chip:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25), 0 0 16px var(--accent-glow);
+    }
+
+    .about-chip strong {
+      display: block;
+      font-size: 1.2rem;
+    }
+
+    .about-chip span {
+      display: block;
+      margin-top: 4px;
+      font-size: 1rem;
+      color: var(--muted);
+    }
+
     /* Botões principais */
     .btn-row {
       display: flex;
@@ -848,6 +885,10 @@
 
     body[data-view="about"] .about-text {
       display: block;
+    }
+
+    body[data-view="about"] .about-actions {
+      display: grid;
     }
 
     body[data-view="about"] .links {
@@ -1268,6 +1309,20 @@
           <div class="realname" id="real-name">Samuel Victor</div>
           <div class="headline" id="headline">GameDev / Programador / Desenvolvedor</div>
           <div class="about-text" id="about-text"></div>
+          <div class="about-actions" id="about-actions">
+            <a class="about-chip" href="pages/project-ghost/ghost.html" target="_blank" rel="noopener noreferrer">
+              <strong>👻 Project Ghost</strong>
+              <span>Veja a história e o universo.</span>
+            </a>
+            <a class="about-chip" href="https://github.com/MasterSpikeDev" target="_blank" rel="noopener">
+              <strong>🧠 Dev Journey</strong>
+              <span>Projetos, código e evolução.</span>
+            </a>
+            <a class="about-chip" href="https://www.linkedin.com/in/samuel-victor-b08725289" target="_blank" rel="noopener">
+              <strong>🤝 Vamos colaborar</strong>
+              <span>Parcerias e oportunidades.</span>
+            </a>
+          </div>
 
           <!-- Skills/Badges Section -->
           <div class="badges" id="badges">
@@ -1582,11 +1637,11 @@
         headline: "GameDev / Programador / Desenvolvedor",
         contactBtn: "Contato", contactTitle: "Contato", close: "Fechar",
         aboutText: [
-          "Sou Samuel Victor. Apaixonado por Jogos, e game dev, atualmente cursando Analise e Desenvolvimento de Sistemas.",
-          "A música é trilha sonora do meu dia, especialmente rock alternativo e jazz. Estudei música por dois anos e toco alguns instrumentos, então sou do tipo que repara nos detalhes que quase ninguém nota.",
-          "Atualmente trabalho criando conteúdo para o 'Minecraft Marketplace' para a empresa 'Eternal Creations', e tenho como meta continuar expandindo minha presença criativa, colaborando em projetos que unam tecnologia, design, e diversão.",
-          "Estudando para criação de sistemas, apps web, e futuramente jogos.",
-          "Um dos meus hobbies é escrever histórias, atualmente com projeto sem fins lucrativos, Project Ghost.",
+          "Sou Samuel Victor — também conhecido como Master Spike — e transformo ideias em experiências digitais com personalidade.",
+          "Entre código e criatividade, uno desenvolvimento de jogos, interfaces web e storytelling para criar projetos que conectam estética, performance e emoção.",
+          "Hoje atuo com conteúdo para Minecraft Marketplace na Eternal Creations, enquanto curso Análise e Desenvolvimento de Sistemas para ampliar ainda mais meu alcance técnico.",
+          "Minha base musical (rock alternativo, jazz e estudo de instrumentos) influencia diretamente meu olhar para ritmo, detalhe e direção criativa em cada projeto.",
+          "No meu projeto autoral, Project Ghost, exploro narrativa original, worldbuilding e design visual como laboratório vivo para minhas próximas criações.",
         ]
       },
       en: {
@@ -1596,11 +1651,11 @@
         headline: "GameDev / Programmer / Developer",
         contactBtn: "Contact", contactTitle: "Contact", close: "Close",
         aboutText: [
-          "I'm Samuel Victor. Passionate about games and game development, currently studying Systems Analysis and Development.",
-          "Music is the soundtrack of my day, especially alternative rock and jazz. I studied music for two years and play a few instruments, so I'm the kind of person who notices details that almost no one else does.",
-          "I currently work creating content for the 'Minecraft Marketplace' for the company 'Eternal Creations', and my goal is to continue expanding my creative presence, collaborating on projects that combine technology, design, and fun.",
-          "Studying systems development, web apps, and in the future, games.",
-          "One of my hobbies is writing stories, currently working on a non-profit project called Project Ghost."
+          "I'm Samuel Victor — also known as Master Spike — and I turn ideas into digital experiences with a strong identity.",
+          "I blend game development, web interface creation, and storytelling to craft projects where aesthetics, performance, and emotion work together.",
+          "I currently create Minecraft Marketplace content at Eternal Creations while studying Systems Analysis and Development to keep expanding my technical depth.",
+          "My musical background (alternative rock, jazz, and instrument practice) shapes my sense of rhythm, detail, and creative direction in every build.",
+          "In my author project, Project Ghost, I explore original narrative, worldbuilding, and visual design as a living lab for what comes next."
         ]
       }
     };
