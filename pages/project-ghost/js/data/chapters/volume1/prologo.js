@@ -4,13 +4,13 @@ export const prologoChapter = {
     chapter: "prologo",
     title: "Prólogo",
     available: true,
-    file: "prologo/prologo-base.pdf",
+    file: "prologo/prologo.pdf",
     reader: {
         title: "Prólogo",
         pageStart: 1,
         pageEnd: 30,
         googleDocsUrl: "https://docs.google.com/document/d/1J3BpHaeWOi7-Dz8iaLW-i4VxXWLOK3kwb8EN9WZpRaQ/edit?usp=sharing",
-        pdf: "prologo/prologo-modo-leitura.pdf",
+        pdf: "prologo/prologo.pdf",
         scenes: [
             {
                 id: "capa",
