@@ -8,14 +8,13 @@ export const prologoChapter = {
     reader: {
         title: "Prólogo",
         pageStart: 1,
-        pageEnd: 30,
+        pageEnd: 20,
         googleDocsUrl: "https://docs.google.com/document/d/1J3BpHaeWOi7-Dz8iaLW-i4VxXWLOK3kwb8EN9WZpRaQ/edit?usp=sharing",
         pdf: "prologo/prologo.pdf",
         scenes: [
             {
                 id: "capa",
                 label: "Cap",
-                description: "Vazio, escuridão, fumaça e sensação de tempo suspenso.",
                 from: 1,
                 to: 2,
                 background: "none",
