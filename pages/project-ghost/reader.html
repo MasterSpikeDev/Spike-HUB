@@ -388,9 +388,11 @@
     }
     const readerUrlParams = new URLSearchParams(window.location.search);
     const isEmbeddedPreview = readerUrlParams.get('embedded') === '1';
+    const shouldSkipStartGate = readerUrlParams.get('skipStart') === '1';
     function getStandaloneReaderUrl(){
       const nextParams = new URLSearchParams(window.location.search);
       nextParams.delete('embedded');
+      nextParams.set('skipStart', '1');
       return `${window.location.pathname}?${nextParams.toString()}`;
     }
     const urlPayload = getUrlReaderPayload();
@@ -1060,15 +1062,18 @@
         sessionStorage.removeItem('pg_reader_autostart_audio');
       } catch {}
     }
-    async function loadAndStart(){
+    async function loadAndStart(options = {}){
       if (st.isStarting) return;
+      const skipGate = Boolean(options.skipGate);
       st.isStarting = true;
-      els.startBtn.classList.add('is-igniting');
-      els.start.classList.add('is-opening');
-      playFireIgnitionSound();
-      if (st.startAudio) await fadeOutAndStop(st.startAudio, 750);
-      st.startAudio = null;
-      await new Promise((resolve) => setTimeout(resolve, 980));
+      if (!skipGate) {
+        els.startBtn.classList.add('is-igniting');
+        els.start.classList.add('is-opening');
+        playFireIgnitionSound();
+        if (st.startAudio) await fadeOutAndStop(st.startAudio, 750);
+        st.startAudio = null;
+        await new Promise((resolve) => setTimeout(resolve, 980));
+      }
       if (isEmbeddedPreview) {
         window.top.location.assign(getStandaloneReaderUrl());
         return;
@@ -1099,12 +1104,18 @@
       scrollToPage(st.page);
     }
 
-    preloadStartCover().catch(() => loading(false));
-    playStartScreenAudio();
-    ['pointerdown', 'keydown', 'touchstart'].forEach((eventName) => {
-      els.start.addEventListener(eventName, playStartScreenAudio, { once:true, passive:true });
-    });
-    els.startBtn.addEventListener('click', loadAndStart);
+    preloadStartCover()
+      .catch(() => loading(false))
+      .finally(() => {
+        if (shouldSkipStartGate) loadAndStart({ skipGate:true });
+      });
+    if (!shouldSkipStartGate) {
+      playStartScreenAudio();
+      ['pointerdown', 'keydown', 'touchstart'].forEach((eventName) => {
+        els.start.addEventListener(eventName, playStartScreenAudio, { once:true, passive:true });
+      });
+    }
+    els.startBtn.addEventListener('click', () => loadAndStart());
     syncZoomControl();
     hideUnavailableMediaPlayer();
     updateMediaButtons();
