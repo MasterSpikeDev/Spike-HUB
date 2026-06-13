@@ -17,6 +17,7 @@
     }
     * { box-sizing: border-box; }
     html, body { margin:0; width:100%; height:100%; background:var(--bg); color:var(--text); overflow:hidden; font-family: Georgia, serif; }
+    body.start-gate-active .reader, body.start-gate-active .bg-layer, body.start-gate-active > .overlay { visibility:hidden; pointer-events:none; }
     .bg-layer { position:fixed; inset:0; transition:opacity .8s ease; overflow:hidden; background:#000; }
     .bg-layer.active { z-index:1; opacity:1; }
     .bg-layer.inactive { z-index:0; opacity:0; }
@@ -187,15 +188,40 @@
       pointer-events:none;
     }
     .start {
+      --start-bg: #000;
+      --slice-gap: 0%;
       position: fixed;
       inset: 0;
       z-index: 20;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #000;
+      background: var(--start-bg);
       overflow: hidden;
+      isolation:isolate;
     }
+    .start::before,
+    .start::after {
+      content:'';
+      position:absolute;
+      top:0;
+      bottom:0;
+      width:calc(50% + 2px);
+      z-index:19;
+      pointer-events:none;
+      background:var(--start-bg);
+      transition:transform 1.05s cubic-bezier(.76, 0, .18, 1), filter .85s ease;
+    }
+    .start::before { left:0; transform:translateX(calc(var(--slice-gap) * -1)); box-shadow:18px 0 44px rgba(255,58,58,.18); }
+    .start::after { right:0; transform:translateX(var(--slice-gap)); box-shadow:-18px 0 44px rgba(255,58,58,.18); }
+    .start.is-opening { pointer-events:none; }
+    .start.is-opening::before { transform:translateX(-105%) skewY(-4deg); filter:brightness(1.25); }
+    .start.is-opening::after { transform:translateX(105%) skewY(4deg); filter:brightness(1.25); }
+    .start.is-opening .card,
+    .start.is-opening #readerFireParticles,
+    .start.is-opening .reader-fire-ambience,
+    .start.is-opening .reader-fire-spark { animation:startGateVanish .7s ease forwards; }
+    @keyframes startGateVanish { to { opacity:0; transform:scale(1.06); } }
     .card {
       position: relative;
       z-index: 23;
@@ -227,16 +253,7 @@
       box-shadow: 0 28px 90px rgba(0,0,0,.74), 0 0 46px rgba(255,58,58,.22);
     }
     .start-actions { width:min(520px, 100%); display:grid; gap:10px; justify-items:center; }
-    .start-title {
-      margin: 0;
-      color: #fff;
-      font-size: clamp(1.45rem, 2.8vw, 2.25rem);
-      letter-spacing: .04em;
-      text-transform: uppercase;
-      font-weight: 800;
-      text-align:center;
-      text-shadow:0 0 24px rgba(255,58,58,.4);
-    }
+    .start-title { display:none; }
     .start-main-btn {
       width: 100%;
       border-radius: 999px;
@@ -248,13 +265,21 @@
       letter-spacing: .05em;
       padding: 15px 18px;
       cursor: pointer;
-      transition: transform .18s ease, box-shadow .18s ease;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
       text-transform: uppercase;
       box-shadow:0 14px 34px rgba(255, 61, 77, .25);
     }
     .start-main-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 24px rgba(255, 61, 77, 0.45);
+    }
+    .start-main-btn.is-igniting {
+      animation:startButtonIgnite .72s ease forwards;
+    }
+    @keyframes startButtonIgnite {
+      0% { transform:scale(1); filter:brightness(1); }
+      45% { transform:scale(.96); filter:brightness(1.35); box-shadow:0 0 34px rgba(255,118,32,.75), 0 0 74px rgba(255,45,28,.42); }
+      100% { transform:scale(1.08); filter:brightness(1.8); opacity:.18; }
     }
     #loading { position:fixed; z-index:15; left:50%; top:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,.8); padding:10px 14px; border-radius:10px; border:1px solid var(--border); display:none; }
     @media (max-width: 900px) {
@@ -268,7 +293,7 @@
     }
   </style>
 </head>
-<body>
+<body class="start-gate-active">
   <div id="bgA" class="bg-layer active">
     <div class="bg-image"></div>
     <video class="bg-video" muted loop playsinline preload="auto"></video>
@@ -410,7 +435,8 @@
       activeAudios:[],
       pageMin: 1,
       pageMax: 1,
-      startAudio:null
+      startAudio:null,
+      isStarting:false
     };
     const els = {
       topBar:document.getElementById('topBar'), start: document.getElementById('start'), startBtn: document.getElementById('startBtn'), chapterTitle:document.getElementById('chapterTitle'),
@@ -426,7 +452,8 @@
     const startScreen = reader.startScreen || {};
     els.startTitle.textContent = startScreen.title || reader.title || 'Project Ghost';
     els.startBtn.textContent = startScreen.buttonLabel || `Iniciar leitura de ${reader.title || 'capítulo'}`;
-    if (startScreen.background) els.start.style.background = startScreen.background;
+    const startBackground = startScreen.backgroundColor || startScreen.background;
+    if (startBackground) els.start.style.setProperty('--start-bg', startBackground);
 
 
     function initReaderFireParticles(){
@@ -727,6 +754,34 @@
       audio.load();
       audio.remove();
     }
+    function playFireIgnitionSound(){
+      try {
+        const ctx = ensureAudioContext();
+        if (!ctx) return;
+        if (ctx.state === 'suspended') ctx.resume();
+        const duration = 1.15;
+        const buffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i += 1) {
+          const t = i / data.length;
+          data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 1.8);
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(420, ctx.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(2600, ctx.currentTime + .22);
+        filter.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + duration);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(st.muted ? 0.0001 : Math.max(st.volume, .35), ctx.currentTime + .08);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+        noise.connect(filter).connect(gain).connect(ctx.destination);
+        noise.start();
+        noise.stop(ctx.currentTime + duration);
+      } catch {}
+    }
     function createSceneAudio(src){
       const audio = document.createElement('audio');
       audio.loop = true;
@@ -999,7 +1054,32 @@
       }
     }
 
+    function createStartAudio(){
+      const src = normalizeSceneMedia(startScreen.audio)[0];
+      if (!src || st.startAudio) return st.startAudio;
+      const audio = createSceneAudio(src);
+      audio.setAttribute('data-start-screen', 'true');
+      st.startAudio = audio;
+      return audio;
+    }
+    async function playStartScreenAudio(){
+      const audio = createStartAudio();
+      if (!audio) return;
+      audio.muted = st.muted;
+      try {
+        await audio.play();
+        fade(audio, Number.isFinite(audio.volume) ? audio.volume : 0, st.muted ? 0 : Math.min(st.volume, .55), 900);
+      } catch {}
+    }
     async function loadAndStart(){
+      if (st.isStarting) return;
+      st.isStarting = true;
+      els.startBtn.classList.add('is-igniting');
+      els.start.classList.add('is-opening');
+      playFireIgnitionSound();
+      if (st.startAudio) await fadeOutAndStop(st.startAudio, 750);
+      st.startAudio = null;
+      await new Promise((resolve) => setTimeout(resolve, 980));
       const pdfFile = readerPdf;
       loading(true, `Carregando ${pdfFile}...`);
       if (!st.doc) st.doc = await pdfjsLib.getDocument(pdfFile).promise;
@@ -1009,6 +1089,7 @@
       const savedPage = Number(sessionStorage.getItem('pg_reader_page'));
       const firstReadingPage = reader.startScreen ? Math.min(2, st.pageMax) : (reader.pageStart || st.pageMin);
       st.page = Math.min(Math.max(st.pageMin, savedPage || firstReadingPage), st.pageMax);
+      document.body.classList.remove('start-gate-active');
       els.start.style.display='none';
 
       const firstScene = getScene(st.page);
@@ -1027,6 +1108,10 @@
 
     initReaderFireParticles();
     preloadStartCover().catch(() => loading(false));
+    playStartScreenAudio();
+    ['pointerdown', 'keydown', 'touchstart'].forEach((eventName) => {
+      els.start.addEventListener(eventName, playStartScreenAudio, { once:true, passive:true });
+    });
     els.startBtn.addEventListener('click', loadAndStart);
     syncZoomControl();
     hideUnavailableMediaPlayer();
