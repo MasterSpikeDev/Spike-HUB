@@ -1055,8 +1055,8 @@
       const audio = createStartAudio();
       if (!audio) return;
       audio.muted = st.muted;
+      if (!audio.paused) return;
       try {
-        audio.load();
         await audio.play();
         fade(audio, Number.isFinite(audio.volume) ? audio.volume : 0, st.muted ? 0 : Math.min(st.volume, .55), 900);
         sessionStorage.removeItem('pg_reader_autostart_audio');
