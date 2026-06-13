@@ -190,13 +190,18 @@
     .start {
       --start-bg: #000;
       --slice-gap: 0%;
+      --start-bg-image: none;
       position: fixed;
       inset: 0;
       z-index: 20;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--start-bg);
+      background-color: var(--start-bg);
+      background-image: linear-gradient(180deg, rgba(0,0,0,.32), rgba(0,0,0,.78)), var(--start-bg-image);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       overflow: hidden;
       isolation:isolate;
     }
@@ -209,7 +214,11 @@
       width:calc(50% + 2px);
       z-index:19;
       pointer-events:none;
-      background:var(--start-bg);
+      background-color:var(--start-bg);
+      background-image:linear-gradient(90deg, rgba(0,0,0,.62), rgba(0,0,0,.2)), var(--start-bg-image);
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
       transition:transform 1.05s cubic-bezier(.76, 0, .18, 1), filter .85s ease;
     }
     .start::before { left:0; transform:translateX(calc(var(--slice-gap) * -1)); box-shadow:18px 0 44px rgba(255,58,58,.18); }
@@ -454,6 +463,8 @@
     els.startBtn.textContent = startScreen.buttonLabel || `Iniciar leitura de ${reader.title || 'capítulo'}`;
     const startBackground = startScreen.backgroundColor || startScreen.background;
     if (startBackground) els.start.style.setProperty('--start-bg', startBackground);
+    const startBackgroundImage = normalizeSceneMedia(startScreen.backgroundImage || startScreen.image || startScreen.backdrop)[0];
+    if (startBackgroundImage) els.start.style.setProperty('--start-bg-image', `url('${startBackgroundImage}')`);
 
 
     function initReaderFireParticles(){
@@ -786,6 +797,8 @@
       const audio = document.createElement('audio');
       audio.loop = true;
       audio.preload = 'auto';
+      audio.autoplay = true;
+      audio.playsInline = true;
       audio.setAttribute('data-src', src);
       audio.src = src;
       audio.volume = 0;
@@ -1067,8 +1080,10 @@
       if (!audio) return;
       audio.muted = st.muted;
       try {
+        audio.load();
         await audio.play();
         fade(audio, Number.isFinite(audio.volume) ? audio.volume : 0, st.muted ? 0 : Math.min(st.volume, .55), 900);
+        sessionStorage.removeItem('pg_reader_autostart_audio');
       } catch {}
     }
     async function loadAndStart(){
