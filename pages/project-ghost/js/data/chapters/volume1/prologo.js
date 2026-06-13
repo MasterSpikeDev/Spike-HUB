@@ -23,7 +23,6 @@ export const prologoChapter = {
                 id: "capa",
                 from: 1,
                 to: 2,
-                audio: readerMusic.fire_inside_me,
                 theme: {
                     accent: "#ff3a3a",
                     panel: "rgba(34, 8, 10, 0.78)",
