@@ -16,8 +16,6 @@ export const prologoChapter = {
                 id: "capa",
                 from: 1,
                 to: 2,
-                background: "none",
-                audio: readerMusic.none,
                 theme: {
                     accent: "#ff3a3a",
                     panel: "rgba(34, 8, 10, 0.78)",
@@ -57,7 +55,6 @@ export const prologoChapter = {
                 from: 7,
                 to: 7,
                 background: "assets/cenas/casa_haruki/espelho.png",
-                audio: readerMusic.none,
                 theme: {
                     accent: "#000812",
                     panel: "rgba(0, 24, 64, 0.78)",
@@ -127,7 +124,6 @@ export const prologoChapter = {
                 from: 15,
                 to: 15,
                 background: "assets/cenas/casa_shiatsu/sotao.png",
-                audio: readerMusic.none,
                 theme: {
                     accent: "#000812",
                     panel: "rgba(0, 24, 64, 0.78)",
@@ -211,7 +207,6 @@ export const prologoChapter = {
                 id: "fim",
                 from: 24,
                 to: 24,
-                background: "assets/cenas/cidade/none.png",
                 audio: [
                     readerMusic.ashes_japonese,
                     readerMusic.chuva

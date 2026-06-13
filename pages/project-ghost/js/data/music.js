@@ -24,15 +24,13 @@ export const readerMusic = {
         id: "metro",
         title: "Metro",
         description: "Som ambiente",
-        src: "assets/audio/ambients/metro.mp3",
-        icon: "assets/cenas/metro_subterraneo.png"
+        src: "assets/audio/ambients/metro.mp3"
     },
     escola: {
         id: "escola",
         title: "Escola",
         description: "Som ambiente",
-        src: "assets/audio/ambients/escola.mp3",
-        icon: "assets/cenas/escola_corredor.png"
+        src: "assets/audio/ambients/escola.mp3"
     },
     cold_inside_me: {
         id: "cold_inside_me",
@@ -45,22 +43,19 @@ export const readerMusic = {
         id: "clock_alarm",
         title: "Clock Alarm",
         description: "Som ambiente",
-        src: "assets/audio/ambients/clock_alarm.mp3",
-        icon: "assets/images/arts/artes-publicadas/banners/logo_OST.png"
+        src: "assets/audio/ambients/clock_alarm.mp3"
     },
     carros_avenida: {
         id: "carros_avenida",
         title: "Carros na Avenida",
         description: "Som ambiente",
-        src: "assets/audio/ambients/carros_avenida.mp3",
-        icon: "assets/cenas/avenida_dia.png"
+        src: "assets/audio/ambients/carros_avenida.mp3"
     },
     chuva: {
         id: "chuva",
         title: "Chuva",
         description: "Som ambiente",
-        src: "assets/audio/ambients/chuva.mp3",
-        icon: "assets/cenas/chuva.png"
+        src: "assets/audio/ambients/chuva.mp3"
     },
     ashes: {
         id: "ashes",
