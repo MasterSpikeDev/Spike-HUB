@@ -51,8 +51,9 @@
       overflow:hidden;
       transition:max-height .34s ease, opacity .24s ease, transform .34s ease, margin .34s ease;
     }
-    .bar.media-collapsed .media-player { max-height:0; opacity:0; transform:translateY(-110%); margin-top:-10px; pointer-events:none; }
+    .bar.media-collapsed .media-player, .bar.media-unavailable .media-player { max-height:0; opacity:0; transform:translateY(-110%); margin-top:-10px; pointer-events:none; }
     .bar.media-collapsed #mediaToggleIcon { transform:rotate(180deg); }
+    .bar.media-unavailable #mediaToggle { display:none; }
     #mediaToggleIcon { transition:transform .25s ease; }
     .media-cover-wrap { position:relative; width:58px; height:58px; flex:0 0 auto; }
     .media-cover {
@@ -80,7 +81,7 @@
     .media-title { font-weight:800; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .media-subtitle { color:var(--muted); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .media-time { color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; white-space:nowrap; }
-    .media-progress-row { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:8px; }
+    .media-progress-row { display:grid; grid-template-columns:1fr auto; align-items:center; gap:8px; }
     .media-progress, .media-volume { accent-color:var(--accent); cursor:pointer; padding:0; background:transparent; border:none; }
     .media-progress { width:100%; min-width:120px; }
     .media-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
@@ -293,10 +294,8 @@
               <div id="mediaTitle" class="media-title">Sem música tocando</div>
               <div id="mediaSubtitle" class="media-subtitle">A trilha da cena aparece aqui.</div>
             </div>
-            <span id="mediaDurationText" class="media-time">0:00</span>
           </div>
           <div class="media-progress-row">
-            <span id="mediaCurrentText" class="media-time">0:00</span>
             <input id="mediaProgress" class="media-progress" type="range" min="0" max="1000" step="1" value="0" aria-label="Progresso da música">
             <span id="mediaRemainingText" class="media-time">-0:00</span>
           </div>
@@ -387,6 +386,7 @@
       mediaPaused:false,
       volume:0.55,
       mediaRaf:null,
+      mediaIdleTimer:null,
       analyser:null,
       analyserData:null,
       audioCtx:null,
@@ -422,6 +422,27 @@
     function getScene(page){ return (reader.scenes || []).find(s => page >= s.from && page <= s.to) || (reader.scenes || [])[0]; }
     function updateMeta(){
       els.pageStatus.textContent = `Página ${st.page} / ${st.total}`;
+    }
+    function collapseMediaPlayer(collapsed = true){
+      els.topBar.classList.toggle('media-collapsed', collapsed);
+      els.mediaToggle.setAttribute('aria-expanded', String(!collapsed));
+      els.mediaToggle.setAttribute('aria-label', collapsed ? 'Mostrar barra de música' : 'Ocultar barra de música');
+      els.mediaToggle.title = collapsed ? 'Mostrar barra de música' : 'Ocultar barra de música';
+    }
+    function scheduleMediaAutoCollapse(){
+      clearTimeout(st.mediaIdleTimer);
+      if (!getPrimaryAudio()) return;
+      st.mediaIdleTimer = setTimeout(() => collapseMediaPlayer(true), 10000);
+    }
+    function showActiveMediaPlayer(){
+      els.topBar.classList.remove('media-unavailable');
+      collapseMediaPlayer(false);
+      scheduleMediaAutoCollapse();
+    }
+    function hideUnavailableMediaPlayer(){
+      clearTimeout(st.mediaIdleTimer);
+      els.topBar.classList.add('media-unavailable');
+      collapseMediaPlayer(true);
     }
     function updateMediaButtons(){
       const audio = getPrimaryAudio();
@@ -537,9 +558,9 @@
     }
     function getSceneArtwork(scene){
       const audioConfig = getMediaConfigList(scene?.audio)[0];
-      const configured = audioConfig?.icon || audioConfig?.cover || audioConfig?.thumbnail || scene?.cover || scene?.artwork || scene?.image || scene?.musicImage || scene?.thumbnail;
+      const configured = audioConfig?.icon || audioConfig?.cover || audioConfig?.thumbnail;
       const selected = normalizeSceneMedia(configured)[0] || normalizeSceneMedia(scene?.background).find((item) => resolveBackgroundType(item) === 'image');
-      return selected || 'assets/images/website/logo.png';
+      return selected || '';
     }
     function applyMediaVolume(){
       st.activeAudios.forEach((audio) => {
@@ -552,12 +573,30 @@
       const audio = getPrimaryAudio();
       const audioConfig = getMediaConfigList(scene?.audio)[0];
       const src = audio?.getAttribute('data-src') || getMediaSrc(audioConfig) || '';
+      if (!audio || !src) {
+        hideUnavailableMediaPlayer();
+        els.mediaTitle.textContent = 'Sem música tocando';
+        els.mediaSubtitle.textContent = '';
+        els.mediaCover.removeAttribute('src');
+        els.mediaDownload.href = '#';
+        els.mediaDownload.removeAttribute('download');
+        els.mediaDownload.classList.add('disabled');
+        updateMediaButtons();
+        updateMediaProgress();
+        setupAnalyser(null);
+        if (st.mediaRaf) cancelAnimationFrame(st.mediaRaf);
+        st.mediaRaf = null;
+        return;
+      }
       els.mediaTitle.textContent = audioConfig?.title || audioConfig?.name || scene?.musicTitle || scene?.audioTitle || getMediaTitle(src);
-      els.mediaSubtitle.textContent = src ? `${audioConfig?.description || scene?.label || 'Cena'} • ${src.split('/').pop()}` : 'Nenhuma trilha para esta cena.';
-      els.mediaCover.src = getSceneArtwork(scene);
-      els.mediaDownload.href = src || '#';
-      els.mediaDownload.toggleAttribute('download', Boolean(src));
-      els.mediaDownload.classList.toggle('disabled', !src);
+      els.mediaSubtitle.textContent = `${audioConfig?.description || scene?.label || 'Cena'} • ${src.split('/').pop()}`;
+      const artwork = getSceneArtwork(scene);
+      if (artwork) els.mediaCover.src = artwork;
+      else els.mediaCover.removeAttribute('src');
+      els.mediaDownload.href = src;
+      els.mediaDownload.setAttribute('download', '');
+      els.mediaDownload.classList.remove('disabled');
+      showActiveMediaPlayer();
       updateMediaButtons();
       updateMediaProgress();
       setupAnalyser(audio);
@@ -569,9 +608,9 @@
       const current = audio?.currentTime || 0;
       const progress = duration ? Math.round((current / duration) * 1000) : 0;
       els.mediaProgress.value = String(progress);
-      els.mediaCurrentText.textContent = formatTime(current);
-      els.mediaDurationText.textContent = formatTime(duration);
-      els.mediaRemainingText.textContent = `-${formatTime(Math.max(duration - current, 0))}`;
+      if (els.mediaCurrentText) els.mediaCurrentText.textContent = '';
+      if (els.mediaDurationText) els.mediaDurationText.textContent = '';
+      els.mediaRemainingText.textContent = duration ? `Faltam ${formatTime(Math.max(duration - current, 0))}` : 'Calculando...';
     }
     function ensureAudioContext(){
       if (st.audioCtx) return st.audioCtx;
@@ -670,6 +709,7 @@
       st.currentSceneAudioKey = sceneAudioKey;
 
       if (sceneAudioList.length === 0) {
+        hideUnavailableMediaPlayer();
         updateMediaMetadata(scene);
         await Promise.all(previousAudios.map((audio) => fadeOutAndStop(audio, 450)));
         return;
@@ -920,13 +960,17 @@
 
     els.startBtn.addEventListener('click', loadAndStart);
     syncZoomControl();
+    hideUnavailableMediaPlayer();
     updateMediaButtons();
     els.back.addEventListener('click', ()=> { window.location.href = './ghost.html'; });
+    ['pointerdown', 'keydown', 'input', 'click'].forEach((eventName) => {
+      els.mediaPlayer.addEventListener(eventName, scheduleMediaAutoCollapse, { passive:true });
+    });
     els.mediaToggle.addEventListener('click', () => {
-      const collapsed = els.topBar.classList.toggle('media-collapsed');
-      els.mediaToggle.setAttribute('aria-expanded', String(!collapsed));
-      els.mediaToggle.setAttribute('aria-label', collapsed ? 'Mostrar barra de música' : 'Ocultar barra de música');
-      els.mediaToggle.title = collapsed ? 'Mostrar barra de música' : 'Ocultar barra de música';
+      if (!getPrimaryAudio()) return hideUnavailableMediaPlayer();
+      const collapsed = !els.topBar.classList.contains('media-collapsed');
+      collapseMediaPlayer(collapsed);
+      if (!collapsed) scheduleMediaAutoCollapse();
     });
     els.mediaPlay.addEventListener('click', async () => {
       const audio = getPrimaryAudio();
