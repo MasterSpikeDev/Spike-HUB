@@ -551,7 +551,13 @@
     }
 
     function isNoneValue(value){
-      return typeof value === 'string' && value.trim().toLowerCase() === 'none';
+      if (typeof value !== 'string') return false;
+      const cleanValue = value.trim().toLowerCase();
+      if (!cleanValue) return false;
+      if (cleanValue === 'none') return true;
+      const cleanPath = cleanValue.split(/[?#]/)[0];
+      const fileName = cleanPath.split('/').pop() || cleanPath;
+      return /^none(?:\.[a-z0-9]+)?$/.test(fileName);
     }
     function getMediaSrc(value){
       if (value && typeof value === 'object') return String(value.src || value.file || value.url || '').trim();
