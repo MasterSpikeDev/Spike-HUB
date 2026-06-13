@@ -386,6 +386,13 @@
         reader: chapter.reader
       };
     }
+    const readerUrlParams = new URLSearchParams(window.location.search);
+    const isEmbeddedPreview = readerUrlParams.get('embedded') === '1';
+    function getStandaloneReaderUrl(){
+      const nextParams = new URLSearchParams(window.location.search);
+      nextParams.delete('embedded');
+      return `${window.location.pathname}?${nextParams.toString()}`;
+    }
     const urlPayload = getUrlReaderPayload();
     const storedPayload = getStoredReaderPayload();
     const payload = urlPayload.reader ? urlPayload : storedPayload;
@@ -1062,6 +1069,10 @@
       if (st.startAudio) await fadeOutAndStop(st.startAudio, 750);
       st.startAudio = null;
       await new Promise((resolve) => setTimeout(resolve, 980));
+      if (isEmbeddedPreview) {
+        window.top.location.assign(getStandaloneReaderUrl());
+        return;
+      }
       const pdfFile = readerPdf;
       loading(true, `Carregando ${pdfFile}...`);
       if (!st.doc) st.doc = await pdfjsLib.getDocument(pdfFile).promise;

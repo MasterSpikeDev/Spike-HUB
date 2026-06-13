@@ -257,6 +257,7 @@ function init() {
     
     // Configurar event listeners
     setupEventListeners();
+    initReaderPreviewPanel();
     initFireFX();
     renderCharacters();
     renderArtworkTypeFilters();
@@ -307,6 +308,7 @@ function setupEventListeners() {
     // Fechar modal com ESC
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
+            closeReaderPreviewPanel();
             document.querySelectorAll('.modal.active').forEach(modal => {
                 closeModal(modal);
             });
@@ -686,9 +688,46 @@ function renderChapters() {
             };
 
             sessionStorage.setItem('pg_reader_chapter', JSON.stringify(chapterPayload));
-            openReadMethodModal();
+            sessionStorage.setItem('pg_reader_autostart_audio', '1');
+            const chapterModal = document.getElementById('modal-ler');
+            chapterModal.classList.remove('active');
+            chapterModal.style.display = 'none';
+            openReaderPreviewPanel(chapterPayload);
         }
     });
+}
+
+function getImmersiveReaderPath() {
+    return `./reader.html?volume=${encodeURIComponent(selectedVolume)}&chapter=${encodeURIComponent(selectedChapter)}&autostartAudio=1`;
+}
+
+function openReaderPreviewPanel(chapterPayload) {
+    const previewPanel = document.getElementById('reader-preview-panel');
+    const previewFrame = document.getElementById('reader-preview-frame');
+    if (!previewPanel || !previewFrame) return;
+
+    sessionStorage.setItem('pg_reader_chapter', JSON.stringify(chapterPayload));
+    sessionStorage.setItem('pg_reader_autostart_audio', '1');
+    previewFrame.src = `${getImmersiveReaderPath()}&embedded=1`;
+    previewPanel.setAttribute('aria-hidden', 'false');
+    previewPanel.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeReaderPreviewPanel() {
+    const previewPanel = document.getElementById('reader-preview-panel');
+    const previewFrame = document.getElementById('reader-preview-frame');
+    if (!previewPanel || !previewFrame) return;
+
+    previewPanel.classList.remove('active');
+    previewPanel.setAttribute('aria-hidden', 'true');
+    previewFrame.src = 'about:blank';
+    document.body.style.overflow = 'auto';
+}
+
+function initReaderPreviewPanel() {
+    const previewBack = document.getElementById('reader-preview-back');
+    if (previewBack) previewBack.addEventListener('click', closeReaderPreviewPanel);
 }
 
 function openReadMethodModal() {
@@ -697,7 +736,7 @@ function openReadMethodModal() {
 
     const pdfPath = `./posts/volume${selectedVolume}/${selectedFile}`;
     const googleDocsUrl = chapterReader.googleDocsUrl || '';
-    const immersivePath = `./reader.html?volume=${encodeURIComponent(selectedVolume)}&chapter=${encodeURIComponent(selectedChapter)}&autostartAudio=1`;
+    const immersivePath = getImmersiveReaderPath();
 
     const openPdfBtn = document.getElementById('open-raw-pdf-btn');
     const openGoogleDocsBtn = document.getElementById('open-google-docs-btn');
