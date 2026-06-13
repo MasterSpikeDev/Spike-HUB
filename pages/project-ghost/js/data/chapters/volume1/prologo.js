@@ -15,7 +15,7 @@ export const prologoChapter = {
             title: "Prólogo",
             buttonLabel: "Iniciar leitura do Prólogo",
             background: "#000000",
-            backgroundImage: "assets/images/website/background_main3.png",
+            backgroundImage: "assets/images/website/none.png",
             audio: readerMusic.fire_inside_me
         },
         scenes: [
