@@ -11,11 +11,18 @@ export const prologoChapter = {
         pageEnd: 24,
         googleDocsUrl: "https://docs.google.com/document/d/1J3BpHaeWOi7-Dz8iaLW-i4VxXWLOK3kwb8EN9WZpRaQ/edit?usp=sharing",
         pdf: "prologo/prologo.pdf",
+        startScreen: {
+            title: "Prólogo",
+            buttonLabel: "Iniciar leitura do Prólogo",
+            background: "#000000",
+            audio: readerMusic.fire_inside_me
+        },
         scenes: [
             {
                 id: "capa",
                 from: 1,
                 to: 2,
+                audio: readerMusic.fire_inside_me,
                 theme: {
                     accent: "#ff3a3a",
                     panel: "rgba(34, 8, 10, 0.78)",

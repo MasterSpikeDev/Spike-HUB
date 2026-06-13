@@ -30,6 +30,11 @@
     .bg-image { background-size:cover; background-position:center; background-repeat:no-repeat; }
     .bg-video { display:none; }
     .overlay { position:fixed; inset:0; z-index:2; background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.68)); }
+    #readerFireParticles { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:21; opacity:.88; }
+    .reader-fire-ambience { position:fixed; inset:0; pointer-events:none; z-index:20; background:radial-gradient(circle at 50% 110%, rgba(255,80,0,.28), transparent 45%), radial-gradient(circle at 10% 0%, rgba(255,30,0,.09), transparent 40%), radial-gradient(circle at 90% 15%, rgba(255,140,0,.08), transparent 35%); mix-blend-mode:screen; animation: readerFireAmbienceShift 12s ease-in-out infinite alternate; }
+    @keyframes readerFireAmbienceShift { 0% { filter:saturate(1) brightness(1); } 100% { filter:saturate(1.15) brightness(1.08); } }
+    .reader-fire-spark { position:fixed; bottom:-40px; width:4px; height:4px; border-radius:50%; pointer-events:none; background:radial-gradient(circle, #ffe8a8 0%, #ff8f1f 65%, transparent 100%); box-shadow:0 0 12px rgba(255,109,22,.8); opacity:0; z-index:22; animation-name: readerFloatSpark; animation-timing-function:linear; animation-iteration-count:infinite; }
+    @keyframes readerFloatSpark { 0% { transform:translate3d(0,0,0) scale(.8); opacity:0; } 12% { opacity:1; } 100% { transform:translate3d(var(--drift-x,30px), -120vh, 0) scale(.15); opacity:0; } }
     .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr; height:100%; }
     .bar { display:grid; grid-template-columns:1fr auto; gap:10px 14px; align-items:center; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); overflow:hidden; transition:grid-template-rows .28s ease, padding .28s ease; }
     .reader-heading { display:flex; flex-direction:column; gap:4px; min-width:0; }
@@ -188,64 +193,64 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255, 58, 58, 0.18), transparent 45%),
-        radial-gradient(circle at 80% 80%, rgba(255, 58, 58, 0.12), transparent 40%),
-        rgba(2, 2, 8, 0.84);
-      backdrop-filter: blur(9px);
+      background: #000;
+      overflow: hidden;
     }
     .card {
-      width: min(760px, 94vw);
-      background: linear-gradient(180deg, rgba(18, 9, 13, 0.96), rgba(10, 8, 14, 0.96));
-      border: 1px solid rgba(255, 70, 70, 0.48);
-      border-radius: 18px;
-      padding: 26px;
-      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.58), 0 0 32px rgba(255, 58, 58, 0.18);
-    }
-    .start-title {
-      margin: 0 0 8px;
-      color: #ff4f4f;
-      font-size: clamp(1.6rem, 2.8vw, 2.15rem);
-      letter-spacing: .02em;
-      text-transform: uppercase;
-      font-weight: 800;
-    }
-    .start-description {
-      margin: 0;
-      color: #f1d8d8;
-      line-height: 1.5;
-      font-size: 1.05rem;
-    }
-    .start-tips {
-      margin: 22px 0;
+      position: relative;
+      z-index: 23;
+      width: min(980px, 94vw);
+      min-height: min(760px, 92vh);
       display: grid;
-      gap: 10px;
-      color: #f4dddd;
-      line-height: 1.45;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      justify-items: center;
+      background: transparent;
+      border: 0;
+      padding: 24px;
     }
-    .start-tips span {
+    .start-cover-frame {
+      min-height: 0;
+      width: 100%;
+      height: 100%;
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 11px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.045);
+      justify-content: center;
     }
-    .start-tips i { color: #ff5b5b; width: 20px; text-align: center; }
+    .start-cover-frame canvas {
+      max-width: min(100%, 720px);
+      max-height: 72vh;
+      width: auto !important;
+      height: auto !important;
+      border-radius: 14px;
+      box-shadow: 0 28px 90px rgba(0,0,0,.74), 0 0 46px rgba(255,58,58,.22);
+    }
+    .start-actions { width:min(520px, 100%); display:grid; gap:10px; justify-items:center; }
+    .start-title {
+      margin: 0;
+      color: #fff;
+      font-size: clamp(1.45rem, 2.8vw, 2.25rem);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      font-weight: 800;
+      text-align:center;
+      text-shadow:0 0 24px rgba(255,58,58,.4);
+    }
     .start-main-btn {
       width: 100%;
-      border-radius: 12px;
+      border-radius: 999px;
       border: 1px solid rgba(255, 110, 110, 0.62);
-      background: linear-gradient(90deg, #b01325 0%, #ff2f3c 52%, #ff5868 100%);
+      background: linear-gradient(90deg, #7b0612 0%, #d41425 52%, #ff5868 100%);
       color: #fff;
-      font-size: 1.05rem;
-      font-weight: 800;
-      letter-spacing: .02em;
-      padding: 14px 16px;
+      font-size: 1.02rem;
+      font-weight: 900;
+      letter-spacing: .05em;
+      padding: 15px 18px;
       cursor: pointer;
       transition: transform .18s ease, box-shadow .18s ease;
       text-transform: uppercase;
+      box-shadow:0 14px 34px rgba(255, 61, 77, .25);
     }
     .start-main-btn:hover {
       transform: translateY(-2px);
@@ -318,14 +323,14 @@
   </div>
 
   <div id="start" class="start">
+    <div class="reader-fire-ambience" aria-hidden="true"></div>
+    <canvas id="readerFireParticles" aria-hidden="true"></canvas>
     <div class="card">
-      <h2 class="start-title">Antes de começar</h2>
-      <p class="start-description">A leitura agora carrega o PDF completo, com todas as páginas em sequência. A trilha é iniciada junto do início da leitura.</p>
-      <div class="start-tips" aria-label="Controles de leitura">
-        <span><i class="fas fa-computer-mouse"></i> No PC, role para baixo para passar pelas páginas. Use Ctrl + rolagem se quiser aproximar ou afastar.</span>
-        <span><i class="fas fa-hand-pointer"></i> No celular, arraste para baixo para continuar a leitura e use pinça com dois dedos para aproximar ou afastar.</span>
+      <div id="startCoverFrame" class="start-cover-frame" aria-label="Capa do capítulo"></div>
+      <div class="start-actions">
+        <h2 id="startTitle" class="start-title">Project Ghost</h2>
+        <button id="startBtn" class="start-main-btn" type="button">Iniciar leitura</button>
       </div>
-      <button id="startBtn" class="start-main-btn" type="button">Começar leitura</button>
     </div>
   </div>
 
@@ -404,12 +409,13 @@
       currentSceneAudioKey:'',
       activeAudios:[],
       pageMin: 1,
-      pageMax: 1
+      pageMax: 1,
+      startAudio:null
     };
     const els = {
       topBar:document.getElementById('topBar'), start: document.getElementById('start'), startBtn: document.getElementById('startBtn'), chapterTitle:document.getElementById('chapterTitle'),
       back:document.getElementById('backBtn'), mediaToggle:document.getElementById('mediaToggle'), mediaToggleIcon:document.getElementById('mediaToggleIcon'),
-      mediaPlayer:document.getElementById('mediaPlayer'), mediaCover:document.getElementById('mediaCover'), mediaTitle:document.getElementById('mediaTitle'), mediaSubtitle:document.getElementById('mediaSubtitle'), mediaCurrentText:document.getElementById('mediaCurrentText'), mediaDurationText:document.getElementById('mediaDurationText'), mediaRemainingText:document.getElementById('mediaRemainingText'), mediaProgress:document.getElementById('mediaProgress'), mediaRestart:document.getElementById('mediaRestart'), mediaPlay:document.getElementById('mediaPlay'), mediaPlayIcon:document.getElementById('mediaPlayIcon'), mediaMute:document.getElementById('mediaMute'), mediaMuteIcon:document.getElementById('mediaMuteIcon'), mediaVolume:document.getElementById('mediaVolume'), mediaDownload:document.getElementById('mediaDownload'), visualizer:document.getElementById('visualizer'),
+      startTitle:document.getElementById('startTitle'), startCoverFrame:document.getElementById('startCoverFrame'), mediaPlayer:document.getElementById('mediaPlayer'), mediaCover:document.getElementById('mediaCover'), mediaTitle:document.getElementById('mediaTitle'), mediaSubtitle:document.getElementById('mediaSubtitle'), mediaCurrentText:document.getElementById('mediaCurrentText'), mediaDurationText:document.getElementById('mediaDurationText'), mediaRemainingText:document.getElementById('mediaRemainingText'), mediaProgress:document.getElementById('mediaProgress'), mediaRestart:document.getElementById('mediaRestart'), mediaPlay:document.getElementById('mediaPlay'), mediaPlayIcon:document.getElementById('mediaPlayIcon'), mediaMute:document.getElementById('mediaMute'), mediaMuteIcon:document.getElementById('mediaMuteIcon'), mediaVolume:document.getElementById('mediaVolume'), mediaDownload:document.getElementById('mediaDownload'), visualizer:document.getElementById('visualizer'),
       pageHost:document.getElementById('pageHost'), pageStatus:document.getElementById('pageStatus'),
       bgA:document.getElementById('bgA'), bgB:document.getElementById('bgB'), loading:document.getElementById('loading'), audioHost:document.getElementById('audioHost')
     };
@@ -417,6 +423,42 @@
     st.bgInactiveLayer = els.bgB;
 
     els.chapterTitle.textContent = `Project Ghost — ${reader.title}`;
+    const startScreen = reader.startScreen || {};
+    els.startTitle.textContent = startScreen.title || reader.title || 'Project Ghost';
+    els.startBtn.textContent = startScreen.buttonLabel || `Iniciar leitura de ${reader.title || 'capítulo'}`;
+    if (startScreen.background) els.start.style.background = startScreen.background;
+
+
+    function initReaderFireParticles(){
+      const canvas = document.getElementById('readerFireParticles');
+      if (!canvas) return;
+      for (let i = 0; i < 32; i += 1) {
+        const spark = document.createElement('span');
+        spark.className = 'reader-fire-spark';
+        spark.style.left = `${Math.random() * 100}vw`;
+        spark.style.animationDuration = `${6 + Math.random() * 8}s`;
+        spark.style.animationDelay = `${Math.random() * -12}s`;
+        spark.style.setProperty('--drift-x', `${-80 + Math.random() * 160}px`);
+        spark.style.opacity = `${0.35 + Math.random() * 0.65}`;
+        els.start.appendChild(spark);
+      }
+      const ctx = canvas.getContext('2d');
+      const particles = [];
+      const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+      const spawnParticle = () => particles.push({ x:Math.random()*canvas.width, y:canvas.height+Math.random()*40, size:1+Math.random()*3, vy:.5+Math.random()*1.8, vx:-.35+Math.random()*.7, life:70+Math.random()*80, hue:18+Math.random()*25 });
+      const animate = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (particles.length < 140) for (let i = 0; i < 4; i += 1) spawnParticle();
+        for (let i = particles.length - 1; i >= 0; i -= 1) {
+          const p = particles[i]; p.x += p.vx; p.y -= p.vy; p.life -= 1;
+          const alpha = Math.max(p.life / 130, 0);
+          ctx.beginPath(); ctx.fillStyle = `hsla(${p.hue}, 100%, 58%, ${alpha})`; ctx.shadowColor = `hsla(${p.hue}, 100%, 62%, ${alpha})`; ctx.shadowBlur = 14; ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+          if (p.life <= 0 || p.y < -20) particles.splice(i, 1);
+        }
+        requestAnimationFrame(animate);
+      };
+      resize(); window.addEventListener('resize', resize); animate();
+    }
 
     function loading(on,msg){ els.loading.style.display = on ? 'block' : 'none'; if(msg) els.loading.textContent=msg; }
     function getScene(page){ return (reader.scenes || []).find(s => page >= s.from && page <= s.to) || (reader.scenes || [])[0]; }
@@ -933,15 +975,40 @@
       });
     }
 
+
+    async function preloadStartCover(){
+      loading(true, 'Carregando capa...');
+      try {
+        st.doc = await pdfjsLib.getDocument(readerPdf).promise;
+        st.total = st.doc.numPages;
+        const page = await st.doc.getPage(1);
+        const base = page.getViewport({ scale:1 });
+        const scale = Math.min(720 / base.width, (window.innerHeight * .72) / base.height);
+        const viewport = page.getViewport({ scale:Math.max(.1, scale) });
+        const pixel = Math.min(window.devicePixelRatio || 1, 2);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.floor(viewport.width * pixel);
+        canvas.height = Math.floor(viewport.height * pixel);
+        canvas.style.width = `${viewport.width}px`;
+        canvas.style.height = `${viewport.height}px`;
+        const context = canvas.getContext('2d', { alpha:false });
+        await page.render({ canvasContext:context, viewport, transform:[pixel,0,0,pixel,0,0] }).promise;
+        els.startCoverFrame.replaceChildren(canvas);
+      } finally {
+        loading(false);
+      }
+    }
+
     async function loadAndStart(){
       const pdfFile = readerPdf;
       loading(true, `Carregando ${pdfFile}...`);
-      st.doc = await pdfjsLib.getDocument(pdfFile).promise;
+      if (!st.doc) st.doc = await pdfjsLib.getDocument(pdfFile).promise;
       st.total = st.doc.numPages;
       st.pageMin = 1;
       st.pageMax = st.total;
       const savedPage = Number(sessionStorage.getItem('pg_reader_page'));
-      st.page = Math.min(Math.max(st.pageMin, savedPage || st.pageMin), st.pageMax);
+      const firstReadingPage = reader.startScreen ? Math.min(2, st.pageMax) : (reader.pageStart || st.pageMin);
+      st.page = Math.min(Math.max(st.pageMin, savedPage || firstReadingPage), st.pageMax);
       els.start.style.display='none';
 
       const firstScene = getScene(st.page);
@@ -958,6 +1025,8 @@
       scrollToPage(st.page);
     }
 
+    initReaderFireParticles();
+    preloadStartCover().catch(() => loading(false));
     els.startBtn.addEventListener('click', loadAndStart);
     syncZoomControl();
     hideUnavailableMediaPlayer();
