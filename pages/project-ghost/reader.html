@@ -199,7 +199,30 @@
       overflow: hidden;
       isolation:isolate;
     }
+    .start::before,
+    .start::after {
+      content:'';
+      position:absolute;
+      top:0;
+      bottom:0;
+      width:calc(50% + 2px);
+      z-index:22;
+      pointer-events:none;
+      opacity:0;
+      visibility:hidden;
+      background-color:var(--start-bg);
+      background-image:linear-gradient(180deg, rgba(0,0,0,.32), rgba(0,0,0,.78)), var(--start-bg-image);
+      background-size:cover;
+      background-repeat:no-repeat;
+      transition:transform 1.05s cubic-bezier(.76, 0, .18, 1), opacity .12s ease, visibility .12s ease, filter .85s ease;
+    }
+    .start::before { left:0; background-position:left center; transform:translateX(0); box-shadow:18px 0 44px rgba(255,58,58,.18); }
+    .start::after { right:0; background-position:right center; transform:translateX(0); box-shadow:-18px 0 44px rgba(255,58,58,.18); }
     .start.is-opening { pointer-events:none; }
+    .start.is-opening::before,
+    .start.is-opening::after { opacity:1; visibility:visible; }
+    .start.is-opening::before { transform:translateX(-105%) skewY(-4deg); filter:brightness(1.25); }
+    .start.is-opening::after { transform:translateX(105%) skewY(4deg); filter:brightness(1.25); }
     .start.is-opening .card { animation:startGateVanish .7s ease forwards; }
     @keyframes startGateVanish { to { opacity:0; transform:scale(1.06); } }
     .card {

@@ -697,7 +697,7 @@ function openReadMethodModal() {
 
     const pdfPath = `./posts/volume${selectedVolume}/${selectedFile}`;
     const googleDocsUrl = chapterReader.googleDocsUrl || '';
-    const immersivePath = `./reader.html?volume=${encodeURIComponent(selectedVolume)}&chapter=${encodeURIComponent(selectedChapter)}`;
+    const immersivePath = `./reader.html?volume=${encodeURIComponent(selectedVolume)}&chapter=${encodeURIComponent(selectedChapter)}&autostartAudio=1`;
 
     const openPdfBtn = document.getElementById('open-raw-pdf-btn');
     const openGoogleDocsBtn = document.getElementById('open-google-docs-btn');
@@ -730,10 +730,11 @@ function openReadMethodModal() {
         };
         sessionStorage.setItem('pg_reader_chapter', JSON.stringify(chapterPayload));
         sessionStorage.setItem('pg_reader_autostart_audio', '1');
+        const readerWindow = window.open(immersivePath, '_blank');
         playFireSound('open');
         closeModal(methodModal);
         closeModal(document.getElementById('modal-ler'));
-        window.location.assign(immersivePath);
+        if (!readerWindow) window.location.assign(immersivePath);
     };
 
     openModal(methodModal);
