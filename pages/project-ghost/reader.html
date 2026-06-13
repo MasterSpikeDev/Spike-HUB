@@ -31,11 +31,6 @@
     .bg-image { background-size:cover; background-position:center; background-repeat:no-repeat; }
     .bg-video { display:none; }
     .overlay { position:fixed; inset:0; z-index:2; background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.68)); }
-    #readerFireParticles { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:21; opacity:.88; }
-    .reader-fire-ambience { position:fixed; inset:0; pointer-events:none; z-index:20; background:radial-gradient(circle at 50% 110%, rgba(255,80,0,.28), transparent 45%), radial-gradient(circle at 10% 0%, rgba(255,30,0,.09), transparent 40%), radial-gradient(circle at 90% 15%, rgba(255,140,0,.08), transparent 35%); mix-blend-mode:screen; animation: readerFireAmbienceShift 12s ease-in-out infinite alternate; }
-    @keyframes readerFireAmbienceShift { 0% { filter:saturate(1) brightness(1); } 100% { filter:saturate(1.15) brightness(1.08); } }
-    .reader-fire-spark { position:fixed; bottom:-40px; width:4px; height:4px; border-radius:50%; pointer-events:none; background:radial-gradient(circle, #ffe8a8 0%, #ff8f1f 65%, transparent 100%); box-shadow:0 0 12px rgba(255,109,22,.8); opacity:0; z-index:22; animation-name: readerFloatSpark; animation-timing-function:linear; animation-iteration-count:infinite; }
-    @keyframes readerFloatSpark { 0% { transform:translate3d(0,0,0) scale(.8); opacity:0; } 12% { opacity:1; } 100% { transform:translate3d(var(--drift-x,30px), -120vh, 0) scale(.15); opacity:0; } }
     .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr; height:100%; }
     .bar { display:grid; grid-template-columns:1fr auto; gap:10px 14px; align-items:center; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); overflow:hidden; transition:grid-template-rows .28s ease, padding .28s ease; }
     .reader-heading { display:flex; flex-direction:column; gap:4px; min-width:0; }
@@ -226,10 +221,7 @@
     .start.is-opening { pointer-events:none; }
     .start.is-opening::before { transform:translateX(-105%) skewY(-4deg); filter:brightness(1.25); }
     .start.is-opening::after { transform:translateX(105%) skewY(4deg); filter:brightness(1.25); }
-    .start.is-opening .card,
-    .start.is-opening #readerFireParticles,
-    .start.is-opening .reader-fire-ambience,
-    .start.is-opening .reader-fire-spark { animation:startGateVanish .7s ease forwards; }
+    .start.is-opening .card { animation:startGateVanish .7s ease forwards; }
     @keyframes startGateVanish { to { opacity:0; transform:scale(1.06); } }
     .card {
       position: relative;
@@ -357,8 +349,6 @@
   </div>
 
   <div id="start" class="start">
-    <div class="reader-fire-ambience" aria-hidden="true"></div>
-    <canvas id="readerFireParticles" aria-hidden="true"></canvas>
     <div class="card">
       <div id="startCoverFrame" class="start-cover-frame" aria-label="Capa do capítulo"></div>
       <div class="start-actions">
@@ -466,37 +456,6 @@
     const startBackgroundImage = normalizeSceneMedia(startScreen.backgroundImage || startScreen.image || startScreen.backdrop)[0];
     if (startBackgroundImage) els.start.style.setProperty('--start-bg-image', `url('${startBackgroundImage}')`);
 
-
-    function initReaderFireParticles(){
-      const canvas = document.getElementById('readerFireParticles');
-      if (!canvas) return;
-      for (let i = 0; i < 32; i += 1) {
-        const spark = document.createElement('span');
-        spark.className = 'reader-fire-spark';
-        spark.style.left = `${Math.random() * 100}vw`;
-        spark.style.animationDuration = `${6 + Math.random() * 8}s`;
-        spark.style.animationDelay = `${Math.random() * -12}s`;
-        spark.style.setProperty('--drift-x', `${-80 + Math.random() * 160}px`);
-        spark.style.opacity = `${0.35 + Math.random() * 0.65}`;
-        els.start.appendChild(spark);
-      }
-      const ctx = canvas.getContext('2d');
-      const particles = [];
-      const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-      const spawnParticle = () => particles.push({ x:Math.random()*canvas.width, y:canvas.height+Math.random()*40, size:1+Math.random()*3, vy:.5+Math.random()*1.8, vx:-.35+Math.random()*.7, life:70+Math.random()*80, hue:18+Math.random()*25 });
-      const animate = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (particles.length < 140) for (let i = 0; i < 4; i += 1) spawnParticle();
-        for (let i = particles.length - 1; i >= 0; i -= 1) {
-          const p = particles[i]; p.x += p.vx; p.y -= p.vy; p.life -= 1;
-          const alpha = Math.max(p.life / 130, 0);
-          ctx.beginPath(); ctx.fillStyle = `hsla(${p.hue}, 100%, 58%, ${alpha})`; ctx.shadowColor = `hsla(${p.hue}, 100%, 62%, ${alpha})`; ctx.shadowBlur = 14; ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
-          if (p.life <= 0 || p.y < -20) particles.splice(i, 1);
-        }
-        requestAnimationFrame(animate);
-      };
-      resize(); window.addEventListener('resize', resize); animate();
-    }
 
     function loading(on,msg){ els.loading.style.display = on ? 'block' : 'none'; if(msg) els.loading.textContent=msg; }
     function getScene(page){ return (reader.scenes || []).find(s => page >= s.from && page <= s.to) || (reader.scenes || [])[0]; }
@@ -1127,7 +1086,6 @@
       scrollToPage(st.page);
     }
 
-    initReaderFireParticles();
     preloadStartCover().catch(() => loading(false));
     playStartScreenAudio();
     ['pointerdown', 'keydown', 'touchstart'].forEach((eventName) => {
