@@ -257,6 +257,18 @@
     }
     .start-actions { width:min(520px, 100%); display:grid; gap:10px; justify-items:center; }
     .start-title { display:none; }
+    .resume-reader-message {
+      max-width:min(620px, 86vw);
+      padding:24px;
+      border:1px solid rgba(255,70,70,.42);
+      border-radius:18px;
+      background:rgba(12,0,0,.72);
+      box-shadow:0 18px 70px rgba(255,0,0,.14);
+      text-align:center;
+      color:#fff;
+    }
+    .resume-reader-message strong { display:block; font-size:1.35rem; margin-bottom:8px; color:#ff4b4b; }
+    .resume-reader-message span { color:var(--muted); line-height:1.45; }
     .start-main-btn {
       width: 100%;
       border-radius: 999px;
@@ -1073,6 +1085,14 @@
         if (st.startAudio) await fadeOutAndStop(st.startAudio, 750);
         st.startAudio = null;
         await new Promise((resolve) => setTimeout(resolve, 980));
+      } else {
+        const savedPageForAudio = Number(sessionStorage.getItem('pg_reader_page'));
+        const audioUnlockPage = savedPageForAudio || (reader.startScreen ? 2 : (reader.pageStart || 1));
+        const audioUnlockScene = getScene(audioUnlockPage);
+        if (audioUnlockScene) {
+          applySceneTheme(audioUnlockScene);
+          try { await setSceneAudio(audioUnlockScene); } catch { console.warn('Áudio bloqueado ou arquivo ausente.'); }
+        }
       }
       if (isEmbeddedPreview) {
         window.top.location.assign(getStandaloneReaderUrl());
@@ -1104,18 +1124,22 @@
       scrollToPage(st.page);
     }
 
-    preloadStartCover()
-      .catch(() => loading(false))
-      .finally(() => {
-        if (shouldSkipStartGate) loadAndStart({ skipGate:true });
-      });
-    if (!shouldSkipStartGate) {
+    if (shouldSkipStartGate) {
+      els.startCoverFrame.innerHTML = `
+        <div class="resume-reader-message">
+          <strong>Leitura pronta</strong>
+          <span>Clique para liberar o PDF e permitir a trilha sonora da cena.</span>
+        </div>
+      `;
+      els.startBtn.textContent = 'Continuar para o PDF';
+    } else {
+      preloadStartCover().catch(() => loading(false));
       playStartScreenAudio();
       ['pointerdown', 'keydown', 'touchstart'].forEach((eventName) => {
         els.start.addEventListener(eventName, playStartScreenAudio, { once:true, passive:true });
       });
     }
-    els.startBtn.addEventListener('click', () => loadAndStart());
+    els.startBtn.addEventListener('click', () => loadAndStart({ skipGate:shouldSkipStartGate }));
     syncZoomControl();
     hideUnavailableMediaPlayer();
     updateMediaButtons();
