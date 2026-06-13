@@ -180,7 +180,10 @@ export const prologoChapter = {
                 from: 22,
                 to: 22,
                 background: "assets/cenas/cidade/rua_noite_chuva.png",
-                audio: readerMusic.ashes_japonese,
+                audio: [
+                    readerMusic.ashes_japonese,
+                    readerMusic.chuva,
+                ],
                 theme: {
                     accent: "#000812",
                     panel: "rgba(0, 24, 64, 0.78)",
@@ -193,7 +196,10 @@ export const prologoChapter = {
                 from: 23,
                 to: 23,
                 background: "assets/cenas/cidade/rua_noite_chuva_carro.png",
-                audio: readerMusic.ashes_japonese,
+                audio: [
+                    readerMusic.ashes_japonese,
+                    readerMusic.chuva
+                ],
                 theme: {
                     accent: "#000812",
                     panel: "rgba(0, 24, 64, 0.78)",
@@ -206,7 +212,10 @@ export const prologoChapter = {
                 from: 24,
                 to: 24,
                 background: "assets/cenas/cidade/none.png",
-                audio: readerMusic.ashes_japonese,
+                audio: [
+                    readerMusic.ashes_japonese,
+                    readerMusic.chuva
+                ],
                 theme: {
                     accent: "#000812",
                     panel: "rgba(0, 24, 64, 0.78)",
