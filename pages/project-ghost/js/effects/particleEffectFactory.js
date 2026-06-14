@@ -16,6 +16,10 @@ function shouldLoop(config) {
   return config.loop !== false;
 }
 
+function getIntensity(config) {
+  return clamp(Number(config.intensity ?? 1), 0, 3);
+}
+
 export function createParticleEffect(definition) {
   const defaults = definition.defaults || {};
   return {
@@ -42,10 +46,17 @@ export function createParticleEffect(definition) {
       this.isStopping = false;
     },
     seedInitialParticles() {
-      const count = Math.floor(Number(this.config.quantity ?? defaults.quantity ?? 80) * Number(this.config.intensity ?? 1));
+      const count = this.getMaxParticles();
       for (let i = 0; i < count; i += 1) {
         this.particles.push(definition.spawn(this, true));
       }
+    },
+    getMaxParticles() {
+      const quantity = Math.max(0, Number(this.config.quantity ?? defaults.quantity ?? 80));
+      const configuredMax = this.config.maxParticles == null ? Infinity : Math.max(0, Number(this.config.maxParticles));
+      const intensity = getIntensity(this.config);
+      if (intensity <= 0) return 0;
+      return Math.floor(Math.min(quantity * Math.max(intensity, 0.05), configuredMax));
     },
     stop() {
       this.isStopping = true;
@@ -62,8 +73,11 @@ export function createParticleEffect(definition) {
         : Math.max(this.targetOpacity, this.opacity - fadeStep);
       if (this.opacity <= 0.001 && this.isStopping) return true;
 
-      const intensity = clamp(Number(this.config.intensity ?? 1), 0, 3);
-      const maxParticles = Math.floor(Number(this.config.quantity ?? defaults.quantity ?? 80) * Math.max(intensity, 0.05));
+      const intensity = getIntensity(this.config);
+      const maxParticles = this.getMaxParticles();
+      if (this.particles.length > maxParticles) {
+        this.particles.splice(maxParticles);
+      }
       const spawnRate = Number(this.config.spawnRate ?? defaults.spawnRate ?? 20) * intensity;
       this.spawnCarry += spawnRate * delta;
       const loop = shouldLoop(this.config);
