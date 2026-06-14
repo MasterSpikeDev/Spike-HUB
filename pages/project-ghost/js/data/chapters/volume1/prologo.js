@@ -42,7 +42,7 @@ export const prologoChapter = {
                 from: 3,
                 to: 5,
                 background: "assets/cenas/ambiente/sonho_prologo.png",
-                audio: readerMusic.clock,
+                audio: [{ ...readerMusic.clock, loop: false, volume: 0.01 }],
                 effects: [
                     { id: "voidParticles", intensity: 10, quantity: 1000, speed: 24, color: "#6f6f78", opacity: 1, fadeIn: 1200, fadeOut: 1000, loop: true },
                     { id: "darkness", layer: "page", color: "#ffffff", edgeOpacity: 1, innerRadius: 0.05, fadeIn: 1000, fadeOut: 1000 }
@@ -103,7 +103,7 @@ export const prologoChapter = {
                 from: 9,
                 to: 9,
                 background: "assets/cenas/escola/escola_corredor.png",
-                audio: [readerMusic.escola, readerMusic.normal_days],
+                audio: [readerMusic.normal_days, readerMusic.escola],
                 theme: {
                     accent: "#000812",
                     panel: "rgba(63, 63, 63, 0.78)",

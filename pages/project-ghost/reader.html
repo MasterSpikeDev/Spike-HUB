@@ -863,6 +863,8 @@
     }
     function applyAudioConfig(audio, audioConfig){
       audio.loop = audioConfig.loop;
+      if (audioConfig.loop) audio.setAttribute('loop', '');
+      else audio.removeAttribute('loop');
       audio.setAttribute('data-track-volume', String(audioConfig.volume));
       audio.muted = st.muted;
       if (!audio.paused) audio.volume = getAudioTargetVolume(audio);
