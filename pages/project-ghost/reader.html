@@ -120,6 +120,15 @@
       box-shadow:0 0 12px rgba(255,58,58,.35);
       transition:height .08s linear;
     }
+    .media-hover-zone {
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:7;
+      height:28px;
+      pointer-events:auto;
+    }
     .viewer {
       position:relative;
       z-index:1;
@@ -372,6 +381,7 @@
         <div id="pageHost" class="page-host" aria-label="Todas as páginas do PDF"></div>
       </div>
     </main>
+    <div id="mediaHoverZone" class="media-hover-zone" aria-hidden="true"></div>
     <canvas id="effectsCanvasAbove" aria-hidden="true"></canvas>
   </div>
 
@@ -493,7 +503,7 @@
       back:document.getElementById('backBtn'), mediaToggle:document.getElementById('mediaToggle'), mediaToggleIcon:document.getElementById('mediaToggleIcon'),
       startTitle:document.getElementById('startTitle'), startCoverFrame:document.getElementById('startCoverFrame'), mediaPlayer:document.getElementById('mediaPlayer'), mediaCover:document.getElementById('mediaCover'), mediaTitle:document.getElementById('mediaTitle'), mediaSubtitle:document.getElementById('mediaSubtitle'), mediaCurrentText:document.getElementById('mediaCurrentText'), mediaDurationText:document.getElementById('mediaDurationText'), mediaRemainingText:document.getElementById('mediaRemainingText'), mediaProgress:document.getElementById('mediaProgress'), mediaRestart:document.getElementById('mediaRestart'), mediaPlay:document.getElementById('mediaPlay'), mediaPlayIcon:document.getElementById('mediaPlayIcon'), mediaMute:document.getElementById('mediaMute'), mediaMuteIcon:document.getElementById('mediaMuteIcon'), mediaVolume:document.getElementById('mediaVolume'), mediaDownload:document.getElementById('mediaDownload'), visualizer:document.getElementById('visualizer'),
       pageHost:document.getElementById('pageHost'), pageStatus:document.getElementById('pageStatus'),
-      bgA:document.getElementById('bgA'), bgB:document.getElementById('bgB'), loading:document.getElementById('loading'), audioHost:document.getElementById('audioHost'), effectsCanvas:document.getElementById('effectsCanvas'), effectsCanvasAbove:document.getElementById('effectsCanvasAbove')
+      bgA:document.getElementById('bgA'), bgB:document.getElementById('bgB'), loading:document.getElementById('loading'), audioHost:document.getElementById('audioHost'), effectsCanvas:document.getElementById('effectsCanvas'), effectsCanvasAbove:document.getElementById('effectsCanvasAbove'), mediaHoverZone:document.getElementById('mediaHoverZone')
     };
     st.bgActiveLayer = els.bgA;
     st.bgInactiveLayer = els.bgB;
@@ -535,8 +545,7 @@
     }
     function showActiveMediaPlayer(){
       els.topBar.classList.remove('media-unavailable');
-      collapseMediaPlayer(false);
-      scheduleMediaAutoCollapse();
+      if (!els.topBar.classList.contains('media-collapsed')) scheduleMediaAutoCollapse();
     }
     function hideUnavailableMediaPlayer(){
       clearTimeout(st.mediaIdleTimer);
@@ -591,6 +600,32 @@
     }
     function normalizeSceneMedia(value){
       return getMediaConfigList(value).map(getMediaSrc);
+    }
+    function getMediaLoop(config){
+      if (config && typeof config === 'object' && 'loop' in config) return config.loop !== false;
+      return true;
+    }
+    function getMediaVolume(config){
+      const rawVolume = config && typeof config === 'object' ? config.volume : undefined;
+      const volume = Number(rawVolume);
+      return Number.isFinite(volume) ? Math.max(0, Math.min(1, volume)) : 1;
+    }
+    function getSceneAudioConfigs(scene){
+      return getMediaConfigList(scene?.audio).map((config) => ({
+        config,
+        src: getMediaSrc(config),
+        loop: getMediaLoop(config),
+        volume: getMediaVolume(config)
+      }));
+    }
+    function getAudioConfigForElement(scene, audio){
+      const src = audio?.getAttribute('data-src') || '';
+      return getSceneAudioConfigs(scene).find((item) => item.src === src)?.config || getMediaConfigList(scene?.audio)[0];
+    }
+    function getAudioTargetVolume(audio){
+      const trackVolume = Number(audio?.getAttribute('data-track-volume'));
+      const safeTrackVolume = Number.isFinite(trackVolume) ? Math.max(0, Math.min(1, trackVolume)) : 1;
+      return st.muted ? 0 : st.volume * safeTrackVolume;
     }
     function resolveBackgroundType(path){
       const cleanPath = String(path || '').split('?')[0].toLowerCase();
@@ -670,13 +705,13 @@
     function applyMediaVolume(){
       st.activeAudios.forEach((audio) => {
         audio.muted = st.muted;
-        audio.volume = st.muted ? 0 : st.volume;
+        audio.volume = getAudioTargetVolume(audio);
       });
       updateMediaButtons();
     }
     function updateMediaMetadata(scene){
       const audio = getPrimaryAudio();
-      const audioConfig = getMediaConfigList(scene?.audio)[0];
+      const audioConfig = getAudioConfigForElement(scene, audio);
       const src = audio?.getAttribute('data-src') || getMediaSrc(audioConfig) || '';
       if (!audio || !src) {
         hideUnavailableMediaPlayer();
@@ -694,7 +729,7 @@
         return;
       }
       els.mediaTitle.textContent = audioConfig?.title || audioConfig?.name || scene?.musicTitle || scene?.audioTitle || getMediaTitle(src);
-      els.mediaSubtitle.textContent = `${audioConfig?.description || scene?.label || 'Cena'} • ${src.split('/').pop()}`;
+      els.mediaSubtitle.textContent = audioConfig?.description || scene?.label || 'Cena';
       const artwork = getSceneArtwork(scene);
       if (artwork) els.mediaCover.src = artwork;
       else els.mediaCover.removeAttribute('src');
@@ -818,50 +853,63 @@
         noise.stop(ctx.currentTime + duration);
       } catch {}
     }
-    function createSceneAudio(src){
+    function applyAudioConfig(audio, audioConfig){
+      audio.loop = audioConfig.loop;
+      audio.setAttribute('data-track-volume', String(audioConfig.volume));
+      audio.muted = st.muted;
+      if (!audio.paused) audio.volume = getAudioTargetVolume(audio);
+    }
+    function createSceneAudio(audioConfig){
       const audio = document.createElement('audio');
-      audio.loop = true;
       audio.preload = 'auto';
       audio.autoplay = true;
       audio.playsInline = true;
-      audio.setAttribute('data-src', src);
-      audio.src = src;
+      audio.setAttribute('data-src', audioConfig.src);
+      audio.src = audioConfig.src;
       audio.volume = 0;
-      audio.muted = st.muted;
+      applyAudioConfig(audio, audioConfig);
       els.audioHost.appendChild(audio);
       return audio;
     }
     async function setSceneAudio(scene){
-      const sceneAudioList = normalizeSceneMedia(scene?.audio);
-      const sceneAudioKey = sceneAudioList.join('|');
-      if (sceneAudioKey === st.currentSceneAudioKey) {
-        updateMediaMetadata(scene);
-        return;
-      }
-
+      const sceneAudioConfigs = getSceneAudioConfigs(scene);
+      const sceneAudioKey = sceneAudioConfigs.map((item) => item.src).join('|');
       const previousAudios = [...st.activeAudios];
-      st.activeAudios = [];
+      const reusableAudios = new Map(previousAudios.map((audio) => [audio.getAttribute('data-src') || '', audio]));
+
       st.currentSceneAudioKey = sceneAudioKey;
 
-      if (sceneAudioList.length === 0) {
+      if (sceneAudioConfigs.length === 0) {
+        st.activeAudios = [];
         hideUnavailableMediaPlayer();
         updateMediaMetadata(scene);
         await Promise.all(previousAudios.map((audio) => fadeOutAndStop(audio, 450)));
         return;
       }
 
-      const nextAudios = sceneAudioList.map((src) => createSceneAudio(src));
+      const nextAudios = sceneAudioConfigs.map((audioConfig) => {
+        const existingAudio = reusableAudios.get(audioConfig.src);
+        if (existingAudio) {
+          reusableAudios.delete(audioConfig.src);
+          applyAudioConfig(existingAudio, audioConfig);
+          return existingAudio;
+        }
+        return createSceneAudio(audioConfig);
+      });
+      const audiosToStop = [...reusableAudios.values()];
+      const newAudios = nextAudios.filter((audio) => !previousAudios.includes(audio));
       st.activeAudios = nextAudios;
       updateMediaMetadata(scene);
 
       await Promise.all(nextAudios.map(async (audio) => {
         audio.muted = st.muted;
         try {
-          if (!st.mediaPaused) await audio.play();
-          fade(audio, 0, st.muted ? 0 : st.volume, 1200);
+          if (!st.mediaPaused && (audio.paused || audio.ended)) await audio.play();
+          const fromVolume = Number.isFinite(audio.volume) ? audio.volume : 0;
+          fade(audio, fromVolume, getAudioTargetVolume(audio), newAudios.includes(audio) ? 1200 : 450);
         } catch {}
       }));
-      await Promise.all(previousAudios.map((audio) => fadeOutAndStop(audio, 900)));
+      await Promise.all(audiosToStop.map((audio) => fadeOutAndStop(audio, 900)));
       updateMediaButtons();
     }
 
@@ -1197,6 +1245,16 @@
       collapseMediaPlayer(collapsed);
       if (!collapsed) scheduleMediaAutoCollapse();
     });
+    els.mediaHoverZone.addEventListener('mouseenter', () => {
+      if (!getPrimaryAudio()) return;
+      collapseMediaPlayer(false);
+      scheduleMediaAutoCollapse();
+    });
+    els.mediaHoverZone.addEventListener('touchstart', () => {
+      if (!getPrimaryAudio()) return;
+      collapseMediaPlayer(false);
+      scheduleMediaAutoCollapse();
+    }, { passive:true });
     els.mediaPlay.addEventListener('click', async () => {
       const audio = getPrimaryAudio();
       if (!audio) return;
