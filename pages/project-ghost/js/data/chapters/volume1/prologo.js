@@ -42,6 +42,10 @@ export const prologoChapter = {
                 to: 5,
                 background: "assets/cenas/ambiente/sonho_prologo.png",
                 audio: readerMusic.clock,
+                effects: [
+                    { id: "voidParticles", intensity: 0.35, quantity: 80, speed: 24, color: "#6f6f78", opacity: 0.35, fadeIn: 1200, fadeOut: 1000 },
+                    { id: "darkness", layer: "page", color: "#000000", edgeOpacity: 0.32, innerRadius: 0.42, fadeIn: 1000, fadeOut: 1000 }
+                ],
                 theme: {
                     accent: "#000000",
                     panel: "rgba(44, 44, 44, 0.78)",
@@ -150,6 +154,10 @@ export const prologoChapter = {
                 to: 19,
                 background: "assets/cenas/cidade/cemiterio.png",
                 audio: readerMusic.chuva,
+                effects: [
+                    { id: "rain", intensity: 0.75, quantity: 170, speed: 820, opacity: 0.5, fadeIn: 900, fadeOut: 900 },
+                    { id: "fog", intensity: 0.35, quantity: 42, speed: 12, opacity: 0.18, fadeIn: 1400, fadeOut: 1200 }
+                ],
                 theme: {
                     accent: "#000812",
                     panel: "rgba(0, 24, 64, 0.78)",
@@ -163,6 +171,9 @@ export const prologoChapter = {
                 to: 20,
                 background: "assets/cenas/casa_haruki/entrada.png",
                 audio: readerMusic.chuva,
+                effects: [
+                    { id: "rain", intensity: 0.55, quantity: 130, speed: 760, opacity: 0.42, fadeIn: 700, fadeOut: 900 }
+                ],
                 theme: {
                     accent: "#000812",
                     panel: "rgba(0, 24, 64, 0.78)",
@@ -176,6 +187,9 @@ export const prologoChapter = {
                 to: 21,
                 background: "assets/cenas/casa_haruki/sala_estar.png",
                 audio: readerMusic.chuva,
+                effects: [
+                    { id: "rain", intensity: 0.35, quantity: 90, speed: 680, opacity: 0.28, fadeIn: 700, fadeOut: 900 }
+                ],
                 theme: {
                     accent: "#000812",
                     panel: "rgba(0, 24, 64, 0.78)",
@@ -191,6 +205,11 @@ export const prologoChapter = {
                 audio: [
                     readerMusic.ashes_japonese,
                     readerMusic.chuva,
+                ],
+                effects: [
+                    { id: "rain", layer: "page", intensity: 0.9, quantity: 190, speed: 900, opacity: 0.42, fadeIn: 700, fadeOut: 800 },
+                    { id: "ashes", intensity: 0.35, quantity: 60, speed: 34, opacity: 0.34, fadeIn: 900, fadeOut: 900 },
+                    { id: "heartbeat", layer: "page", bpm: 72, intensity: 0.12, overlayIntensity: 0.9, overlayDuration: 520, overlayFadeOut: 850, color: "#8f0015", edgeOpacity: 0.7, fadeIn: 900, fadeOut: 700 }
                 ],
                 theme: {
                     accent: "#000812",
@@ -208,6 +227,11 @@ export const prologoChapter = {
                     readerMusic.ashes_japonese,
                     readerMusic.chuva
                 ],
+                effects: [
+                    { id: "rain", layer: "page", intensity: 0.85, quantity: 180, speed: 880, opacity: 0.4, fadeIn: 500, fadeOut: 800 },
+                    { id: "ashes", intensity: 0.45, quantity: 70, speed: 38, opacity: 0.38, fadeIn: 700, fadeOut: 800 },
+                    { id: "heartbeat", layer: "page", bpm: 84, intensity: 0.16, overlayIntensity: 1, overlayDuration: 420, overlayFadeOut: 700, color: "#ff1f3d", edgeOpacity: 0.75, fadeIn: 400, fadeOut: 800 }
+                ],
                 theme: {
                     accent: "#000812",
                     panel: "rgba(0, 24, 64, 0.78)",
@@ -222,6 +246,10 @@ export const prologoChapter = {
                 audio: [
                     readerMusic.ashes_japonese,
                     readerMusic.chuva
+                ],
+                effects: [
+                    { id: "rain", layer: "page", intensity: 0.6, quantity: 130, speed: 760, opacity: 0.32, fadeIn: 500, fadeOut: 1300 },
+                    { id: "ashes", intensity: 0.55, quantity: 80, speed: 30, opacity: 0.34, fadeIn: 600, fadeOut: 1200 }
                 ],
                 theme: {
                     accent: "#000812",
