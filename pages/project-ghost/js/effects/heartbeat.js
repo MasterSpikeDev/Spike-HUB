@@ -5,6 +5,9 @@ export default {
     this.config = {
       bpm: 72,
       intensity: .45,
+      overlayIntensity: null,
+      overlayDuration: 260,
+      overlayFadeOut: 520,
       volume: .3,
       color: 'rgba(255, 0, 42, 1)',
       edgeOpacity: .5,
@@ -17,6 +20,9 @@ export default {
     this.phase = 0;
     this.audio = null;
     this.nextBeatAt = 0;
+    this.previousCycle = 1;
+    this.overlayLevel = 0;
+    this.overlayHoldRemaining = 0;
     this.isStopping = false;
     this.ensureAudio();
   },
@@ -71,9 +77,23 @@ export default {
     const pulse = Math.max(firstBeat, secondBeat);
     const eased = pulse * pulse * intensity * this.opacity;
     this.manager.setPagePulse(eased);
-    this.drawVignette(eased);
+    this.updateOverlay(delta, cycle, pulse);
+    this.drawVignette();
     this.playBeatIfNeeded(cycle);
+    this.previousCycle = cycle;
     return false;
+  },
+  updateOverlay(delta, cycle, pulse) {
+    const beatStarted = cycle < this.previousCycle || (pulse > .72 && this.previousCycle > .28);
+    if (beatStarted) {
+      this.overlayHoldRemaining = Math.max(0, Number(this.config.overlayDuration ?? 260)) / 1000;
+      this.overlayLevel = 1;
+    } else if (this.overlayHoldRemaining > 0) {
+      this.overlayHoldRemaining = Math.max(0, this.overlayHoldRemaining - delta);
+    } else {
+      const fadeOut = Math.max(1, Number(this.config.overlayFadeOut ?? 520)) / 1000;
+      this.overlayLevel = Math.max(0, this.overlayLevel - delta / fadeOut);
+    }
   },
   playBeatIfNeeded(cycle) {
     if (!this.audio || this.manager.isMuted()) return;
@@ -85,10 +105,14 @@ export default {
     this.audio.volume = Math.max(0, Math.min(1, (Number(this.config.volume ?? .3)) * this.manager.getVolume()));
     this.audio.play().catch(() => {});
   },
-  drawVignette(amount) {
+  drawVignette() {
     const ctx = this.manager.ctx;
     const w = this.manager.width;
     const h = this.manager.height;
+    const overlayIntensity = this.config.overlayIntensity == null
+      ? Math.max(0, Math.min(2, Number(this.config.intensity ?? .45)))
+      : Math.max(0, Math.min(2, Number(this.config.overlayIntensity)));
+    const amount = this.overlayLevel * overlayIntensity * this.opacity;
     if (!ctx || amount <= 0 || !w || !h) return;
     const edgeOpacity = Math.max(0, Math.min(1, Number(this.config.edgeOpacity ?? .5)));
     ctx.save();

@@ -165,7 +165,17 @@ Overlay/vinheta fixa de escuridão. Não é partícula. Cobre as bordas da tela 
 Pulso de tensão. Não é partícula. Faz a página pulsar em direção ao leitor com transformação 3D e desenha uma vinheta pulsante com cor configurável.
 
 ```js
-{ id: "heartbeat", layer: "page", bpm: 84, intensity: 0.28, color: "#ff1f3d", edgeOpacity: 0.55 }
+{
+  id: "heartbeat",
+  layer: "page",
+  bpm: 84,
+  intensity: 0.18,
+  overlayIntensity: 0.9,
+  overlayDuration: 420,
+  overlayFadeOut: 700,
+  color: "#ff1f3d",
+  edgeOpacity: 0.65
+}
 ```
 
 Com som:
@@ -175,8 +185,27 @@ Com som:
 ```
 
 - `bpm`: batidas por minuto.
-- `intensity`: força do pulso 3D.
+- `intensity`: força do pulso 3D da página. Use baixo se quiser só uma vibração leve.
+- `overlayIntensity`: força independente da vinheta. Use alto quando quiser a página pulsando leve, mas as bordas bem visíveis.
+- `overlayDuration`: tempo em milissegundos que a vinheta fica segurando depois de cada batida.
+- `overlayFadeOut`: tempo em milissegundos para a vinheta sumir depois do `overlayDuration`.
 - `color`: cor da vinheta no pulso.
 - `edgeOpacity`: força da vinheta nas bordas.
 - `sound`: áudio opcional.
 - `volume`: volume relativo ao volume global do reader.
+
+Exemplo para batida física leve com overlay forte e mais duradouro:
+
+```js
+{
+  id: "heartbeat",
+  layer: "page",
+  bpm: 72,
+  intensity: 0.12,
+  overlayIntensity: 1,
+  overlayDuration: 550,
+  overlayFadeOut: 900,
+  color: "#8f0015",
+  edgeOpacity: 0.75
+}
+```

@@ -209,7 +209,7 @@ export const prologoChapter = {
                 effects: [
                     { id: "rain", layer: "page", intensity: 0.9, quantity: 190, speed: 900, opacity: 0.42, fadeIn: 700, fadeOut: 800 },
                     { id: "ashes", intensity: 0.35, quantity: 60, speed: 34, opacity: 0.34, fadeIn: 900, fadeOut: 900 },
-                    { id: "heartbeat", layer: "page", bpm: 72, intensity: 0.18, color: "#8f0015", edgeOpacity: 0.45, fadeIn: 900, fadeOut: 700 }
+                    { id: "heartbeat", layer: "page", bpm: 72, intensity: 0.12, overlayIntensity: 0.9, overlayDuration: 520, overlayFadeOut: 850, color: "#8f0015", edgeOpacity: 0.7, fadeIn: 900, fadeOut: 700 }
                 ],
                 theme: {
                     accent: "#000812",
@@ -230,7 +230,7 @@ export const prologoChapter = {
                 effects: [
                     { id: "rain", layer: "page", intensity: 0.85, quantity: 180, speed: 880, opacity: 0.4, fadeIn: 500, fadeOut: 800 },
                     { id: "ashes", intensity: 0.45, quantity: 70, speed: 38, opacity: 0.38, fadeIn: 700, fadeOut: 800 },
-                    { id: "heartbeat", layer: "page", bpm: 84, intensity: 0.28, color: "#ff1f3d", edgeOpacity: 0.55, fadeIn: 400, fadeOut: 800 }
+                    { id: "heartbeat", layer: "page", bpm: 84, intensity: 0.16, overlayIntensity: 1, overlayDuration: 420, overlayFadeOut: 700, color: "#ff1f3d", edgeOpacity: 0.75, fadeIn: 400, fadeOut: 800 }
                 ],
                 theme: {
                     accent: "#000812",
