@@ -217,7 +217,7 @@ Variação de `ashes`, mais lenta, menor e bege. Boa para sótão, sala velha e 
 
 ## `voidParticles` — partículas do vazio
 
-Partículas sobrenaturais com composição luminosa (`lighter`). Boas para sonho, vazio, dimensão estranha e cenas abstratas.
+Partículas sobrenaturais com composição luminosa (`lighter`). Boas para sonho, vazio, dimensão estranha e cenas abstratas. Este efeito tem reciclagem própria: quando uma partícula sai da tela, ela volta para o fluxo automaticamente enquanto `loop` estiver ativo.
 
 ### Opções específicas
 
@@ -229,18 +229,20 @@ Partículas sobrenaturais com composição luminosa (`lighter`). Boas para sonho
 | `color` | `"#7c4dff"` | Cor das partículas. |
 | `opacity` | `0.5` | Transparência/brilho. |
 | `size` | `2.3` | Raio máximo. |
-| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key`, `loop` | comuns | Controles gerais. |
+| `origin` | `"center"` | Origem do reaparecimento das partículas. Use `"center"` para nascer perto do centro ou `"screen"` para nascer espalhado pela tela. |
+| `loop` | `true` | Mantém o vazio reciclando partículas continuamente. |
+| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
 
 ### Exemplo discreto
 
 ```js
-{ id: "voidParticles", intensity: 0.35, quantity: 80, spawnRate: 16, speed: 24, color: "#6f6f78", opacity: 0.35, size: 2.1 }
+{ id: "voidParticles", intensity: 0.35, quantity: 80, spawnRate: 16, speed: 24, color: "#6f6f78", opacity: 0.35, size: 2.1, origin: "center", loop: true }
 ```
 
 ### Exemplo sobrenatural forte
 
 ```js
-{ id: "voidParticles", layer: "page", intensity: 0.8, quantity: 140, spawnRate: 26, speed: 48, color: "#7c4dff", opacity: 0.55, size: 2.6 }
+{ id: "voidParticles", layer: "page", intensity: 3, quantity: 1000, maxParticles: 1500, spawnRate: 40, speed: 48, color: "#7c4dff", opacity: 0.55, size: 2.6, origin: "screen", loop: true }
 ```
 
 ## `embers` — brasas
