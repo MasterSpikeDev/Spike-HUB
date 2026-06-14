@@ -42,7 +42,7 @@ export const prologoChapter = {
                 from: 3,
                 to: 5,
                 background: "assets/cenas/ambiente/sonho_prologo.png",
-                audio: [{ ...readerMusic.clock, loop: false, volume: 0.01 }],
+                audio: [{ ...readerMusic.clock, loop: true, volume: 1 }],
                 effects: [
                     { id: "voidParticles", intensity: 10, quantity: 1000, speed: 24, color: "#6f6f78", opacity: 1, fadeIn: 1200, fadeOut: 1000, loop: true },
                     { id: "darkness", layer: "page", color: "#ffffff", edgeOpacity: 1, innerRadius: 0.05, fadeIn: 1000, fadeOut: 1000 }
@@ -59,7 +59,7 @@ export const prologoChapter = {
                 from: 6,
                 to: 6,
                 background: "assets/cenas/casa_haruki/quarto_haruki.png",
-                audio: readerMusic.clock_alarm,
+                audio: { ...readerMusic.clock_alarm, loop: false },
                 theme: {
                     accent: "#000812",
                     panel: "rgba(0, 24, 64, 0.78)",
@@ -131,7 +131,7 @@ export const prologoChapter = {
                 from: 11,
                 to: 12,
                 background: "assets/cenas/escola/diretoria.png",
-                audio: readerMusic.escola,
+                audio: { ...readerMusic.escola, volume: 0.1 },
                 theme: {
                     accent: "#000812",
                     panel: "rgba(42, 19, 0, 0.78)",
@@ -166,7 +166,7 @@ export const prologoChapter = {
                     muted: "#ffffff"
                 },
                 effects: [
-                    { id: "dust", intensity: 10, quantity: 600, spawnRate: 8, speed: 14, opacity: 0.9, size: 1.8, wind: 8, color: "rgba(215,200,170,.55)" }
+                    { id: "dust", intensity: 10, quantity: 1000, spawnRate: 8, speed: 14, opacity: 0.5, size: 1.8, wind: 8, color: "rgb(190, 169, 127)", layer: "page" }
                 ]
             },
             {
@@ -193,7 +193,14 @@ export const prologoChapter = {
                 from: 17,
                 to: 17,
                 background: "assets/cenas/flashback/flashback_casa_haruki_pais.png",
-                audio: readerMusic.chuva,
+                audio: [
+
+                    {
+                        ...readerMusic.for_them
+                    }, {
+                        ...readerMusic.chuva, volume: 0.5
+                    }
+                ],
                 effects: [
                     ,
                     { id: "darkness", layer: "page", color: "#ffffff", edgeOpacity: 1, innerRadius: 0.03, fadeIn: 1000, fadeOut: 1000 }
@@ -211,10 +218,16 @@ export const prologoChapter = {
                 from: 18,
                 to: 19,
                 background: "assets/cenas/cidade/cemiterio.png",
-                audio: readerMusic.chuva,
+                audio: [
+                    {
+                        ...readerMusic.for_them
+                    }, {
+                        ...readerMusic.chuva, volume: 0.5
+                    }
+                ],
                 effects: [
                     { id: "rain", intensity: 10, quantity: 100, speed: 820, opacity: 0.5, fadeIn: 900, fadeOut: 900, layer: "page" },
-                    { id: "fog", intensity: 0.35, quantity: 42, speed: 12, opacity: 0.18, fadeIn: 1400, fadeOut: 1200 }
+                    { id: "fog", intensity: 1, quantity: 42, speed: 12, opacity: 0.18, fadeIn: 1400, fadeOut: 1200, layer: "page" }
                 ],
                 theme: {
                     accent: "#000812",
@@ -228,8 +241,10 @@ export const prologoChapter = {
                 from: 20,
                 to: 20,
                 background: "assets/cenas/casa_haruki/entrada.png",
-                audio: readerMusic.chuva,
-                effects: [                 
+                audio: {
+                        ...readerMusic.chuva, volume: 0.3
+                    },
+                effects: [
 
                 ],
                 theme: {
@@ -244,9 +259,11 @@ export const prologoChapter = {
                 from: 21,
                 to: 21,
                 background: "assets/cenas/casa_haruki/sala_estar.png",
-                audio: readerMusic.chuva,
+                audio: {
+                        ...readerMusic.chuva, volume: 0.3
+                    },
                 effects: [
-                    
+
                 ],
                 theme: {
                     accent: "#000812",

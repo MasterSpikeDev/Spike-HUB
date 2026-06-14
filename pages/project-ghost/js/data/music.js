@@ -77,6 +77,13 @@ export const readerMusic = {
         description: "Trilha sonora oficial de Project Ghost",
         src: "assets/audio/project_ghost_official/11.normal_days.wav",
         icon: "assets/images/arts/artes-publicadas/banners/logo_OST.png"
+    },
+    for_them: {
+        id: "for_them",
+        title: "For hem",
+        description: "Trilha sonora oficial de Project Ghost",
+        src: "assets/audio/project_ghost_official/32.for_them.wav",
+        icon: "assets/images/arts/artes-publicadas/banners/logo_OST.png"
     }
 };
 
