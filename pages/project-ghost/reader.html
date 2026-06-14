@@ -30,10 +30,12 @@
     }
     .bg-image { background-size:cover; background-position:center; background-repeat:no-repeat; }
     .bg-video { display:none; }
-    #effectsCanvas { position:fixed; inset:0; z-index:1; width:100%; height:100%; pointer-events:none; opacity:0; transition:opacity .35s ease; background:transparent; box-shadow:none; border-radius:0; }
+    #effectsCanvas, #effectsCanvasAbove { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; opacity:0; transition:opacity .35s ease; background:transparent; box-shadow:none; border-radius:0; }
+    #effectsCanvas { z-index:1; }
+    #effectsCanvasAbove { z-index:4; }
     .overlay { position:fixed; inset:0; z-index:2; background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.68)); }
     .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr; height:100%; }
-    .bar { display:grid; grid-template-columns:1fr auto; gap:10px 14px; align-items:center; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); overflow:hidden; transition:grid-template-rows .28s ease, padding .28s ease; }
+    .bar { position:relative; z-index:6; display:grid; grid-template-columns:1fr auto; gap:10px 14px; align-items:center; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); overflow:hidden; transition:grid-template-rows .28s ease, padding .28s ease; }
     .reader-heading { display:flex; flex-direction:column; gap:4px; min-width:0; }
     .top-page-status { color:var(--muted); font-size:13px; line-height:1.2; }
     .controls { display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
@@ -116,6 +118,8 @@
       transition:height .08s linear;
     }
     .viewer {
+      position:relative;
+      z-index:1;
       display:flex;
       align-items:flex-start;
       justify-content:center;
@@ -140,6 +144,9 @@
       align-items:center;
       gap:18px;
       position:relative;
+      transform-origin:center center;
+      transform-style:preserve-3d;
+      will-change:transform, filter;
     }
     .page-frame {
       position:relative;
@@ -362,6 +369,7 @@
         <div id="pageHost" class="page-host" aria-label="Todas as páginas do PDF"></div>
       </div>
     </main>
+    <canvas id="effectsCanvasAbove" aria-hidden="true"></canvas>
   </div>
 
   <div id="start" class="start">
@@ -391,6 +399,8 @@
     import embersEffect from "./js/effects/embers.js";
     import sparksEffect from "./js/effects/sparks.js";
     import leavesEffect from "./js/effects/leaves.js";
+    import cherryBlossomsEffect from "./js/effects/cherryBlossoms.js";
+    import darknessEffect from "./js/effects/darkness.js";
     import heartbeatEffect from "./js/effects/heartbeat.js";
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
 
@@ -480,16 +490,18 @@
       back:document.getElementById('backBtn'), mediaToggle:document.getElementById('mediaToggle'), mediaToggleIcon:document.getElementById('mediaToggleIcon'),
       startTitle:document.getElementById('startTitle'), startCoverFrame:document.getElementById('startCoverFrame'), mediaPlayer:document.getElementById('mediaPlayer'), mediaCover:document.getElementById('mediaCover'), mediaTitle:document.getElementById('mediaTitle'), mediaSubtitle:document.getElementById('mediaSubtitle'), mediaCurrentText:document.getElementById('mediaCurrentText'), mediaDurationText:document.getElementById('mediaDurationText'), mediaRemainingText:document.getElementById('mediaRemainingText'), mediaProgress:document.getElementById('mediaProgress'), mediaRestart:document.getElementById('mediaRestart'), mediaPlay:document.getElementById('mediaPlay'), mediaPlayIcon:document.getElementById('mediaPlayIcon'), mediaMute:document.getElementById('mediaMute'), mediaMuteIcon:document.getElementById('mediaMuteIcon'), mediaVolume:document.getElementById('mediaVolume'), mediaDownload:document.getElementById('mediaDownload'), visualizer:document.getElementById('visualizer'),
       pageHost:document.getElementById('pageHost'), pageStatus:document.getElementById('pageStatus'),
-      bgA:document.getElementById('bgA'), bgB:document.getElementById('bgB'), loading:document.getElementById('loading'), audioHost:document.getElementById('audioHost'), effectsCanvas:document.getElementById('effectsCanvas')
+      bgA:document.getElementById('bgA'), bgB:document.getElementById('bgB'), loading:document.getElementById('loading'), audioHost:document.getElementById('audioHost'), effectsCanvas:document.getElementById('effectsCanvas'), effectsCanvasAbove:document.getElementById('effectsCanvasAbove')
     };
     st.bgActiveLayer = els.bgA;
     st.bgInactiveLayer = els.bgB;
     const effectManager = new EffectManager({
       canvas: els.effectsCanvas,
+      overlayCanvas: els.effectsCanvasAbove,
+      pageHost: els.pageHost,
       getMuted: () => st.muted || st.mediaPaused,
       getVolume: () => st.volume
     });
-    effectManager.registerMany([rainEffect, smokeEffect, fogEffect, snowEffect, ashesEffect, dustEffect, voidParticlesEffect, fireEffect, embersEffect, sparksEffect, leavesEffect, heartbeatEffect]);
+    effectManager.registerMany([rainEffect, smokeEffect, fogEffect, snowEffect, ashesEffect, dustEffect, voidParticlesEffect, fireEffect, embersEffect, sparksEffect, leavesEffect, cherryBlossomsEffect, darknessEffect, heartbeatEffect]);
     effectManager.preload((reader.scenes || []).flatMap((scene) => scene.effects || []));
 
     els.chapterTitle.textContent = `Project Ghost — ${reader.title}`;

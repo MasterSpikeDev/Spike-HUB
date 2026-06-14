@@ -43,7 +43,8 @@ export const prologoChapter = {
                 background: "assets/cenas/ambiente/sonho_prologo.png",
                 audio: readerMusic.clock,
                 effects: [
-                    { id: "voidParticles", intensity: 0.35, quantity: 80, speed: 24, color: "#6f6f78", opacity: 0.35, fadeIn: 1200, fadeOut: 1000 }
+                    { id: "voidParticles", intensity: 0.35, quantity: 80, speed: 24, color: "#6f6f78", opacity: 0.35, fadeIn: 1200, fadeOut: 1000 },
+                    { id: "darkness", layer: "page", color: "#000000", opacity: 0.25, centerOpacity: 0.02, fadeIn: 1000, fadeOut: 1000 }
                 ],
                 theme: {
                     accent: "#000000",
@@ -206,9 +207,9 @@ export const prologoChapter = {
                     readerMusic.chuva,
                 ],
                 effects: [
-                    { id: "rain", intensity: 0.9, quantity: 190, speed: 900, opacity: 0.55, fadeIn: 700, fadeOut: 800 },
+                    { id: "rain", layer: "page", intensity: 0.9, quantity: 190, speed: 900, opacity: 0.42, fadeIn: 700, fadeOut: 800 },
                     { id: "ashes", intensity: 0.35, quantity: 60, speed: 34, opacity: 0.34, fadeIn: 900, fadeOut: 900 },
-                    { id: "heartbeat", bpm: 72, intensity: 0.18, fadeIn: 900, fadeOut: 700 }
+                    { id: "heartbeat", layer: "page", bpm: 72, intensity: 0.18, color: "#8f0015", edgeOpacity: 0.45, fadeIn: 900, fadeOut: 700 }
                 ],
                 theme: {
                     accent: "#000812",
@@ -227,9 +228,9 @@ export const prologoChapter = {
                     readerMusic.chuva
                 ],
                 effects: [
-                    { id: "rain", intensity: 0.85, quantity: 180, speed: 880, opacity: 0.5, fadeIn: 500, fadeOut: 800 },
+                    { id: "rain", layer: "page", intensity: 0.85, quantity: 180, speed: 880, opacity: 0.4, fadeIn: 500, fadeOut: 800 },
                     { id: "ashes", intensity: 0.45, quantity: 70, speed: 38, opacity: 0.38, fadeIn: 700, fadeOut: 800 },
-                    { id: "heartbeat", bpm: 84, intensity: 0.28, fadeIn: 400, fadeOut: 800 }
+                    { id: "heartbeat", layer: "page", bpm: 84, intensity: 0.28, color: "#ff1f3d", edgeOpacity: 0.55, fadeIn: 400, fadeOut: 800 }
                 ],
                 theme: {
                     accent: "#000812",
@@ -247,7 +248,7 @@ export const prologoChapter = {
                     readerMusic.chuva
                 ],
                 effects: [
-                    { id: "rain", intensity: 0.6, quantity: 130, speed: 760, opacity: 0.38, fadeIn: 500, fadeOut: 1300 },
+                    { id: "rain", layer: "page", intensity: 0.6, quantity: 130, speed: 760, opacity: 0.32, fadeIn: 500, fadeOut: 1300 },
                     { id: "ashes", intensity: 0.55, quantity: 80, speed: 30, opacity: 0.34, fadeIn: 600, fadeOut: 1200 }
                 ],
                 theme: {
