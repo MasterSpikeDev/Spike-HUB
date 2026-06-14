@@ -66,7 +66,7 @@ export const readerMusic = {
     },
     ashes_japonese: {
         id: "ashes",
-        title: "Ashes",
+        title: "Ashes - Japanese",
         description: "Trilha sonora oficial de Project Ghost",
         src: "assets/audio/project_ghost_official/38.cinzas_ending_japonese.wav",
         icon: "assets/images/arts/artes-publicadas/banners/logo_OST.png"
