@@ -17,7 +17,7 @@
     }
     * { box-sizing: border-box; }
     html, body { margin:0; width:100%; height:100%; background:var(--bg); color:var(--text); overflow:hidden; font-family: Georgia, serif; }
-    body.start-gate-active .reader, body.start-gate-active .bg-layer, body.start-gate-active > .overlay, body.start-gate-active #effectsCanvas { visibility:hidden; pointer-events:none; }
+    body.start-gate-active .reader, body.start-gate-active .bg-layer, body.start-gate-active > .overlay { visibility:hidden; pointer-events:none; }
     .bg-layer { position:fixed; inset:0; transition:opacity .8s ease; overflow:hidden; background:#000; }
     .bg-layer.active { z-index:1; opacity:1; }
     .bg-layer.inactive { z-index:0; opacity:0; }
@@ -30,9 +30,8 @@
     }
     .bg-image { background-size:cover; background-position:center; background-repeat:no-repeat; }
     .bg-video { display:none; }
-    #effectsCanvas { position:fixed; inset:0; z-index:2; width:100%; height:100%; pointer-events:none; opacity:1; }
-    .overlay { position:fixed; inset:0; z-index:3; background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.68)); }
-    .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr; height:100%; transform:scale(calc(1 + var(--effects-heartbeat-scale, 0))); transform-origin:center center; transition:transform .08s linear; will-change:transform; }
+    .overlay { position:fixed; inset:0; z-index:2; background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.68)); }
+    .reader { position:relative; z-index:5; display:grid; grid-template-rows:auto 1fr; height:100%; }
     .bar { display:grid; grid-template-columns:1fr auto; gap:10px 14px; align-items:center; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--border); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,.32); overflow:hidden; transition:grid-template-rows .28s ease, padding .28s ease; }
     .reader-heading { display:flex; flex-direction:column; gap:4px; min-width:0; }
     .top-page-status { color:var(--muted); font-size:13px; line-height:1.2; }
@@ -318,7 +317,6 @@
     <div class="bg-image"></div>
     <video class="bg-video" muted loop playsinline preload="auto"></video>
   </div>
-  <canvas id="effectsCanvas" aria-hidden="true"></canvas>
   <div class="overlay"></div>
   <div id="loading">Carregando...</div>
   <div class="reader">
@@ -379,7 +377,6 @@
   <script type="module">
     import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";
     import { chaptersData } from "./js/data.js";
-    import { EffectManager, defaultEffects } from "./js/effects/index.js";
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
 
     function getStoredReaderPayload(){
@@ -461,25 +458,17 @@
       pageMin: 1,
       pageMax: 1,
       startAudio:null,
-      isStarting:false,
-      effectManager:null
+      isStarting:false
     };
     const els = {
       topBar:document.getElementById('topBar'), start: document.getElementById('start'), startBtn: document.getElementById('startBtn'), chapterTitle:document.getElementById('chapterTitle'),
       back:document.getElementById('backBtn'), mediaToggle:document.getElementById('mediaToggle'), mediaToggleIcon:document.getElementById('mediaToggleIcon'),
       startTitle:document.getElementById('startTitle'), startCoverFrame:document.getElementById('startCoverFrame'), mediaPlayer:document.getElementById('mediaPlayer'), mediaCover:document.getElementById('mediaCover'), mediaTitle:document.getElementById('mediaTitle'), mediaSubtitle:document.getElementById('mediaSubtitle'), mediaCurrentText:document.getElementById('mediaCurrentText'), mediaDurationText:document.getElementById('mediaDurationText'), mediaRemainingText:document.getElementById('mediaRemainingText'), mediaProgress:document.getElementById('mediaProgress'), mediaRestart:document.getElementById('mediaRestart'), mediaPlay:document.getElementById('mediaPlay'), mediaPlayIcon:document.getElementById('mediaPlayIcon'), mediaMute:document.getElementById('mediaMute'), mediaMuteIcon:document.getElementById('mediaMuteIcon'), mediaVolume:document.getElementById('mediaVolume'), mediaDownload:document.getElementById('mediaDownload'), visualizer:document.getElementById('visualizer'),
       pageHost:document.getElementById('pageHost'), pageStatus:document.getElementById('pageStatus'),
-      bgA:document.getElementById('bgA'), bgB:document.getElementById('bgB'), effectsCanvas:document.getElementById('effectsCanvas'), loading:document.getElementById('loading'), audioHost:document.getElementById('audioHost')
+      bgA:document.getElementById('bgA'), bgB:document.getElementById('bgB'), loading:document.getElementById('loading'), audioHost:document.getElementById('audioHost')
     };
     st.bgActiveLayer = els.bgA;
     st.bgInactiveLayer = els.bgB;
-    st.effectManager = new EffectManager({
-      canvas: els.effectsCanvas,
-      audioHost: els.audioHost,
-      getMuted: () => st.muted,
-      getVolume: () => st.volume
-    });
-    st.effectManager.registerMany(defaultEffects);
 
     els.chapterTitle.textContent = `Project Ghost — ${reader.title}`;
     const startScreen = reader.startScreen || {};
@@ -646,7 +635,6 @@
         audio.muted = st.muted;
         audio.volume = st.muted ? 0 : st.volume;
       });
-      st.effectManager?.setAudioState();
       updateMediaButtons();
     }
     function updateMediaMetadata(scene){
@@ -954,8 +942,6 @@
         await setSceneBackground(scene);
         applySceneTheme(scene);
         try { await setSceneAudio(scene); } catch { console.warn('Áudio bloqueado ou arquivo ausente.'); }
-        st.effectManager?.preload(scene.effects || []);
-        st.effectManager?.applyEffects(scene.effects || []);
         st.currentScene = scene.id;
       }
     }
@@ -1254,7 +1240,6 @@
     viewer.addEventListener('touchcancel', () => { pinchState = null; }, { passive:true });
 
     window.addEventListener('keydown',(e)=>{ if(e.key==='Home') scrollToPage(st.pageMin); if(e.key==='End') scrollToPage(st.pageMax); if(e.key.toLowerCase()==='m') els.mediaMute.click(); });
-    window.addEventListener('pagehide', () => st.effectManager?.destroy());
     let t; window.addEventListener('resize',()=>{
       clearTimeout(t);
       t=setTimeout(async ()=> {
