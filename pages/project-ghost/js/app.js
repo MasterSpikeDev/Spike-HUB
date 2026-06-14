@@ -714,6 +714,13 @@ function closeReaderPreviewPanel() {
 function initReaderPreviewPanel() {
     const previewBack = document.getElementById('reader-preview-back');
     if (previewBack) previewBack.addEventListener('click', closeReaderPreviewPanel);
+
+    window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data?.type === 'pg_reader_preview_opened') {
+            closeReaderPreviewPanel();
+        }
+    });
 }
 
 function openReadMethodModal() {
@@ -722,7 +729,6 @@ function openReadMethodModal() {
 
     const pdfPath = `./posts/volume${selectedVolume}/${selectedFile}`;
     const googleDocsUrl = chapterReader.googleDocsUrl || '';
-    const immersivePath = getImmersiveReaderPath();
 
     const openPdfBtn = document.getElementById('open-raw-pdf-btn');
     const openGoogleDocsBtn = document.getElementById('open-google-docs-btn');
@@ -753,13 +759,10 @@ function openReadMethodModal() {
             title: selectedChapterData?.title || selectedChapter,
             reader: selectedChapterData?.reader || {}
         };
-        sessionStorage.setItem('pg_reader_chapter', JSON.stringify(chapterPayload));
-        sessionStorage.setItem('pg_reader_autostart_audio', '1');
-        const readerWindow = window.open(immersivePath, '_blank');
         playFireSound('open');
         closeModal(methodModal);
         closeModal(document.getElementById('modal-ler'));
-        if (!readerWindow) window.location.assign(immersivePath);
+        openReaderPreviewPanel(chapterPayload);
     };
 
     openModal(methodModal);

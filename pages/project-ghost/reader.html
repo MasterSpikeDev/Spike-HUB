@@ -1095,7 +1095,13 @@
         }
       }
       if (isEmbeddedPreview) {
-        window.top.location.assign(getStandaloneReaderUrl());
+        const standaloneUrl = getStandaloneReaderUrl();
+        const readerWindow = window.open(standaloneUrl, '_blank');
+        if (readerWindow) {
+          window.parent?.postMessage({ type:'pg_reader_preview_opened' }, window.location.origin);
+        } else {
+          window.top.location.assign(standaloneUrl);
+        }
         return;
       }
       const pdfFile = readerPdf;
