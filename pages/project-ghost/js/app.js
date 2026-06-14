@@ -678,21 +678,7 @@ function renderChapters() {
     // Botão de leitura
     document.getElementById('confirm-read').addEventListener('click', function() {
         if (selectedVolume && selectedChapter && selectedFile) {
-            const chapterReader = selectedChapterData?.reader || {};
-            const chapterPayload = {
-                volume: selectedVolume,
-                chapter: selectedChapter,
-                file: selectedFile,
-                title: selectedChapterData?.title || selectedChapter,
-                reader: chapterReader
-            };
-
-            sessionStorage.setItem('pg_reader_chapter', JSON.stringify(chapterPayload));
-            sessionStorage.setItem('pg_reader_autostart_audio', '1');
-            const chapterModal = document.getElementById('modal-ler');
-            chapterModal.classList.remove('active');
-            chapterModal.style.display = 'none';
-            openReaderPreviewPanel(chapterPayload);
+            openReadMethodModal();
         }
     });
 }
