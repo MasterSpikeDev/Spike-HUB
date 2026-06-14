@@ -44,7 +44,7 @@ export const prologoChapter = {
                 audio: readerMusic.clock,
                 effects: [
                     { id: "voidParticles", intensity: 0.35, quantity: 80, speed: 24, color: "#6f6f78", opacity: 0.35, fadeIn: 1200, fadeOut: 1000 },
-                    { id: "darkness", layer: "page", color: "#000000", opacity: 0.25, centerOpacity: 0.02, fadeIn: 1000, fadeOut: 1000 }
+                    { id: "darkness", layer: "page", color: "#000000", edgeOpacity: 0.32, innerRadius: 0.42, fadeIn: 1000, fadeOut: 1000 }
                 ],
                 theme: {
                     accent: "#000000",

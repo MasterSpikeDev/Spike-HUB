@@ -2,7 +2,17 @@ export default {
   id: 'darkness',
   create(manager, config = {}) {
     this.manager = manager;
-    this.config = { color: 'rgba(0, 0, 0, 1)', opacity: .45, centerOpacity: 0, fadeIn: 700, fadeOut: 700, ...config };
+    this.config = {
+      color: 'rgba(0, 0, 0, 1)',
+      opacity: .45,
+      edgeOpacity: null,
+      centerOpacity: 0,
+      innerRadius: .42,
+      outerRadius: .74,
+      fadeIn: 700,
+      fadeOut: 700,
+      ...config
+    };
     this.opacity = 0;
     this.targetOpacity = 1;
     this.isStopping = false;
@@ -29,13 +39,24 @@ export default {
     const w = this.manager.width;
     const h = this.manager.height;
     if (!ctx || !w || !h) return;
-    const maxOpacity = Math.max(0, Math.min(1, Number(this.config.opacity ?? .45))) * this.opacity;
+    const configuredEdgeOpacity = this.config.edgeOpacity ?? this.config.opacity ?? .45;
+    const edgeOpacity = Math.max(0, Math.min(1, Number(configuredEdgeOpacity))) * this.opacity;
     const centerOpacity = Math.max(0, Math.min(1, Number(this.config.centerOpacity ?? 0))) * this.opacity;
-    const radius = Math.hypot(w, h) * .54;
-    const gradient = ctx.createRadialGradient(w / 2, h / 2, Math.max(1, Math.min(w, h) * .18), w / 2, h / 2, radius);
+    const innerRadius = Math.max(.05, Math.min(.9, Number(this.config.innerRadius ?? .42)));
+    const outerRadius = Math.max(innerRadius + .01, Math.min(1.2, Number(this.config.outerRadius ?? .74)));
+    const shortestSide = Math.min(w, h);
+    const longestSide = Math.max(w, h);
+    const gradient = ctx.createRadialGradient(
+      w / 2,
+      h / 2,
+      Math.max(1, shortestSide * innerRadius),
+      w / 2,
+      h / 2,
+      Math.max(shortestSide, longestSide * outerRadius)
+    );
     gradient.addColorStop(0, this.withAlpha(this.config.color, centerOpacity));
-    gradient.addColorStop(.54, this.withAlpha(this.config.color, centerOpacity * .55));
-    gradient.addColorStop(1, this.withAlpha(this.config.color, maxOpacity));
+    gradient.addColorStop(.55, this.withAlpha(this.config.color, centerOpacity));
+    gradient.addColorStop(1, this.withAlpha(this.config.color, edgeOpacity));
     ctx.save();
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, w, h);

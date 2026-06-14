@@ -150,14 +150,16 @@ Pétalas de cerejeira. Boa para cenas delicadas, memórias, romance, nostalgia o
 
 ## darkness
 
-Overlay/vinheta fixa de escuridão. Não é partícula. Cobre as bordas da tela e se adapta ao formato da viewport.
+Vinheta fixa de escuridão. Não é partícula. Funciona como uma borda escura sobre as extremidades da tela, no mesmo estilo da borda do `heartbeat`, mas fica fixa enquanto o efeito estiver ativo.
 
 ```js
-{ id: "darkness", layer: "page", color: "#000000", opacity: 0.35, centerOpacity: 0.02 }
+{ id: "darkness", layer: "page", color: "#000000", edgeOpacity: 0.35, innerRadius: 0.42 }
 ```
 
-- `opacity`: força nas bordas.
-- `centerOpacity`: quanto escurece o centro.
+- `edgeOpacity`: força da borda/vinheta. `opacity` ainda funciona como alias para compatibilidade.
+- `innerRadius`: distância do centro onde a borda começa a aparecer. Valores maiores deixam o centro mais limpo.
+- `outerRadius`: expansão da borda até fora da tela. Ajuste raramente necessário.
+- `centerOpacity`: quanto escurece o centro. O padrão é `0` para manter o PDF limpo.
 - `color`: cor da vinheta. Pode ser preto, vermelho, roxo etc.
 
 ## heartbeat
