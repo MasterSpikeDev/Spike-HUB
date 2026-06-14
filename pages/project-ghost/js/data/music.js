@@ -70,6 +70,13 @@ export const readerMusic = {
         description: "Trilha sonora oficial de Project Ghost",
         src: "assets/audio/project_ghost_official/38.cinzas_ending_japonese.wav",
         icon: "assets/images/arts/artes-publicadas/banners/logo_OST.png"
+    },
+    normal_days: {
+        id: "normal_days",
+        title: "Normal Days",
+        description: "Trilha sonora oficial de Project Ghost",
+        src: "assets/audio/project_ghost_official/11.normal_days.wav",
+        icon: "assets/images/arts/artes-publicadas/banners/logo_OST.png"
     }
 };
 

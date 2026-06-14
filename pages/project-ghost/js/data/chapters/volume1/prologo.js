@@ -28,6 +28,7 @@ export const prologoChapter = {
                 id: "capa",
                 from: 1,
                 to: 2,
+                audio: readerMusic.fire_inside_me,
                 theme: {
                     accent: "#ff3a3a",
                     panel: "rgba(34, 8, 10, 0.78)",
@@ -44,7 +45,7 @@ export const prologoChapter = {
                 audio: readerMusic.clock,
                 effects: [
                     { id: "voidParticles", intensity: 10, quantity: 1000, speed: 24, color: "#6f6f78", opacity: 1, fadeIn: 1200, fadeOut: 1000, loop: true },
-                    { id: "darkness", layer: "page", color: "#000000", edgeOpacity: 0.32, innerRadius: 0.42, fadeIn: 1000, fadeOut: 1000 }
+                    { id: "darkness", layer: "page", color: "#ffffff", edgeOpacity: 1, innerRadius: 0.05, fadeIn: 1000, fadeOut: 1000 }
                 ],
                 theme: {
                     accent: "#000000",
@@ -71,10 +72,11 @@ export const prologoChapter = {
                 from: 7,
                 to: 7,
                 background: "assets/cenas/casa_haruki/espelho.png",
+                audio: readerMusic.normal_days,
                 theme: {
                     accent: "#000812",
-                    panel: "rgba(0, 24, 64, 0.78)",
-                    text: "#ffffff",
+                    panel: "rgba(127, 87, 0, 0.78)", // fundo painel
+                    text: "#ffffff", // titulo, texto
                     muted: "#ffffff"
                 }
             },
@@ -84,10 +86,13 @@ export const prologoChapter = {
                 from: 8,
                 to: 8,
                 background: "assets/cenas/cidade/metro_subterraneo_hall.png",
-                audio: readerMusic.metro,
+                audio: [
+                    readerMusic.normal_days,
+                    readerMusic.metro
+                ],
                 theme: {
                     accent: "#000812",
-                    panel: "rgba(0, 24, 64, 0.78)",
+                    panel: "rgba(63, 63, 63, 0.78)",
                     text: "#ffffff",
                     muted: "#ffffff"
                 }
@@ -96,12 +101,26 @@ export const prologoChapter = {
                 id: "escola",
                 label: "Escola",
                 from: 9,
-                to: 10,
+                to: 9,
                 background: "assets/cenas/escola/escola_corredor.png",
-                audio: readerMusic.escola,
+                audio: [readerMusic.escola, readerMusic.normal_days],
                 theme: {
                     accent: "#000812",
-                    panel: "rgba(0, 24, 64, 0.78)",
+                    panel: "rgba(63, 63, 63, 0.78)",
+                    text: "#ffffff",
+                    muted: "#ffffff"
+                }
+            },
+            {
+                id: "escola_2",
+                label: "Escola",
+                from: 10,
+                to: 10,
+                background: "assets/cenas/escola/escola_corredor.png",
+                audio: [readerMusic.escola],
+                theme: {
+                    accent: "#000812",
+                    panel: "rgba(63, 63, 63, 0.78)",
                     text: "#ffffff",
                     muted: "#ffffff"
                 }
@@ -115,7 +134,7 @@ export const prologoChapter = {
                 audio: readerMusic.escola,
                 theme: {
                     accent: "#000812",
-                    panel: "rgba(0, 24, 64, 0.78)",
+                    panel: "rgba(42, 19, 0, 0.78)",
                     text: "#ffffff",
                     muted: "#ffffff"
                 }
@@ -129,7 +148,7 @@ export const prologoChapter = {
                 audio: readerMusic.carros_avenida,
                 theme: {
                     accent: "#000812",
-                    panel: "rgba(0, 24, 64, 0.78)",
+                    panel: "rgba(114, 51, 0, 0.78)",
                     text: "#ffffff",
                     muted: "#ffffff"
                 }
@@ -142,20 +161,59 @@ export const prologoChapter = {
                 background: "assets/cenas/casa_shiatsu/sotao.png",
                 theme: {
                     accent: "#000812",
+                    panel: "rgba(64, 38, 0, 0.78)",
+                    text: "#ffffff",
+                    muted: "#ffffff"
+                },
+                effects: [
+                    { id: "dust", intensity: 10, quantity: 600, spawnRate: 8, speed: 14, opacity: 0.9, size: 1.8, wind: 8, color: "rgba(215,200,170,.55)" }
+                ]
+            },
+            {
+                id: "cemiterio",
+                label: "Cemitério",
+                from: 16,
+                to: 16,
+                background: "assets/cenas/cidade/cemiterio.png",
+                audio: readerMusic.chuva,
+                effects: [
+                    { id: "rain", intensity: 10, quantity: 500, speed: 820, opacity: 0.5, fadeIn: 900, fadeOut: 900, layer: "page" },
+                    { id: "fog", intensity: 0.35, quantity: 42, speed: 12, opacity: 0.18, fadeIn: 1400, fadeOut: 1200 }
+                ],
+                theme: {
+                    accent: "#000812",
                     panel: "rgba(0, 24, 64, 0.78)",
                     text: "#ffffff",
                     muted: "#ffffff"
                 }
             },
             {
+                id: "flashback",
+                label: "Flashback",
+                from: 17,
+                to: 17,
+                background: "assets/cenas/flashback/flashback_casa_haruki_pais.png",
+                audio: readerMusic.chuva,
+                effects: [
+                    ,
+                    { id: "darkness", layer: "page", color: "#ffffff", edgeOpacity: 1, innerRadius: 0.03, fadeIn: 1000, fadeOut: 1000 }
+                ],
+                theme: {
+                    accent: "#000812",
+                    panel: "rgba(255, 255, 255, 0.27)",
+                    text: "#000000",
+                    muted: "#000000"
+                }
+            },
+            {
                 id: "cemiterio",
                 label: "Cemitério",
-                from: 16,
+                from: 18,
                 to: 19,
                 background: "assets/cenas/cidade/cemiterio.png",
                 audio: readerMusic.chuva,
                 effects: [
-                    { id: "rain", intensity: 0.75, quantity: 170, speed: 820, opacity: 0.5, fadeIn: 900, fadeOut: 900 },
+                    { id: "rain", intensity: 10, quantity: 100, speed: 820, opacity: 0.5, fadeIn: 900, fadeOut: 900, layer: "page" },
                     { id: "fog", intensity: 0.35, quantity: 42, speed: 12, opacity: 0.18, fadeIn: 1400, fadeOut: 1200 }
                 ],
                 theme: {
@@ -171,12 +229,12 @@ export const prologoChapter = {
                 to: 20,
                 background: "assets/cenas/casa_haruki/entrada.png",
                 audio: readerMusic.chuva,
-                effects: [
-                    { id: "rain", intensity: 0.55, quantity: 130, speed: 760, opacity: 0.42, fadeIn: 700, fadeOut: 900 }
+                effects: [                 
+
                 ],
                 theme: {
                     accent: "#000812",
-                    panel: "rgba(0, 24, 64, 0.78)",
+                    panel: "rgba(27, 18, 0, 0.78)",
                     text: "#ffffff",
                     muted: "#ffffff"
                 }
@@ -188,11 +246,11 @@ export const prologoChapter = {
                 background: "assets/cenas/casa_haruki/sala_estar.png",
                 audio: readerMusic.chuva,
                 effects: [
-                    { id: "rain", intensity: 0.35, quantity: 90, speed: 680, opacity: 0.28, fadeIn: 700, fadeOut: 900 }
+                    
                 ],
                 theme: {
                     accent: "#000812",
-                    panel: "rgba(0, 24, 64, 0.78)",
+                    panel: "rgba(27, 18, 0, 0.78)",
                     text: "#ffffff",
                     muted: "#ffffff"
                 }
@@ -207,13 +265,13 @@ export const prologoChapter = {
                     readerMusic.chuva,
                 ],
                 effects: [
-                    { id: "rain", layer: "page", intensity: 0.9, quantity: 190, speed: 900, opacity: 0.42, fadeIn: 700, fadeOut: 800 },
-                    { id: "ashes", intensity: 0.35, quantity: 60, speed: 34, opacity: 0.34, fadeIn: 900, fadeOut: 900 },
-                    { id: "heartbeat", layer: "page", bpm: 72, intensity: 0.12, overlayIntensity: 0.9, overlayDuration: 520, overlayFadeOut: 850, color: "#8f0015", edgeOpacity: 0.7, fadeIn: 900, fadeOut: 700 }
+                    { id: "rain", layer: "page", intensity: 0.9, quantity: 190, speed: 900, opacity: 0.42, fadeIn: 700, fadeOut: 800, layer: "page" },
+                    //{ id: "heartbeat", layer: "page", bpm: 30, intensity: 0.03, overlayIntensity: 0.2, overlayDuration: 420, overlayFadeOut: 700, color: "#ff1f3d", edgeOpacity: 0.75, fadeIn: 400, fadeOut: 800, sound: "assets/audio/effects/batida_coracao.mp3" }
+
                 ],
                 theme: {
                     accent: "#000812",
-                    panel: "rgba(0, 24, 64, 0.78)",
+                    panel: "rgba(0, 6, 17, 0.78)",
                     text: "#ffffff",
                     muted: "#ffffff"
                 }
@@ -229,12 +287,10 @@ export const prologoChapter = {
                 ],
                 effects: [
                     { id: "rain", layer: "page", intensity: 0.85, quantity: 180, speed: 880, opacity: 0.4, fadeIn: 500, fadeOut: 800 },
-                    { id: "ashes", intensity: 0.45, quantity: 70, speed: 38, opacity: 0.38, fadeIn: 700, fadeOut: 800 },
-                    { id: "heartbeat", layer: "page", bpm: 84, intensity: 0.16, overlayIntensity: 1, overlayDuration: 420, overlayFadeOut: 700, color: "#ff1f3d", edgeOpacity: 0.75, fadeIn: 400, fadeOut: 800 }
                 ],
                 theme: {
                     accent: "#000812",
-                    panel: "rgba(0, 24, 64, 0.78)",
+                    panel: "rgba(0, 6, 17, 0.78)",
                     text: "#ffffff",
                     muted: "#ffffff"
                 }
@@ -253,7 +309,7 @@ export const prologoChapter = {
                 ],
                 theme: {
                     accent: "#000812",
-                    panel: "rgba(0, 24, 64, 0.78)",
+                    panel: "rgba(0, 0, 0, 0.78)",
                     text: "#ffffff",
                     muted: "#ffffff"
                 }
