@@ -687,6 +687,45 @@ function getImmersiveReaderPath() {
     return `./reader.html?volume=${encodeURIComponent(selectedVolume)}&chapter=${encodeURIComponent(selectedChapter)}&autostartAudio=1`;
 }
 
+function getConfiguredReadMethods(chapterData = selectedChapterData) {
+    const reader = chapterData?.reader || {};
+    const configuredMethods = chapterData?.readingMethods || chapterData?.readMethods || reader.readingMethods || reader.readMethods || {};
+    const hasPdfPath = Boolean(chapterData?.file || chapterData?.pdf || reader.rawPdf || reader.pdfCommon);
+
+    return {
+        pdf: configuredMethods.pdf ?? configuredMethods.rawPdf ?? hasPdfPath,
+        googleDocs: configuredMethods.googleDocs ?? configuredMethods.docs ?? Boolean(reader.googleDocsUrl),
+        immersive: configuredMethods.immersive ?? true
+    };
+}
+
+function hasAvailableReadMethod(chapterData = selectedChapterData) {
+    const reader = chapterData?.reader || {};
+    const methods = getConfiguredReadMethods(chapterData);
+    const rawPdf = reader.rawPdf || reader.pdfCommon || chapterData?.pdf || chapterData?.file;
+
+    return Boolean(
+        (methods.pdf && rawPdf)
+        || (methods.googleDocs && reader.googleDocsUrl)
+        || methods.immersive
+    );
+}
+
+function setReadMethodButtonState(button, isAvailable, availableTitle, unavailableTitle) {
+    if (!button) return;
+
+    button.disabled = !isAvailable;
+    button.classList.toggle('unavailable', !isAvailable);
+    button.setAttribute('aria-disabled', String(!isAvailable));
+    button.title = isAvailable ? availableTitle : unavailableTitle;
+}
+
+function resolveRawPdfPath(chapterReader) {
+    const rawPdf = chapterReader.rawPdf || chapterReader.pdfCommon || selectedChapterData?.pdf || selectedFile;
+    if (!rawPdf) return '';
+    return rawPdf.startsWith('./') ? rawPdf : `./posts/volume${selectedVolume}/${rawPdf}`;
+}
+
 function openReaderPreviewPanel(chapterPayload) {
     const previewPanel = document.getElementById('reader-preview-panel');
     const previewFrame = document.getElementById('reader-preview-frame');
@@ -727,24 +766,43 @@ function openReadMethodModal() {
     const methodModal = document.getElementById('modal-read-method');
     const chapterReader = selectedChapterData?.reader || {};
 
-    const pdfPath = `./posts/volume${selectedVolume}/${selectedFile}`;
+    const readMethods = getConfiguredReadMethods();
+    const pdfPath = resolveRawPdfPath(chapterReader);
     const googleDocsUrl = chapterReader.googleDocsUrl || '';
 
     const openPdfBtn = document.getElementById('open-raw-pdf-btn');
     const openGoogleDocsBtn = document.getElementById('open-google-docs-btn');
     const openImmersiveReaderBtn = document.getElementById('open-immersive-reader-btn');
 
+    setReadMethodButtonState(
+        openPdfBtn,
+        readMethods.pdf && Boolean(pdfPath),
+        "Abrir PDF comum",
+        "PDF comum indisponível para este capítulo"
+    );
+    setReadMethodButtonState(
+        openGoogleDocsBtn,
+        readMethods.googleDocs && Boolean(googleDocsUrl),
+        "Abrir capítulo no Google Docs",
+        "Google Docs indisponível para este capítulo"
+    );
+    setReadMethodButtonState(
+        openImmersiveReaderBtn,
+        readMethods.immersive,
+        "Abrir painel da leitura imersiva",
+        "Leitura imersiva indisponível para este capítulo"
+    );
+
     openPdfBtn.onclick = () => {
+        if (!readMethods.pdf || !pdfPath) return;
         playFireSound('open');
         window.open(pdfPath, '_blank');
         closeModal(methodModal);
         closeModal(document.getElementById('modal-ler'));
     };
 
-    openGoogleDocsBtn.disabled = !googleDocsUrl;
-    openGoogleDocsBtn.title = googleDocsUrl ? "Abrir capítulo no Google Docs" : "Link do Google Docs ainda não configurado para este capítulo";
     openGoogleDocsBtn.onclick = () => {
-        if (!googleDocsUrl) return;
+        if (!readMethods.googleDocs || !googleDocsUrl) return;
         playFireSound('open');
         window.open(googleDocsUrl, '_blank');
         closeModal(methodModal);
@@ -752,6 +810,7 @@ function openReadMethodModal() {
     };
 
     openImmersiveReaderBtn.onclick = () => {
+        if (!readMethods.immersive) return;
         const chapterPayload = {
             volume: selectedVolume,
             chapter: selectedChapter,
@@ -773,11 +832,7 @@ function openReadMethodModal() {
 // Atualizar botão de leitura (mantido igual)
 function updateReadButton() {
     const confirmRead = document.getElementById('confirm-read');
-    if (selectedVolume && selectedChapter && selectedFile) {
-        confirmRead.disabled = false;
-    } else {
-        confirmRead.disabled = true;
-    }
+    confirmRead.disabled = !(selectedVolume && selectedChapter && hasAvailableReadMethod());
 }
 
 

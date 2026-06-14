@@ -5,6 +5,11 @@ export const prologoChapter = {
     title: "Prólogo",
     available: true,
     file: "prologo/prologo.pdf",
+    readingMethods: {
+        pdf: true,
+        googleDocs: true,
+        immersive: true
+    },
     reader: {
         title: "Prólogo",
         pageStart: 1,
