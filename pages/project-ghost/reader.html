@@ -853,6 +853,14 @@
         noise.stop(ctx.currentTime + duration);
       } catch {}
     }
+    function normalizeAudioConfig(config){
+      return {
+        config,
+        src: getMediaSrc(config),
+        loop: getMediaLoop(config),
+        volume: getMediaVolume(config)
+      };
+    }
     function applyAudioConfig(audio, audioConfig){
       audio.loop = audioConfig.loop;
       audio.setAttribute('data-track-volume', String(audioConfig.volume));
@@ -860,14 +868,16 @@
       if (!audio.paused) audio.volume = getAudioTargetVolume(audio);
     }
     function createSceneAudio(audioConfig){
+      const normalizedAudioConfig = typeof audioConfig === 'string' ? normalizeAudioConfig(audioConfig) : audioConfig;
       const audio = document.createElement('audio');
       audio.preload = 'auto';
       audio.autoplay = true;
       audio.playsInline = true;
-      audio.setAttribute('data-src', audioConfig.src);
-      audio.src = audioConfig.src;
+      audio.setAttribute('data-src', normalizedAudioConfig.src);
+      audio.src = normalizedAudioConfig.src;
       audio.volume = 0;
-      applyAudioConfig(audio, audioConfig);
+      audio.addEventListener('ended', updateMediaButtons);
+      applyAudioConfig(audio, normalizedAudioConfig);
       els.audioHost.appendChild(audio);
       return audio;
     }
@@ -904,9 +914,11 @@
       await Promise.all(nextAudios.map(async (audio) => {
         audio.muted = st.muted;
         try {
-          if (!st.mediaPaused && (audio.paused || audio.ended)) await audio.play();
+          const isNewAudio = newAudios.includes(audio);
+          const shouldStartAudio = isNewAudio ? (audio.paused || audio.ended) : (audio.paused && !audio.ended);
+          if (!st.mediaPaused && shouldStartAudio) await audio.play();
           const fromVolume = Number.isFinite(audio.volume) ? audio.volume : 0;
-          fade(audio, fromVolume, getAudioTargetVolume(audio), newAudios.includes(audio) ? 1200 : 450);
+          fade(audio, fromVolume, getAudioTargetVolume(audio), isNewAudio ? 1200 : 450);
         } catch {}
       }));
       await Promise.all(audiosToStop.map((audio) => fadeOutAndStop(audio, 900)));
