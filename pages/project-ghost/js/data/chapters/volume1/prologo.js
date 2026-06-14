@@ -43,7 +43,7 @@ export const prologoChapter = {
                 background: "assets/cenas/ambiente/sonho_prologo.png",
                 audio: readerMusic.clock,
                 effects: [
-                    { id: "voidParticles", intensity: 0.35, quantity: 80, speed: 24, color: "#6f6f78", opacity: 0.35, fadeIn: 1200, fadeOut: 1000 },
+                    { id: "voidParticles", intensity: 10, quantity: 1000, speed: 24, color: "#6f6f78", opacity: 1, fadeIn: 1200, fadeOut: 1000, loop: true },
                     { id: "darkness", layer: "page", color: "#000000", edgeOpacity: 0.32, innerRadius: 0.42, fadeIn: 1000, fadeOut: 1000 }
                 ],
                 theme: {

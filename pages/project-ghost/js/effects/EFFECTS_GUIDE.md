@@ -40,8 +40,9 @@ Todos eles aceitam estas opções:
 | Opção | Tipo | Padrão | Função |
 | --- | --- | --- | --- |
 | `id` | string | obrigatório | Nome do efeito. |
-| `intensity` | number | `1` | Multiplica a quantidade máxima e o nascimento de partículas. Pode usar `0` a `3`; acima de `1` pesa mais. |
-| `quantity` | number | varia por efeito | Máximo de partículas simultâneas antes do multiplicador `intensity`. |
+| `intensity` | number | `1` | Multiplica a quantidade máxima e o nascimento de partículas. O motor limita o valor efetivo entre `0` e `3` por performance. |
+| `quantity` | number | varia por efeito | Quantidade base de partículas antes do multiplicador `intensity`. |
+| `maxParticles` | number | sem limite extra | Teto opcional de segurança depois de aplicar `quantity * intensity`. Útil para configs agressivas. |
 | `spawnRate` | number | varia por efeito | Quantas partículas novas podem nascer por segundo antes do multiplicador `intensity`. |
 | `speed` | number | varia por efeito | Velocidade base do movimento. |
 | `color` | string | varia por efeito | Cor principal. Aceita `#hex`, `rgb(...)` ou `rgba(...)`. |
@@ -53,8 +54,11 @@ Todos eles aceitam estas opções:
 | `layer` | string | `"background"` | Camada do efeito. |
 | `overPdf` | boolean | `false` | Atalho para camada de página. |
 | `key` | string | automático | Chave opcional para instâncias duplicadas. |
+| `loop` | boolean | `true` | Mantém a partícula em loop. Quando uma partícula sai da tela/morre, ela é resetada ou substituída. Use `false` apenas para efeito único que deve terminar sozinho. |
 
-> Observação: você não precisa configurar tudo. Cada efeito tem padrões próprios. Configure só o que quiser ajustar.
+> Observação: por padrão, todas as partículas são loop contínuo (`loop: true`). Quando uma partícula morre/sai da tela, ela volta pelo `reset` do efeito e continua enquanto a cena estiver ativa. Você não precisa configurar tudo; cada efeito tem padrões próprios. Configure só o que quiser ajustar.
+>
+> Configs muito altas, como `quantity: 1000` com `intensity: 10`, podem parecer que "travaram" ou que não estão em loop porque geram partículas demais. O motor usa `intensity` efetiva até `3`; se quiser muita partícula com segurança, prefira `quantity: 1000`, `intensity: 3` e, se necessário, `maxParticles: 1200` ou `1500`.
 
 ---
 
@@ -76,7 +80,7 @@ Chuva em linhas diagonais rápidas. É um dos efeitos mais leves e estáveis.
 | `size` | `1.2` | Espessura da linha. |
 | `length` | `26` | Comprimento máximo das gotas. |
 | `wind` | `-140` | Inclinação/deslocamento horizontal. |
-| `intensity`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
+| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key`, `loop` | comuns | Controles gerais. |
 
 ### Exemplo leve
 
@@ -105,7 +109,7 @@ Neblina lenta e ampla. É uma variação de `smoke` com partículas maiores e ma
 | `opacity` | `0.22` | Transparência geral. |
 | `size` | `95` | Tamanho das massas. |
 | `spread` | `2.4` | Espalhamento horizontal. |
-| `intensity`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
+| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key`, `loop` | comuns | Controles gerais. |
 
 ### Exemplo sutil
 
@@ -134,7 +138,7 @@ Fumaça que sobe, cresce e desaparece. Usa gradiente radial, então é mais pesa
 | `opacity` | `0.35` | Transparência geral. |
 | `size` | `38` | Raio inicial máximo das partículas. |
 | `spread` | `1` | Espalhamento horizontal. |
-| `intensity`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
+| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key`, `loop` | comuns | Controles gerais. |
 
 ### Exemplo
 
@@ -157,7 +161,7 @@ Flocos brancos caindo lentamente com oscilação horizontal.
 | `opacity` | `0.68` | Transparência dos flocos. |
 | `size` | `2.2` | Raio máximo dos flocos. |
 | `wind` | `18` | Vento horizontal. |
-| `intensity`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
+| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key`, `loop` | comuns | Controles gerais. |
 
 ### Exemplo
 
@@ -180,7 +184,7 @@ Pequenos fragmentos cinzas caindo/flutuando.
 | `opacity` | `0.48` | Transparência. |
 | `size` | `2.4` | Tamanho dos fragmentos. |
 | `wind` | `28` | Vento horizontal. |
-| `intensity`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
+| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key`, `loop` | comuns | Controles gerais. |
 
 ### Exemplo
 
@@ -203,7 +207,7 @@ Variação de `ashes`, mais lenta, menor e bege. Boa para sótão, sala velha e 
 | `opacity` | `0.25` | Transparência. |
 | `size` | `1.8` | Tamanho dos pontos/fragmentos. |
 | `wind` | `8` | Vento horizontal. |
-| `intensity`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
+| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key`, `loop` | comuns | Controles gerais. |
 
 ### Exemplo
 
@@ -213,7 +217,7 @@ Variação de `ashes`, mais lenta, menor e bege. Boa para sótão, sala velha e 
 
 ## `voidParticles` — partículas do vazio
 
-Partículas sobrenaturais com composição luminosa (`lighter`). Boas para sonho, vazio, dimensão estranha e cenas abstratas.
+Partículas sobrenaturais com composição luminosa (`lighter`). Boas para sonho, vazio, dimensão estranha e cenas abstratas. Este efeito tem reciclagem própria: quando uma partícula sai da tela, ela volta para o fluxo automaticamente enquanto `loop` estiver ativo.
 
 ### Opções específicas
 
@@ -225,18 +229,20 @@ Partículas sobrenaturais com composição luminosa (`lighter`). Boas para sonho
 | `color` | `"#7c4dff"` | Cor das partículas. |
 | `opacity` | `0.5` | Transparência/brilho. |
 | `size` | `2.3` | Raio máximo. |
-| `intensity`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
+| `origin` | `"center"` | Origem do reaparecimento das partículas. Use `"center"` para nascer perto do centro ou `"screen"` para nascer espalhado pela tela. |
+| `loop` | `true` | Mantém o vazio reciclando partículas continuamente. |
+| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
 
 ### Exemplo discreto
 
 ```js
-{ id: "voidParticles", intensity: 0.35, quantity: 80, spawnRate: 16, speed: 24, color: "#6f6f78", opacity: 0.35, size: 2.1 }
+{ id: "voidParticles", intensity: 0.35, quantity: 80, spawnRate: 16, speed: 24, color: "#6f6f78", opacity: 0.35, size: 2.1, origin: "center", loop: true }
 ```
 
 ### Exemplo sobrenatural forte
 
 ```js
-{ id: "voidParticles", layer: "page", intensity: 0.8, quantity: 140, spawnRate: 26, speed: 48, color: "#7c4dff", opacity: 0.55, size: 2.6 }
+{ id: "voidParticles", layer: "page", intensity: 3, quantity: 1000, maxParticles: 1500, spawnRate: 40, speed: 48, color: "#7c4dff", opacity: 0.55, size: 2.6, origin: "screen", loop: true }
 ```
 
 ## `embers` — brasas
@@ -253,7 +259,7 @@ Pontos quentes subindo com brilho. Usa composição `lighter`.
 | `color` | `"#ff8a2a"` | Cor das brasas. |
 | `opacity` | `0.72` | Transparência/brilho. |
 | `size` | `2.8` | Raio máximo. |
-| `intensity`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
+| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key`, `loop` | comuns | Controles gerais. |
 
 ### Exemplo
 
@@ -275,7 +281,7 @@ Variação mais intensa de `embers`. Não desenha labaredas realistas; funciona 
 | `color` | `"#ff5a1f"` | Cor principal. |
 | `opacity` | `0.8` | Transparência/brilho. |
 | `size` | `4` | Tamanho das partículas. |
-| `intensity`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
+| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key`, `loop` | comuns | Controles gerais. |
 
 ### Exemplo
 
@@ -297,7 +303,7 @@ Variação rápida e pequena de `embers`. Boa para impacto, curto-circuito, meta
 | `color` | `"#ffd166"` | Cor das faíscas. |
 | `opacity` | `0.85` | Transparência/brilho. |
 | `size` | `1.7` | Tamanho das faíscas. |
-| `intensity`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
+| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key`, `loop` | comuns | Controles gerais. |
 
 ### Exemplo
 
@@ -320,7 +326,7 @@ Variação de `ashes` com fragmentos maiores e cor marrom/alaranjada. Representa
 | `opacity` | `0.62` | Transparência. |
 | `size` | `5` | Tamanho dos fragmentos. |
 | `wind` | `45` | Vento horizontal. |
-| `intensity`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
+| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key`, `loop` | comuns | Controles gerais. |
 
 ### Exemplo
 
@@ -343,7 +349,7 @@ Pétalas rosadas com queda, rotação e balanço lateral.
 | `opacity` | `0.72` | Transparência. |
 | `size` | `6` | Tamanho das pétalas. |
 | `wind` | `28` | Vento horizontal. |
-| `intensity`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key` | comuns | Controles gerais. |
+| `intensity`, `maxParticles`, `fadeIn`, `fadeOut`, `layer`, `overPdf`, `key`, `loop` | comuns | Controles gerais. |
 
 ### Exemplo
 
