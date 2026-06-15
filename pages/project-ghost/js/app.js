@@ -20,7 +20,7 @@ let selectedVolume = null;
 let selectedChapter = null;
 let selectedFile = null;
 let selectedChapterData = null;
-let selectedArtworkType = 'all';
+let selectedArtworkType = 'arte oficial';
 let selectedArtworkSearch = '';
 let fireAudioCtx = null;
 let imageZoom = 1;
@@ -498,6 +498,38 @@ function getArtTypeLabel(type) {
     return artTypeLabels[type] || type;
 }
 
+
+const artTypeSortPriority = {
+    'arte oficial': 0,
+    'concept art': 1,
+    'fan art': 2
+};
+
+function getArtworkYearValue(art) {
+    const parsedYear = Number.parseInt(art?.year, 10);
+    return Number.isNaN(parsedYear) ? 0 : parsedYear;
+}
+
+function getArtworkTypePriority(art) {
+    const normalizedType = normalizeArtType(art?.artType);
+    return artTypeSortPriority[normalizedType] ?? 99;
+}
+
+function getSortedArtworks(items) {
+    return items
+        .map((art, index) => ({ art, index }))
+        .sort((a, b) => {
+            const yearDifference = getArtworkYearValue(b.art) - getArtworkYearValue(a.art);
+            if (yearDifference !== 0) return yearDifference;
+
+            const typeDifference = getArtworkTypePriority(a.art) - getArtworkTypePriority(b.art);
+            if (typeDifference !== 0) return typeDifference;
+
+            return b.index - a.index;
+        })
+        .map(({ art }) => art);
+}
+
 function getFilteredArtworksByType(items, type) {
     if (type === 'all') return items;
     return items.filter((art) => normalizeArtType(art.artType) === type);
@@ -517,7 +549,7 @@ function renderArtworkTypeFilters() {
     const filtersContainer = document.getElementById('art-filters');
     if (!filtersContainer) return;
 
-    const filterTypes = ['all', 'concept art', 'fan art', 'arte oficial'];
+    const filterTypes = ['all', 'arte oficial', 'concept art', 'fan art'];
     filtersContainer.innerHTML = filterTypes.map((type) => `
         <button type="button" class="art-filter-btn ${selectedArtworkType === type ? 'active' : ''}" data-art-type="${type}">
             ${getArtTypeLabel(type)}
@@ -550,7 +582,7 @@ function renderArtworks() {
     }
 
     const artworksByType = getFilteredArtworksByType(artworks, selectedArtworkType);
-    const filteredArtworks = getFilteredArtworksBySearch(artworksByType, selectedArtworkSearch);
+    const filteredArtworks = getSortedArtworks(getFilteredArtworksBySearch(artworksByType, selectedArtworkSearch));
 
     if (filteredArtworks.length === 0) {
         galleryGrid.innerHTML = '<p class="no-artworks" style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">Nenhuma arte encontrada para os filtros atuais.</p>';
@@ -860,7 +892,7 @@ function renderCharacterGallery(items) {
         `;
     }
 
-    const filterTypes = ['all', 'concept art', 'fan art', 'arte oficial'];
+    const filterTypes = ['all', 'arte oficial', 'concept art', 'fan art'];
 
     return `
         <div class="character-art-filters">
@@ -876,7 +908,7 @@ function renderCharacterGallery(items) {
         </div>
 
         <div class="character-gallery-grid">
-            ${items.map((art) => `
+            ${getSortedArtworks(items).map((art) => `
                 <button class="character-gallery-item" type="button"
                     data-image="${art.image}"
                     data-title="${art.title}"
