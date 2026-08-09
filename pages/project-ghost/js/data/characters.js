@@ -2,7 +2,7 @@ export const characters = {
     haruki: {
         tag: "haruki",
         name: "Haruki Takamatsu",
-        portrait: "assets/images/arts/ficha-personagem/haruki/haruki_1.png",
+        portrait: "assets/images/arts/ficha-personagem/haruki/haruki_3.png",
         portraits: [
             "assets/images/arts/ficha-personagem/haruki/haruki_1.png",
             "assets/images/arts/ficha-personagem/haruki/haruki_2.png",
@@ -69,7 +69,7 @@ export const characters = {
     fumiko: {
         tag: "fumiko",
         name: "Fumiko Emi",
-        portrait: "assets/images/arts/ficha-personagem/fumiko/fumiko_1.png",
+        portrait: "assets/images/arts/ficha-personagem/fumiko/fumiko_2.png",
 
         portraits: [
             "assets/images/arts/ficha-personagem/fumiko/fumiko_1.png",
@@ -269,7 +269,342 @@ export const characters = {
             tenacidade: 5,
             espirito: 10
         }
-    }
+    },
+    ichiko: {
+        tag: "ichiko",
+        name: "Ichiko Kurogane",
+        portrait: "assets/images/arts/ficha-personagem/ichiko/ichiko_1.png",
 
+        portraits: [
+            "assets/images/arts/ficha-personagem/ichiko/ichiko_1.png",
+        ],
+
+        description:
+            "Ichiko Kurogane é o Ritualista da Divisão Fantasma, responsável por estudar, preparar e executar os procedimentos que os outros membros preferem não conhecer em detalhes. À primeira vista, sua postura descontraída, seu sorriso constante e seu jeito exageradamente curioso poderiam fazê-lo parecer apenas excêntrico. O problema é que Ichiko não possui praticamente nenhum senso de limite quando o assunto envolve sangue, Spirits ou o corpo humano. Sua pele é anormalmente fria, seus caninos ficam visíveis quando sorri e sua empolgação diante de situações grotescas frequentemente faz com que outras pessoas questionem se ele está realmente brincando. Apesar da aparência de alguém completamente perturbado, Ichiko possui um dos maiores conhecimentos sobre Spirits dentro da Divisão Fantasma. Seu fascínio pelo sangue frequentemente parece mórbido, mas por trás dele existe uma compreensão quase religiosa daquilo que cada gota representa: uma pequena parte de alguém que continua existindo mesmo depois que aquela pessoa desaparece.",
+
+        spirit_user: "Sim",
+
+        role: "Membro da Divisão Fantasma / Ritualista da Divisão Fantasma",
+        codename: "O Ritualista",
+
+        age: "25 anos",
+        height: "184 cm",
+        weight: "72 kg",
+        birthday: "31 de julho", // Junji Ito - horror, obsessão e grotesco
+        bloodType: "???",
+        gender: "Masculino",
+
+        occupation: "Ritualista / Especialista em fenômenos espirituais e sangue",
+        affiliation: "Divisão Fantasma",
+        status: "Vivo",
+
+        abilities: [
+            "Fermentação de sangue",
+            "Leitura de memórias através do sangue",
+            "Transfusão de sangue",
+            "Acidificação sanguínea"
+        ],
+
+        background:
+            "???",
+
+        personality:
+            "Excêntrico, hiperativo, curioso e assustadoramente confortável com situações que deixariam qualquer outra pessoa desconfortável. Ichiko fala rápido quando está empolgado, repete palavras, invade o espaço pessoal dos outros sem perceber e frequentemente precisa ser lembrado por Fumiko de que existem coisas chamadas ''boas maneiras''. Seu sorriso quase permanente e seu humor mórbido fazem com que pareça muito menos confiável do que realmente é. Apesar disso, Ichiko é extremamente inteligente, observador e dedicado às pessoas da Divisão. Ele utiliza humor e comportamento exagerado como uma maneira de impedir que os outros percebam quando alguma coisa realmente o afeta. Possui uma relação complicada com culpa e acredita que algumas coisas que fez no passado simplesmente não podem ser apagadas. Por isso, sua lealdade à Divisão é praticamente absoluta. Quando a situação deixa de ser engraçada, Ichiko muda completamente: fica silencioso, preciso e assustadoramente sério. Ele pode brincar com sangue, cadáveres e Spirits durante uma investigação, mas jamais trata a morte de um aliado como brincadeira.",
+
+        relationships: [
+            {
+                name: "Haruki Takamatsu",
+                relation: "Aliado / Curiosidade científica / Protetor"
+            },
+            {
+                name: "Fumiko Emi",
+                relation: "Líder / Aliada / Respeito"
+            },
+            {
+                name: "Genki Kato",
+                relation: "Aliado / Amigo / Provocações constantes"
+            },
+            {
+                name: "Naomi Suzuki",
+                relation: "Aliada / Amiga / Provocações constantes"
+            },
+            {
+                name: "???",
+                relation: "???"
+            }/*,
+            {
+                name: "Kazuma Kurogane",
+                relation: "Irmão / Trauma / Conflito"
+            }*/
+        ],
+
+        trivia: [
+            "Sua pele é naturalmente muito fria ao toque.",
+            "Seus caninos ficam bastante visíveis quando sorri.",
+            "Quando fica genuinamente sério, normalmente para de sorrir por completo.",
+            "Possui uma geladeira hospitalar dedicada exclusivamente às bolsas de sangue utilizadas pela Divisão.",
+            "Sabe de memória o tipo sanguíneo de todos os membros da Divisão Fantasma.",
+            "Tem o hábito de inclinar a cabeça enquanto analisa algo que considera interessante.",
+            "Sua risada costuma ser seca, alta e desconfortavelmente longa (Khehehehehe).",
+            "Não considera sangue algo nojento e genuinamente não entende por que outras pessoas têm tanta aversão a ele.",
+            "Sua bebida favorita é limonada de frutas vermelhas."
+        ],
+
+        stats: {
+            forca: 5,
+            agilidade: 8,
+            intelecto: 9,
+            tenacidade: 6,
+            espirito: 10
+        }
+    },
+
+    //
+    sonia: {
+        tag: "sonia",
+        name: "Sônia Takamatsu",
+        portrait: "assets/images/arts/ficha-personagem/sonia/sonia_1.png",
+
+        portraits: [
+            "assets/images/arts/ficha-personagem/sonia/sonia_1.png",
+        ],
+
+        description:
+            "Sônia Takamatsu é a avó de Haruki e a pessoa responsável por manter alguma normalidade em sua vida depois da perda dos pais. Baixinha, acolhedora e aparentemente frágil por causa da idade, ela possui uma presença que domina a casa sem precisar levantar a voz. É o tipo de pessoa que demonstra amor através de pequenas ações: prepara o café, lembra horários, separa vitaminas, confere remédios, lava uniformes e reclama quando Haruki sai de casa sem comer. Seu cabelo grisalho curto e levemente ondulado, os óculos de leitura presos por uma pequena corrente e as roupas confortáveis fazem com que pareça exatamente aquilo que Haruki mais precisa quando volta para casa: segurança.",
+
+        spirit_user: "Não",
+
+        role: "Avó e responsável legal de Haruki Takamatsu",
+        codename: "Nenhum",
+
+        age: "66 anos",
+        height: "158 cm",
+        weight: "67 kg",
+        birthday: "21 de setembro",
+        bloodType: "A+",
+        gender: "Feminino",
+        occupation: "Aposentada",
+        affiliation: "Família Takamatsu",
+        status: "Vivo",
+
+        abilities: [
+            "Nenhuma habilidade sobrenatural",
+            "Culinária",
+            "Primeiros socorros básicos"
+        ],
+
+        background:
+            "Depois da morte dos pais de Haruki, Sônia assumiu a responsabilidade pelo neto e passou a organizar praticamente todos os aspectos de sua rotina. Os meses seguintes foram marcados pelo luto dentro da casa, contas médicas, consultas, medicamentos e pela tentativa constante de impedir que Haruki simplesmente desistisse de cuidar de si mesmo. Sônia nunca tentou substituir os pais dele, mas fez questão de que a casa continuasse funcionando. Mesmo quando Haruki se fecha, chega tarde ou responde de maneira ríspida, ela continua deixando comida pronta e perguntando se ele tomou os remédios. Para Sônia, cuidar não é uma obrigação: é a maneira que encontrou de manter sua família unida depois de perder parte dela.",
+
+        personality:
+            "Carinhosa, protetora, persistente e muito mais firme do que sua aparência sugere. Sônia raramente grita e prefere demonstrar desaprovação com silêncio, pequenas broncas ou um olhar por cima dos óculos. É extremamente atenta ao estado físico e emocional de Haruki e percebe rapidamente quando ele está escondendo alguma coisa, mesmo que nem sempre consiga descobrir o quê. Possui valores tradicionais em alguns aspectos, mas não é rígida nem intolerante. Sua maior característica é a constância: independentemente do tamanho do problema, Sônia continua fazendo café pela manhã e esperando Haruki voltar para casa.",
+
+        relationships: [
+            {
+                name: "Haruki Takamatsu",
+                relation: "Neto / Responsável / Amor incondicional"
+            },
+            {
+                name: "Shiatsu Takamatsu",
+                relation: "Filho / Família"
+            },
+            {
+                name: "Sachiko Takamatsu",
+                relation: "Nora / Família"
+            },
+            {
+                name: "Akira Takamatsu",
+                relation: "Filho falecido"
+            },
+            {
+                name: "Yui Takamatsu",
+                relation: "Nora falecida"
+            }
+        ],
+
+        trivia: [
+            "Usa óculos de leitura presos por uma pequena corrente.",
+            "Mantém remédios e vitaminas organizados por horário.",
+            "Tem o hábito de dobrar as mangas enquanto cozinha.",
+            "Guarda documentos, recibos e boletos em pastas extremamente organizadas.",
+            "Percebe imediatamente quando Haruki não dormiu direito.",
+            "Mesmo quando está irritada, pergunta se ele já comeu.",
+            "Não gosta quando Haruki sai de casa sem tomar café.",
+            "É uma das poucas pessoas que consegue fazer Haruki obedecer apenas chamando seu nome."
+        ],
+
+        stats: {
+            forca: 2,
+            agilidade: 3,
+            intelecto: 8,
+            tenacidade: 1,
+            espirito: 6
+        }
+    },
+
+    shiatsu: {
+        tag: "shiatsu",
+        name: "Shiatsu Takamatsu",
+        portrait: "assets/images/arts/ficha-personagem/shiatsu/shiatsu_1.png",
+
+        portraits: [
+            "assets/images/arts/ficha-personagem/shiatsu/shiatsu_1.png",
+        ],
+
+        description:
+            "Shiatsu Takamatsu é tio de Haruki e terapeuta, dono de um pequeno consultório. Calmo e bem-humorado, conhece profundamente músculos, articulações e os limites do corpo humano. Por causa disso, acaba ajudando Haruki de maneira inesperada em sua vida como combatente, ensinando técnicas simples para cair sem se machucar, absorver impactos e reconhecer lesões. Também conhece boa parte da história da família Takamatsu e preservou objetos deixados pelo pai de Haruki.",
+
+        spirit_user: "Não",
+
+        role: "Tio de Haruki / Confidente da Família Takamatsu",
+        codename: "Nenhum",
+
+        age: "47 anos",
+        height: "180 cm",
+        weight: "83 kg",
+        birthday: "3 de novembro",
+        bloodType: "O+",
+        gender: "Masculino",
+
+        occupation: "Massagista / Terapeuta / Proprietário de pequeno consultório",
+        affiliation: "Família Takamatsu",
+        status: "Vivo",
+
+        abilities: [
+            "Nenhuma habilidade sobrenatural",
+            "Terapia de shiatsu",
+            "Conhecimento avançado de músculos e articulações",
+            "Identificação de lesões físicas",
+            "Redução e estabilização emergencial de luxações",
+            "Técnicas de queda e absorção de impacto",
+            "Noções de movimentação corporal",
+            "Primeiros socorros"
+        ],
+
+        background:
+            "Shiatsu foi muito próximo do pai de Haruki e conhece histórias da família que o sobrinho nunca ouviu. Depois da morte dos pais dele, tornou-se uma presença discreta em sua vida. Além de preservar uma antiga katana e uma carta deixadas para Haruki, passou a ajudá-lo com conhecimentos adquiridos durante anos trabalhando diretamente com o corpo humano.",
+
+        personality:
+            "Calmo, paciente e bem-humorado. Shiatsu prefere ensinar através de histórias e demonstrações em vez de grandes discursos. Costuma parecer despreocupado, mas percebe rapidamente quando Haruki está escondendo dor física ou emocional. Quando necessário, consegue ser bastante firme.",
+
+        relationships: [
+            {
+                name: "Haruki Takamatsu",
+                relation: "Sobrinho / Confidente / Figura paterna secundária"
+            },
+            {
+                name: "Sônia Takamatsu",
+                relation: "Mãe / Família"
+            },
+            {
+                name: "Sachiko Takamatsu",
+                relation: "Esposa"
+            },
+            {
+                name: "Akira Takamatsu",
+                relation: "Irmão falecido / Melhor amigo"
+            },
+            {
+                name: "Yui Takamatsu",
+                relation: "Cunhada falecida"
+            }
+        ],
+
+        trivia: [
+            "Reconhece músculos tensionados ou lesionados apenas pela palpação.",
+            "Percebe rapidamente quando Haruki está escondendo alguma lesão.",
+            "Ensinou Haruki a distribuir o impacto de uma queda pelo corpo inteiro em vez de tentar pará-la com os braços.",
+            "Ensina Haruki movimentos que parecem simples, mas acabam sendo extremamente úteis durante batalhas.",
+            "Sabe improvisar estabilizações para articulações deslocadas até que atendimento médico adequado seja possível.",
+            "Costuma explicar movimentos usando exemplos de músculos e articulações em vez de técnicas de luta.",
+            "Frequentemente reclama da postura de Haruki.",
+            "Acredita que conhecer os limites do próprio corpo é tão importante quanto saber lutar.",
+            "Faz chá para visitas mesmo quando ninguém pediu."
+        ],
+
+        stats: {
+            forca: 7,
+            agilidade: 4,
+            intelecto: 7,
+            tenacidade: 7,
+            espirito: 4
+        }
+    },
+
+    diretora: {
+        tag: ["reiko"],
+        name: "Reiko Kurosawa",
+        portrait: "assets/images/arts/ficha-personagem/diretora-golden-oak/diretora_1.png",
+
+        portraits: [
+            "assets/images/arts/ficha-personagem/diretora-golden-oak/diretora_1.png",
+        ],
+
+        description:
+            "Reiko Kurosawa é a diretora da Golden Oak Academy. Elegante, rígida e extremamente observadora, mantém a escola sob disciplina constante sem precisar levantar a voz. Apesar da aparência fria, sabe diferenciar um aluno irresponsável de alguém que realmente precisa de ajuda. Por isso, passa a observar Haruki com mais atenção conforme seus problemas dentro da escola aumentam.",
+
+        spirit_user: "Não",
+
+        role: "Diretora da Golden Oak Academy",
+        codename: "Nenhum",
+
+        age: "50 anos",
+        height: "174 cm",
+        weight: "68 kg",
+        birthday: "8 de março",
+        bloodType: "A-",
+        gender: "Feminino",
+        occupation: "Diretora escolar",
+        affiliation: "Golden Oak Academy",
+        status: "Vivo",
+
+        abilities: [
+            "Nenhuma habilidade sobrenatural",
+            "Administração escolar",
+            "Gestão de conflitos",
+            "Excelente capacidade de observação",
+            "Oratória"
+        ],
+
+        background:
+            "Reiko construiu sua carreira dentro da educação até assumir a direção da Golden Oak Academy. Conhecida por sua disciplina e organização, acredita que punições só fazem sentido quando também se entende a origem do problema. O comportamento cada vez mais irregular de Haruki acaba despertando sua preocupação.",
+
+        personality:
+            "Rígida, controlada e muito profissional. Possui pouca tolerância para desrespeito ou desculpas, mas não é cruel. Observadora, percebe facilmente quando um aluno está escondendo algo e acredita que respeito deve existir dos dois lados.",
+
+        relationships: [
+            {
+                name: "Haruki Takamatsu",
+                relation: "Aluno / Caso disciplinar / Preocupação"
+            },
+            {
+                name: "Shiatsu Takamatsu",
+                relation: "Responsável de Haruki / Contato escolar"
+            },
+            {
+                name: "Sônia Takamatsu",
+                relation: "Responsável legal de Haruki"
+            }
+        ],
+
+        trivia: [
+            "Usa óculos retangulares de armação fina.",
+            "Possui uma única mecha grisalha na parte frontal do cabelo.",
+            "Costuma usar batom vinho ou vermelho escuro.",
+            "Prefere roupas sociais brancas ou off-white.",
+            "Nunca precisa levantar a voz para conseguir silêncio.",
+            "Seu escritório é extremamente organizado.",
+            "Costuma encarar alunos por cima dos óculos quando percebe uma mentira.",
+            "Haruki inicialmente acredita que ela simplesmente o odeia."
+        ],
+
+        stats: {
+            forca: 3,
+            agilidade: 3,
+            intelecto: 9,
+            tenacidade: 8,
+            espirito: 5
+        }
+    }
 };
 

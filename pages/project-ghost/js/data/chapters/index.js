@@ -1,14 +1,16 @@
 import { prologoChapter } from "./volume1/prologo.js";
+import { capitulo_1 } from "./volume1/capitulo_1.js";
 
 export const chaptersData = {
-    totalVolumes: 2,
+    totalVolumes: 3,
     volumes: [
         {
             volume: 1,
             title: "PROJECT GHOST",
             available: true,
             chapters: [
-                prologoChapter
+                prologoChapter,
+                capitulo_1
             ]
         },
         {

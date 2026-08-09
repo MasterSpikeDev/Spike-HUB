@@ -90,10 +90,10 @@ export const readerMusic = {
 export const musicTracks = [
     {
         id: 1,
-        title: "Project Ghost - Abertura conceito",
+        title: "Project Ghost - Playlist Oficial OST",
         description: "Orquestra Sombria",
-        thumbnail: "assets/images/arts/musicas/1.png",
+        thumbnail: "assets/images/arts/artes-publicadas/banners/logo_OST.png",
         icon: "assets/images/arts/musicas/1.png",
-        url: "https://www.youtube.com/watch?v=KHIodTpO_5Q"
+        url: "https://www.youtube.com/watch?v=UakuUfuSkqk&list=PLJ8w9A8_TS3X9ba745JhM4aSzaTvGLJwt"
     }
 ];

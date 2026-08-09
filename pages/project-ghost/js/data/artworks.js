@@ -281,6 +281,33 @@ export const artworks = [
         year: "2026",
         artist: "Concept Art - IA",
         tags: ["nero"]
+    },
+    {
+        title: "Shiatsu Takamatsu",
+        artType: "concept art",
+        image: "assets/images/arts/artes-publicadas/concept-arts/tio-shiatsu/shiatsu-takamatsu.png",
+        description: "Arte conceitual",
+        year: "2026",
+        artist: "Concept Art - IA",
+        tags: ["shiatsu"]
+    },
+    {
+        title: "Sônia Takamatsu",
+        artType: "concept art",
+        image: "assets/images/arts/artes-publicadas/concept-arts/avo-sonia/sonia-takamatsu.png",
+        description: "Arte conceitual",
+        year: "2026",
+        artist: "Concept Art - IA",
+        tags: ["sonia"]
+    },
+    {
+        title: "Reiko Kurosawa",
+        artType: "concept art",
+        image: "assets/images/arts/artes-publicadas/concept-arts/diretora-golden-oak/diretora-golden-oak.png",
+        description: "Arte conceitual",
+        year: "2026",
+        artist: "Concept Art - IA",
+        tags: ["reiko"]
     }
 ];
 // Dados dos capítulos (mantidos iguais)
