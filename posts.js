@@ -1,6 +1,67 @@
 // posts.js
 // Expondo globalmente (sem ES Modules)
 window.POSTS = [
+
+    {
+        title: { pt: "Realism Reimagined", en: "Realism Reimagined" },
+        desc: {
+            pt: "Rediscover every block with beautifully crafted 32× HD textures. Enhanced terrain generation, animated foliage, and stunning visual effects bring every biome to life.",
+            en: "Rediscover every block with beautifully crafted 32× HD textures. Enhanced terrain generation, animated foliage, and stunning visual effects bring every biome to life."
+        },
+        img: "assets/portfolio/post11.png",
+        category: "commercial",
+        role: {
+            pt: "Correções Bugs - pós produção",
+            en: "Bug Fixes – Post-production"
+        },
+        links: [
+            { label: { pt: "Eternal Creations", en: "Eternal Creations" }, href: "https://eternalcreations.games/games/realism-reimagined" },
+            { label: { pt: "Youtube", en: "Youtube" }, href: "https://www.youtube.com/watch?v=sbC7XCGUnMY" },
+            { label: { pt: "Minecraft Marketplace", en: "Minecraft Marketplace" }, href: "https://www.minecraft.net/en-us/marketplace/pdp/blocklab-studios/realism-reimagined-hd/71dd83ad-7d91-4cfd-9e0a-96e8cfe3d984" }
+
+        ],
+        videos: []
+    },
+    {
+        title: { pt: "Chroma Visuals", en: "Chroma Visuals" },
+        desc: {
+            pt: "Transform your Minecraft world with Chroma Visuals — a Vibrant Visuals pack that turns every biome into a living, breathing masterpiece of color and light.",
+            en: "Transform your Minecraft world with Chroma Visuals — a Vibrant Visuals pack that turns every biome into a living, breathing masterpiece of color and light."
+        },
+        img: "assets/portfolio/post10.png",
+        category: "commercial",
+        role: {
+            pt: "Correções Bugs - pós produção",
+            en: "Bug Fixes – Post-production"
+        },
+        links: [
+            { label: { pt: "Eternal Creations", en: "Eternal Creations" }, href: "https://eternalcreations.games/games/chroma-visuals" },
+            { label: { pt: "Youtube", en: "Youtube" }, href: "https://www.youtube.com/watch?v=Jmq-XIDBWDc" },
+            { label: { pt: "Minecraft Marketplace", en: "Minecraft Marketplace" }, href: "https://www.minecraft.net/en-us/marketplace/pdp/blocklab-studios/chroma-visuals/2721f5e6-52ac-45e4-8d01-d55f61aa887d" }
+
+        ],
+        videos: []
+    },
+    {
+        title: { pt: "Survival Essentials", en: "Survival Essentials" },
+        desc: {
+            pt: "Adicione movimento ao seu mundo com o Physics Add-On: itens realistas, árvores caindo, mortes limpas de criaturas e detritos — tudo ajustável nas configurações.",
+            en: "Amplify your survival experience with new mobs, custom blocks, and epic expansions. Face down powerful bosses, gear up with fresh tools and armor, and explore dungeons teeming with treasure! Take on villager quests, uncover hidden structures, and forge the ultimate survival loadout. With Survival Essentials, every adventure promises excitement and discovery."
+        },
+        img: "assets/portfolio/post9.png",
+        category: "commercial",
+        role: {
+            pt: "Correções Bugs - pós produção",
+            en: "Bug Fixes – Post-production"
+        },
+        links: [
+            { label: { pt: "Eternal Creations", en: "Eternal Creations" }, href: "https://eternalcreations.games/games/survival-essentials" },
+            { label: { pt: "Youtube", en: "Youtube" }, href: "https://www.youtube.com/watch?v=Q7jg3BnZWp0" },
+            { label: { pt: "Minecraft Marketplace", en: "Minecraft Marketplace" }, href: "https://www.minecraft.net/pt-br/marketplace/pdp/blocklab-studios/survival-essentials-[dx]/42d71941-17da-46cc-8003-8b1f2b8d03e7" }
+
+        ],
+        videos: []
+    },
     {
         title: { pt: "Item Physics & More Add-On", en: "Item Physics & More Add-On" },
         desc: {
@@ -10,8 +71,8 @@ window.POSTS = [
         img: "assets/portfolio/post8.png",
         category: "commercial",
         role: {
-            pt: "Sistemas com Script API, mecânicas de itens, lógica de gameplay e depuração.",
-            en: "Script API systems, custom item mechanics, gameplay logic and debugging."
+            pt: "Sistemas com Script API, mecânicas de itens 3D, mecânicas de morte e animação, lógica de gameplay, depuração, interface de usuário, sistema queda de arvores precisa.",
+            en: "Script API systems, 3D item mechanics, death and animation mechanics, gameplay logic, debugging, user interface, precise tree-felling system."
         },
         links: [
             { label: { pt: "Eternal Creations", en: "Eternal Creations" }, href: "https://eternalcreations.games/games/item-physics-more-add-on" },
@@ -30,11 +91,12 @@ window.POSTS = [
         img: "assets/portfolio/post4.png",
         category: "commercial",
         role: {
-            pt: "Implementação de conteúdo, lógica de gameplay, testes e suporte à produção.",
-            en: "Content implementation, gameplay logic, testing and production support."
+            pt: "Implementação de conteúdo, lógica de gameplay, testes, suporte à produção, sistema de mini-games e missões, npcs interativos.",
+            en: "Content implementation, gameplay logic, testing, production support, mini-game and quest systems, interactive NPCs."
         },
         links: [
             { label: { pt: "Eternal Creations", en: "Eternal Creations" }, href: "https://eternalcreations.games/games/vibrant-adventures" },
+            { label: { pt: "Youtube", en: "Youtube" }, href: "https://www.youtube.com/watch?v=YfMJQw27Tms" },
             { label: { pt: "Minecraft Marketplace", en: "Minecraft Marketplace" }, href: "https://www.minecraft.net/en-us/marketplace/pdp/minecraft/vibrant-adventures/f85c0b48-e3aa-4156-af13-dec7537e79ae" }
         ],
         videos: []
@@ -48,8 +110,8 @@ window.POSTS = [
         img: "assets/portfolio/post2.jpg",
         category: "commercial",
         role: {
-            pt: "Sistemas de gameplay, implementação de conteúdo, Script API e depuração.",
-            en: "Gameplay systems, content implementation, Script API and debugging."
+            pt: "Implementação de blocos, sistemas basicos de otimização de biomas.",
+            en: "Implementation of blocks and basic biome optimization systems."
         },
         links: [
             { label: { pt: "Eternal Creations", en: "Eternal Creations" }, href: "https://eternalcreations.games/games/biomecraft" },
@@ -68,8 +130,8 @@ window.POSTS = [
         img: "assets/portfolio/post3.jpg",
         category: "commercial",
         role: {
-            pt: "Lógica de geração, sistemas de gameplay, testes e correção de bugs.",
-            en: "Generation logic, gameplay systems, testing and bug fixing."
+            pt: "Implementação de mobs, logica de geração, e implementação de blocos.",
+            en: "Implementation of mobs, generation logic, and implementation of blocks."
         },
         links: [
             { label: { pt: "Eternal Creations", en: "Eternal Creations" }, href: "https://eternalcreations.games/games/better-structures" },
@@ -88,11 +150,15 @@ window.POSTS = [
         img: "assets/portfolio/post5.png",
         category: "commercial",
         role: {
-            pt: "Mecânicas de encantamento, lógica de itens, Script API e balanceamento técnico.",
-            en: "Enchantment mechanics, item logic, Script API and technical balancing."
+            pt: "Mecânicas de encantamento, lógica de itens, Script API.",
+            en: "Enchantment mechanics, item logic, Script API."
         },
         links: [
             { label: { pt: "Eternal Creations", en: "Eternal Creations" }, href: "https://eternalcreations.games/games/more-enchants" },
+            { label: { pt: "YouTube Review - 1.0", en: "YouTube - 1.0" }, href: "https://www.youtube.com/watch?v=kX5Ex-xq-W4&t=88s" },
+            { label: { pt: "YouTube Review - 2.0", en: "YouTube - 2.0" }, href: "https://www.youtube.com/watch?v=FWiUOYwmI58&t=42s" },
+            { label: { pt: "YouTube Review - 3.0", en: "YouTube - 3.0" }, href: "https://www.youtube.com/watch?v=PU7p2mZDFcE" },
+
             { label: { pt: "Minecraft Marketplace", en: "Minecraft Marketplace" }, href: "https://www.minecraft.net/en-us/marketplace/pdp/blocklab-studios/more-enchants-add--on/dfa41d12-3d83-4e4c-b3f0-dd5e91e85340" }
 
         ],
@@ -107,11 +173,12 @@ window.POSTS = [
         img: "assets/portfolio/post6.png",
         category: "commercial",
         role: {
-            pt: "Mecânicas de itens, sistemas utilitários, lógica de gameplay e depuração.",
-            en: "Item mechanics, utility systems, gameplay logic and debugging."
+            pt: "Mecânicas de itens, sistemas utilitários, lógica de gameplay e bug fixes.",
+            en: "Item mechanics, utility systems, gameplay logic and bug fixes."
         },
         links: [
             { label: { pt: "Eternal Creations", en: "Eternal Creations" }, href: "https://eternalcreations.games/games/more-utilities" },
+            { label: { pt: "YouTube", en: "YouTube" }, href: "https://youtu.be/giDXSZCsKYs?si=ATbhEdoOmx7SSckN" },
             { label: { pt: "Minecraft Marketplace", en: "Minecraft Marketplace" }, href: "https://www.minecraft.net/en-us/marketplace/pdp/blocklab-studios/more-utilities-2.0-add--on/7a7dc34b-5633-4527-88fa-3661eaa6771e" }
 
         ],

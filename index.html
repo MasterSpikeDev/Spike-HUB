@@ -1,105 +1,587 @@
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Portfólio de Samuel Victor — desenvolvimento web, automações, bots para Discord e integrações com inteligência artificial.">
+  <meta name="description"
+    content="Portfólio de Master Spike — desenvolvimento web, automações, bots para Discord e integrações com inteligência artificial.">
   <meta name="theme-color" content="#090b10">
-  <title>Samuel Victor — Desenvolvedor</title>
+  <title>Master Spike — Desenvolvedor</title>
   <link rel="icon" type="image/png" href="assets/icons/spike-hub-tab-icon.png">
   <style>
-    :root { --bg:#090b10; --surface:#10141d; --surface-2:#171c27; --text:#f4f6fb; --muted:#9ca6b8; --line:#252c3a; --accent:#ffb648; --accent-2:#ff7a45; --max:1180px; }
-    * { box-sizing:border-box; }
-    html { scroll-behavior:smooth; }
-    body { margin:0; color:var(--text); background:var(--bg); font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.6; }
-    body::before { content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; background:radial-gradient(circle at 75% 0,rgba(255,182,72,.12),transparent 28rem),radial-gradient(circle at 5% 35%,rgba(255,122,69,.07),transparent 24rem); }
-    a { color:inherit; }
-    button,select { font:inherit; }
-    .container { width:min(calc(100% - 40px),var(--max)); margin:auto; }
-    .skip { position:fixed; left:1rem; top:-5rem; z-index:20; padding:.75rem 1rem; background:var(--text); color:var(--bg); border-radius:.5rem; }
-    .skip:focus { top:1rem; }
-    header { position:sticky; top:0; z-index:10; border-bottom:1px solid rgba(255,255,255,.07); background:rgba(9,11,16,.84); backdrop-filter:blur(18px); }
-    nav { min-height:74px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
-    .brand { text-decoration:none; font-weight:850; letter-spacing:-.03em; font-size:1.16rem; }
-    .brand span { color:var(--accent); }
-    .nav-links { display:flex; align-items:center; gap:26px; }
-    .nav-links a { color:var(--muted); text-decoration:none; font-size:.93rem; font-weight:650; transition:.2s; }
-    .nav-links a:hover,.nav-links a:focus-visible { color:var(--text); }
-    #lang { color:var(--text); background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:8px 10px; }
-    section { padding:96px 0; }
-    .hero { min-height:calc(100vh - 74px); display:grid; grid-template-columns:1.25fr .75fr; align-items:center; gap:70px; padding-top:64px; }
-    .eyebrow { margin:0 0 18px; color:var(--accent); font-size:.78rem; font-weight:800; letter-spacing:.15em; text-transform:uppercase; }
-    h1 { margin:0; max-width:820px; font-size:clamp(3.2rem,7vw,6.8rem); line-height:.95; letter-spacing:-.07em; }
-    h1 span { display:block; color:var(--muted); font-size:.53em; letter-spacing:-.045em; margin-top:20px; }
-    .lead { max-width:690px; margin:28px 0 0; color:#bdc5d3; font-size:clamp(1.05rem,1.8vw,1.25rem); }
-    .actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:34px; }
-    .button { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:48px; padding:0 20px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--text); text-decoration:none; font-weight:750; transition:transform .2s,border-color .2s,background .2s; }
-    .button.primary { color:#17100a; border-color:transparent; background:linear-gradient(135deg,var(--accent),var(--accent-2)); }
-    .button:hover { transform:translateY(-2px); border-color:#556078; }
-    .profile { justify-self:end; width:min(100%,340px); }
-    .portrait { aspect-ratio:1; overflow:hidden; border:1px solid var(--line); border-radius:24px; background:var(--surface); box-shadow:0 25px 80px rgba(0,0,0,.45); }
-    .portrait img { width:100%; height:100%; display:block; object-fit:cover; }
-    .availability { display:flex; align-items:center; gap:9px; margin-top:16px; color:var(--muted); font-size:.9rem; }
-    .dot { width:8px; height:8px; border-radius:50%; background:#62d891; box-shadow:0 0 0 5px rgba(98,216,145,.1); }
-    .section-head { display:flex; justify-content:space-between; align-items:end; gap:30px; margin-bottom:40px; }
-    h2 { margin:0; font-size:clamp(2.2rem,5vw,4rem); line-height:1; letter-spacing:-.05em; }
-    .section-copy { max-width:520px; margin:0; color:var(--muted); }
-    .expertise-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
-    .expertise { padding:30px; min-height:230px; border:1px solid var(--line); border-radius:16px; background:linear-gradient(145deg,var(--surface-2),var(--surface)); }
-    .number { color:var(--accent); font:700 .78rem/1 monospace; }
-    .expertise h3 { margin:34px 0 10px; font-size:1.35rem; letter-spacing:-.025em; }
-    .expertise p { margin:0; color:var(--muted); }
-    .stack { display:flex; flex-wrap:wrap; gap:8px; margin-top:22px; }
-    .tag { padding:6px 10px; border:1px solid var(--line); border-radius:6px; color:#c9d0dc; font-size:.78rem; background:#0c0f15; }
-    .experience { border-top:1px solid var(--line); }
-    .timeline { border-top:1px solid var(--line); }
-    .experience-row { display:grid; grid-template-columns:220px 1fr; gap:48px; padding:34px 0; border-bottom:1px solid var(--line); }
-    .experience-period { color:var(--accent); font:700 .83rem/1.5 monospace; }
-    .experience-row h3 { margin:0 0 5px; font-size:1.4rem; letter-spacing:-.03em; }
-    .experience-role { margin:0 0 12px; color:#cbd2de; font-weight:700; }
-    .experience-description { max-width:760px; margin:0; color:var(--muted); }
-    .work { border-top:1px solid var(--line); }
-    .project-group + .project-group { margin-top:76px; }
-    .group-head { margin-bottom:24px; }
-    .group-head h3 { margin:0 0 7px; font-size:1.7rem; letter-spacing:-.035em; }
-    .group-head p { margin:0; color:var(--muted); }
-    .cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; }
-    .project { overflow:hidden; border:1px solid var(--line); border-radius:16px; background:var(--surface); }
-    .project-media { aspect-ratio:16/9; overflow:hidden; background:#080a0e; }
-    .project-media img { width:100%; height:100%; display:block; object-fit:cover; transition:transform .45s; }
-    .project:hover img { transform:scale(1.035); }
-    .project-body { padding:25px; }
-    .project h3 { margin:0 0 9px; font-size:1.35rem; }
-    .project p { min-height:3.2em; margin:0; color:var(--muted); }
-    .project-role { min-height:0!important; margin-top:18px!important; padding-top:16px; border-top:1px solid var(--line); color:#cbd2de!important; }
-    .project-role strong { color:var(--text); }
-    .project-links { display:flex; flex-wrap:wrap; gap:16px; margin-top:21px; }
-    .project-links a { color:var(--accent); font-size:.88rem; font-weight:750; text-decoration:none; }
-    .project-links a:hover { text-decoration:underline; }
-    .contact { padding-bottom:70px; }
-    .contact-panel { padding:clamp(30px,6vw,70px); border:1px solid var(--line); border-radius:22px; background:linear-gradient(120deg,#171b24,#10131a); }
-    .contact-panel h2 { max-width:760px; }
-    .contact-panel p { max-width:650px; margin:20px 0 0; color:var(--muted); font-size:1.05rem; }
-    footer { padding:28px 0; color:var(--muted); border-top:1px solid var(--line); }
-    .footer-inner { display:flex; justify-content:space-between; gap:20px; font-size:.88rem; }
-    .footer-links { display:flex; gap:18px; }
-    .footer-links a { text-decoration:none; }
-    @media (max-width:800px) { .nav-links>a { display:none; } .hero { grid-template-columns:1fr; gap:44px; padding:72px 0; } .profile { justify-self:start; width:240px; } .section-head { display:block; } .section-copy { margin-top:18px; } .expertise-grid,.cards { grid-template-columns:1fr; } .experience-row { grid-template-columns:1fr; gap:10px; } section { padding:72px 0; } }
-    @media (max-width:480px) { .container { width:min(calc(100% - 28px),var(--max)); } .profile { width:190px; } .footer-inner { flex-direction:column; } h1 { font-size:3.35rem; } }
-    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } *,*::before,*::after { transition:none!important; } }
+    :root {
+      --bg: #090b10;
+      --surface: #10141d;
+      --surface-2: #171c27;
+      --text: #f4f6fb;
+      --muted: #9ca6b8;
+      --line: #252c3a;
+      --accent: #ffb648;
+      --accent-2: #ff7a45;
+      --max: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: radial-gradient(circle at 75% 0, rgba(255, 182, 72, .12), transparent 28rem), radial-gradient(circle at 5% 35%, rgba(255, 122, 69, .07), transparent 24rem);
+    }
+
+    a {
+      color: inherit;
+    }
+
+    button,
+    select {
+      font: inherit;
+    }
+
+    .container {
+      width: min(calc(100% - 40px), var(--max));
+      margin: auto;
+    }
+
+    .skip {
+      position: fixed;
+      left: 1rem;
+      top: -5rem;
+      z-index: 20;
+      padding: .75rem 1rem;
+      background: var(--text);
+      color: var(--bg);
+      border-radius: .5rem;
+    }
+
+    .skip:focus {
+      top: 1rem;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255, 255, 255, .07);
+      background: rgba(9, 11, 16, .84);
+      backdrop-filter: blur(18px);
+    }
+
+    nav {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      text-decoration: none;
+      font-weight: 850;
+      letter-spacing: -.03em;
+      font-size: 1.16rem;
+    }
+
+    .brand span {
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .93rem;
+      font-weight: 650;
+      transition: .2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a:focus-visible {
+      color: var(--text);
+    }
+
+    #lang {
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 8px 10px;
+    }
+
+    section {
+      padding: 96px 0;
+    }
+
+    .hero {
+      min-height: calc(100vh - 74px);
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      align-items: center;
+      gap: 70px;
+      padding-top: 64px;
+    }
+
+    .eyebrow {
+      margin: 0 0 18px;
+      color: var(--accent);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 820px;
+      font-size: clamp(3.2rem, 7vw, 6.8rem);
+      line-height: .95;
+      letter-spacing: -.07em;
+    }
+
+    h1 span {
+      display: block;
+      color: var(--muted);
+      font-size: .53em;
+      letter-spacing: -.045em;
+      margin-top: 20px;
+    }
+
+    .lead {
+      max-width: 690px;
+      margin: 28px 0 0;
+      color: #bdc5d3;
+      font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 34px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 48px;
+      padding: 0 20px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 750;
+      transition: transform .2s, border-color .2s, background .2s;
+    }
+
+    .button.primary {
+      color: #17100a;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      border-color: #556078;
+    }
+
+    .profile {
+      justify-self: end;
+      width: min(100%, 340px);
+    }
+
+    .portrait {
+      aspect-ratio: 1;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--surface);
+      box-shadow: 0 25px 80px rgba(0, 0, 0, .45);
+    }
+
+    .portrait img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .availability {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #62d891;
+      box-shadow: 0 0 0 5px rgba(98, 216, 145, .1);
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 1;
+      letter-spacing: -.05em;
+    }
+
+    .section-copy {
+      max-width: 520px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .expertise-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .expertise {
+      padding: 30px;
+      min-height: 230px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(145deg, var(--surface-2), var(--surface));
+    }
+
+    .number {
+      color: var(--accent);
+      font: 700 .78rem/1 monospace;
+    }
+
+    .expertise h3 {
+      margin: 34px 0 10px;
+      font-size: 1.35rem;
+      letter-spacing: -.025em;
+    }
+
+    .expertise p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 22px;
+    }
+
+    .tag {
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: #c9d0dc;
+      font-size: .78rem;
+      background: #0c0f15;
+    }
+
+    .experience {
+      border-top: 1px solid var(--line);
+    }
+
+    .timeline {
+      border-top: 1px solid var(--line);
+    }
+
+    .experience-row {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 48px;
+      padding: 34px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .experience-period {
+      color: var(--accent);
+      font: 700 .83rem/1.5 monospace;
+    }
+
+    .experience-row h3 {
+      margin: 0 0 5px;
+      font-size: 1.4rem;
+      letter-spacing: -.03em;
+    }
+
+    .experience-role {
+      margin: 0 0 12px;
+      color: #cbd2de;
+      font-weight: 700;
+    }
+
+    .experience-description {
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .work {
+      border-top: 1px solid var(--line);
+    }
+
+    .project-group+.project-group {
+      margin-top: 76px;
+    }
+
+    .group-head {
+      margin-bottom: 24px;
+    }
+
+    .group-head h3 {
+      margin: 0 0 7px;
+      font-size: 1.7rem;
+      letter-spacing: -.035em;
+    }
+
+    .group-head p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .project {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+    }
+
+    .project-media {
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      background: #080a0e;
+    }
+
+    .project-media img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      transition: transform .45s;
+    }
+
+    .project:hover img {
+      transform: scale(1.035);
+    }
+
+    .project-body {
+      padding: 25px;
+    }
+
+    .project h3 {
+      margin: 0 0 9px;
+      font-size: 1.35rem;
+    }
+
+    .project p {
+      min-height: 3.2em;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .project-role {
+      min-height: 0 !important;
+      margin-top: 18px !important;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      color: #cbd2de !important;
+    }
+
+    .project-role strong {
+      color: var(--text);
+    }
+
+    .project-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 21px;
+    }
+
+    .project-links a {
+      color: var(--accent);
+      font-size: .88rem;
+      font-weight: 750;
+      text-decoration: none;
+    }
+
+    .project-links a:hover {
+      text-decoration: underline;
+    }
+
+    .contact {
+      padding-bottom: 70px;
+    }
+
+    .contact-panel {
+      padding: clamp(30px, 6vw, 70px);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(120deg, #171b24, #10131a);
+    }
+
+    .contact-panel h2 {
+      max-width: 760px;
+    }
+
+    .contact-panel p {
+      max-width: 650px;
+      margin: 20px 0 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    footer {
+      padding: 28px 0;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      font-size: .88rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 18px;
+    }
+
+    .footer-links a {
+      text-decoration: none;
+    }
+
+    @media (max-width:800px) {
+      .nav-links>a {
+        display: none;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        gap: 44px;
+        padding: 72px 0;
+      }
+
+      .profile {
+        justify-self: start;
+        width: 240px;
+      }
+
+      .section-head {
+        display: block;
+      }
+
+      .section-copy {
+        margin-top: 18px;
+      }
+
+      .expertise-grid,
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .experience-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      section {
+        padding: 72px 0;
+      }
+    }
+
+    @media (max-width:480px) {
+      .container {
+        width: min(calc(100% - 28px), var(--max));
+      }
+
+      .profile {
+        width: 190px;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+      }
+
+      h1 {
+        font-size: 3.35rem;
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+      }
+    }
   </style>
 </head>
+
 <body>
   <a class="skip" href="#main" data-i18n="skip">Pular para o conteúdo</a>
   <header>
     <nav class="container" aria-label="Navegação principal">
-      <a class="brand" href="#main">Samuel<span>.</span></a>
+      <a class="brand" href="#main">Spike<span> .</span></a>
       <div class="nav-links">
         <a href="#especialidades" data-i18n="navExpertise">Especialidades</a>
         <a href="#experiencia" data-i18n="navExperience">Experiência</a>
         <a href="#projetos" data-i18n="navWork">Projetos</a>
         <a href="#contato" data-i18n="navContact">Contato</a>
-        <select id="lang" aria-label="Idioma"><option value="pt">PT</option><option value="en">EN</option></select>
+        <select id="lang" aria-label="Idioma">
+          <option value="pt">PT</option>
+          <option value="en">EN</option>
+        </select>
       </div>
     </nav>
   </header>
@@ -108,62 +590,154 @@
     <div class="container hero">
       <div>
         <p class="eyebrow" data-i18n="eyebrow">Desenvolvedor de experiências digitais</p>
-        <h1>Samuel Victor<span data-i18n="role">Minecraft Bedrock, sistemas de gameplay e experiências interativas.</span></h1>
-        <p class="lead" data-i18n="lead">Desenvolvedor focado em produtos para Minecraft Marketplace, Script API e mecânicas de gameplay, com experiência complementar em web, bots para Discord e integrações com IA.</p>
+        <h1>Master Spike<span data-i18n="role">Minecraft Bedrock, sistemas de gameplay e experiências
+            interativas.</span></h1>
+        <p class="lead" data-i18n="lead">Desenvolvedor focado em produtos para Minecraft Marketplace, Script API e
+          mecânicas de gameplay, com experiência complementar em web, bots para Discord e integrações com IA.</p>
         <div class="actions">
           <a class="button primary" href="#projetos" data-i18n="seeWork">Ver projetos →</a>
-          <a class="button" href="mailto:spikestudios8@gmail.com" data-i18n="talk">Vamos conversar</a>
+          <a class="button" href="https://discord.com/users/597912419796516873" data-i18n="talk">Vamos conversar</a>
         </div>
       </div>
-      <aside class="profile" aria-label="Perfil de Samuel Victor">
-        <div class="portrait"><img src="assets/images/me-main3.png" alt="Ilustração de perfil de Samuel Victor"></div>
-        <div class="availability"><span class="dot"></span><span data-i18n="available">Disponível para oportunidades freelance, contrato e studios.</span></div>
+      <aside class="profile" aria-label="Perfil de Master Spike">
+        <div class="portrait"><img src="assets/images/me-main3.webp" alt="Ilustração de perfil de Master Spike"></div>
+        <div class="availability"><span class="dot"></span><span data-i18n="available">Disponível para oportunidades
+            freelance, contrato e studios.</span></div>
       </aside>
     </div>
 
     <section id="especialidades" class="container">
       <div class="section-head">
-        <div><p class="eyebrow" data-i18n="expertiseLabel">O que eu faço</p><h2 data-i18n="expertiseTitle">Especialidades</h2></div>
-        <p class="section-copy" data-i18n="expertiseCopy">Desenvolvimento orientado a resultados, combinando código, design e integrações para criar soluções completas.</p>
+        <div>
+          <p class="eyebrow" data-i18n="expertiseLabel">O que eu faço</p>
+          <h2 data-i18n="expertiseTitle">Especialidades</h2>
+        </div>
+        <p class="section-copy" data-i18n="expertiseCopy">Desenvolvimento orientado a resultados, combinando código,
+          design e integrações para criar soluções completas.</p>
       </div>
       <div class="expertise-grid">
-        <article class="expertise"><span class="number">01</span><h3 data-i18n="gamesTitle">Minecraft Bedrock</h3><p data-i18n="gamesCopy">Sistemas para Minecraft Marketplace com Script API, mecânicas de gameplay, itens, entidades e conteúdo interativo.</p><div class="stack"><span class="tag">Bedrock</span><span class="tag">Script API</span><span class="tag">Game Design</span><span class="tag">Marketplace</span></div></article>
-        <article class="expertise"><span class="number">02</span><h3 data-i18n="webTitle">Sites profissionais</h3><p data-i18n="webCopy">Interfaces responsivas, rápidas e acessíveis, com HTML avançado e atenção a cada detalhe da experiência.</p><div class="stack"><span class="tag">HTML5</span><span class="tag">CSS3</span><span class="tag">JavaScript</span><span class="tag">TypeScript</span></div></article>
-        <article class="expertise"><span class="number">03</span><h3 data-i18n="discordTitle">Bots para Discord</h3><p data-i18n="discordCopy">Bots personalizados para comunidades, automações, moderação e conexão com serviços externos.</p><div class="stack"><span class="tag">Discord API</span><span class="tag">Node.js</span><span class="tag">Python</span><span class="tag">Automação</span></div></article>
-        <article class="expertise"><span class="number">04</span><h3 data-i18n="aiTitle">APIs de inteligência artificial</h3><p data-i18n="aiCopy">Integração de modelos de IA em produtos e fluxos de trabalho para criar experiências inteligentes e úteis.</p><div class="stack"><span class="tag">AI APIs</span><span class="tag">REST</span><span class="tag">JSON</span><span class="tag">Integrações</span></div></article>
+        <article class="expertise"><span class="number">01</span>
+          <h3 data-i18n="gamesTitle">Minecraft Bedrock</h3>
+          <p data-i18n="gamesCopy">Sistemas para Minecraft Marketplace com Script API, mecânicas de gameplay, itens,
+            entidades e conteúdo interativo.</p>
+          <div class="stack"><span class="tag">Bedrock</span><span class="tag">Script API</span><span class="tag">Game
+              Design</span><span class="tag">Marketplace</span></div>
+        </article>
+        <article class="expertise"><span class="number">02</span>
+          <h3 data-i18n="webTitle">Sites profissionais</h3>
+          <p data-i18n="webCopy">Interfaces responsivas, rápidas e acessíveis, com HTML avançado e atenção a cada
+            detalhe da experiência.</p>
+          <div class="stack"><span class="tag">HTML5</span><span class="tag">CSS3</span><span
+              class="tag">JavaScript</span><span class="tag">TypeScript</span></div>
+        </article>
+        <article class="expertise"><span class="number">03</span>
+          <h3 data-i18n="discordTitle">Bots para Discord</h3>
+          <p data-i18n="discordCopy">Bots personalizados para comunidades, automações, moderação e conexão com serviços
+            externos.</p>
+          <div class="stack"><span class="tag">Discord API</span><span class="tag">Node.js</span><span
+              class="tag">Python</span><span class="tag">Automação</span></div>
+        </article>
+        <article class="expertise"><span class="number">04</span>
+          <h3 data-i18n="aiTitle">APIs de inteligência artificial</h3>
+          <p data-i18n="aiCopy">Integração de modelos de IA em produtos e fluxos de trabalho para criar experiências
+            inteligentes e úteis.</p>
+          <div class="stack"><span class="tag">AI APIs</span><span class="tag">REST</span><span
+              class="tag">JSON</span><span class="tag">Integrações</span></div>
+        </article>
       </div>
     </section>
 
     <section id="experiencia" class="experience">
       <div class="container">
-        <div class="section-head"><div><p class="eyebrow" data-i18n="experienceLabel">Trajetória profissional</p><h2 data-i18n="experienceTitle">Experiência</h2></div><p class="section-copy" data-i18n="experienceCopy">Experiência prática entregando conteúdo comercial e projetos independentes para Minecraft Bedrock.</p></div>
+        <div class="section-head">
+          <div>
+            <p class="eyebrow" data-i18n="experienceLabel">Trajetória profissional</p>
+            <h2 data-i18n="experienceTitle">Experiência</h2>
+          </div>
+          <p class="section-copy" data-i18n="experienceCopy">Experiência prática entregando conteúdo comercial e
+            projetos independentes para Minecraft Bedrock.</p>
+        </div>
         <div class="timeline">
-          <article class="experience-row"><div class="experience-period">2024 — 2026</div><div><h3>Eternal Creations</h3><p class="experience-role">Minecraft Marketplace Developer</p><p class="experience-description" data-i18n="eternalDescription">Trabalho em projetos comerciais para o Bedrock Marketplace, desenvolvendo sistemas de gameplay, recursos com Script API, itens, entidades, mecânicas de combate, debugging e pipelines de produção.</p></div></article>
-          <article class="experience-row"><div class="experience-period" data-i18n="independentPeriod">Projetos independentes</div><div><h3>MasterSpike</h3><p class="experience-role" data-i18n="independentRole">Desenvolvedor independente</p><p class="experience-description" data-i18n="independentDescription">Criação e publicação de mapas, resource packs e experimentos próprios, cuidando da ideia, desenvolvimento, direção visual, testes e lançamento.</p></div></article>
+          <article class="experience-row">
+            <div class="experience-period">2024 — 2026</div>
+            <div>
+              <h3>Eternal Creations</h3>
+              <p class="experience-role">Minecraft Marketplace Developer</p>
+              <p class="experience-description" data-i18n="eternalDescription">Trabalho em projetos comerciais para o
+                Bedrock Marketplace, desenvolvendo sistemas de gameplay, recursos com Script API, itens, entidades,
+                mecânicas de combate, debugging e pipelines de produção.</p>
+            </div>
+          </article>
+          <article class="experience-row">
+            <div class="experience-period" data-i18n="independentPeriod">Projetos independentes</div>
+            <div>
+              <h3>Spike Studios</h3>
+              <p class="experience-role" data-i18n="independentRole">Desenvolvedor independente</p>
+              <p class="experience-description" data-i18n="independentDescription">Criação e publicação de mapas,
+                resource packs e experimentos próprios, cuidando da ideia, desenvolvimento, direção visual, testes e
+                lançamento.</p>
+            </div>
+          </article>
         </div>
       </div>
     </section>
 
     <section id="projetos" class="work">
       <div class="container">
-        <div class="section-head"><div><p class="eyebrow" data-i18n="workLabel">Trabalhos selecionados</p><h2 data-i18n="workTitle">Projetos</h2></div><p class="section-copy" data-i18n="workCopy">Produtos publicados e experiências que mostram meu trabalho com desenvolvimento e conteúdo interativo.</p></div>
-        <div class="project-group"><div class="group-head"><h3 data-i18n="commercialTitle">Trabalhos comerciais</h3><p data-i18n="commercialCopy">Projetos desenvolvidos como parte da equipe da Eternal Creations para o Minecraft Marketplace.</p></div><div id="commercial-cards" class="cards"></div></div>
-        <div class="project-group"><div class="group-head"><h3 data-i18n="personalTitle">Projetos pessoais</h3><p data-i18n="personalCopy">Projetos independentes, experimentos e trabalhos autorais.</p></div><div id="personal-cards" class="cards"></div></div>
+        <div class="section-head">
+          <div>
+            <p class="eyebrow" data-i18n="workLabel">Trabalhos selecionados</p>
+            <h2 data-i18n="workTitle">Projetos</h2>
+          </div>
+          <p class="section-copy" data-i18n="workCopy">Produtos publicados e experiências que mostram meu trabalho com
+            desenvolvimento e conteúdo interativo.</p>
+        </div>
+        <div class="project-group">
+          <div class="group-head">
+            <h3 data-i18n="commercialTitle">Trabalhos comerciais</h3>
+            <p data-i18n="commercialCopy">Projetos desenvolvidos como parte da equipe da Eternal Creations para o
+              Minecraft Marketplace.</p>
+          </div>
+          <div id="commercial-cards" class="cards"></div>
+        </div>
+        <div class="project-group">
+          <div class="group-head">
+            <h3 data-i18n="personalTitle">Projetos pessoais</h3>
+            <p data-i18n="personalCopy">Projetos independentes, experimentos e trabalhos autorais.</p>
+          </div>
+          <div id="personal-cards" class="cards"></div>
+        </div>
       </div>
     </section>
 
     <section id="contato" class="contact container">
-      <div class="contact-panel"><p class="eyebrow" data-i18n="contactLabel">Contato</p><h2 data-i18n="contactTitle">Tem uma ideia? Vamos construir algo excelente.</h2><p data-i18n="contactCopy">Estou aberto a projetos de desenvolvimento web, bots para Discord, automações e integrações com inteligência artificial.</p><div class="actions"><a class="button primary" href="mailto:spikestudios8@gmail.com">spikestudios8@gmail.com</a><a class="button" href="https://github.com/MasterSpikeDev" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a class="button" href="https://www.linkedin.com/in/samuel-victor-b08725289" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a></div></div>
+      <div class="contact-panel">
+        <p class="eyebrow" data-i18n="contactLabel">Contato</p>
+        <h2 data-i18n="contactTitle">Tem uma ideia? Vamos construir algo excelente.</h2>
+        <p data-i18n="contactCopy">Estou aberto a projetos de desenvolvimento web, bots para Discord, automações e
+          integrações com inteligência artificial.</p>
+        <div class="actions"><a class="button primary"
+            href="mailto:spikestudios8@gmail.com">spikestudios8@gmail.com</a><a class="button"
+            href="https://github.com/MasterSpikeDev" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a
+            class="button" href="https://www.linkedin.com/in/Spike-victor-b08725289" target="_blank"
+            rel="noopener noreferrer">LinkedIn ↗</a></div>
+      </div>
     </section>
   </main>
-  <footer><div class="container footer-inner"><span>© <span id="year"></span> Samuel Victor.</span><div class="footer-links"><a href="https://github.com/MasterSpikeDev">GitHub</a><a href="https://www.linkedin.com/in/samuel-victor-b08725289">LinkedIn</a></div></div></footer>
+  <footer>
+    <div class="container footer-inner"><span>© <span id="year"></span> Master Spike.</span>
+      <div class="footer-links"><a href="https://github.com/MasterSpikeDev">GitHub</a><a
+          href="https://www.linkedin.com/in/Spike-victor-b08725289">LinkedIn</a></div>
+    </div>
+  </footer>
   <script src="posts.js"></script>
   <script>
-    const strings={pt:{skip:"Pular para o conteúdo",navExpertise:"Especialidades",navExperience:"Experiência",navWork:"Projetos",navContact:"Contato",eyebrow:"Desenvolvedor de experiências digitais",role:"Minecraft Bedrock, sistemas de gameplay e experiências interativas.",lead:"Desenvolvedor focado em produtos para Minecraft Marketplace, Script API e mecânicas de gameplay, com experiência complementar em web, bots para Discord e integrações com IA.",seeWork:"Ver projetos →",talk:"Vamos conversar",available:"Disponível para oportunidades freelance, contrato e studios.",expertiseLabel:"O que eu faço",expertiseTitle:"Especialidades",expertiseCopy:"Desenvolvimento orientado a resultados, combinando código, design e integrações para criar soluções completas.",webTitle:"Sites profissionais",webCopy:"Interfaces responsivas, rápidas e acessíveis, com HTML avançado e atenção a cada detalhe da experiência.",discordTitle:"Bots para Discord",discordCopy:"Bots personalizados para comunidades, automações, moderação e conexão com serviços externos.",aiTitle:"APIs de inteligência artificial",aiCopy:"Integração de modelos de IA em produtos e fluxos de trabalho para criar experiências inteligentes e úteis.",gamesTitle:"Minecraft Bedrock",gamesCopy:"Sistemas para Minecraft Marketplace com Script API, mecânicas de gameplay, itens, entidades e conteúdo interativo.",experienceLabel:"Trajetória profissional",experienceTitle:"Experiência",experienceCopy:"Experiência prática entregando conteúdo comercial e projetos independentes para Minecraft Bedrock.",eternalDescription:"Trabalho em projetos comerciais para o Bedrock Marketplace, desenvolvendo sistemas de gameplay, recursos com Script API, itens, entidades, mecânicas de combate, debugging e pipelines de produção.",independentPeriod:"Projetos independentes",independentRole:"Desenvolvedor independente",independentDescription:"Criação e publicação de mapas, resource packs e experimentos próprios, cuidando da ideia, desenvolvimento, direção visual, testes e lançamento.",commercialTitle:"Trabalhos comerciais",commercialCopy:"Projetos desenvolvidos como parte da equipe da Eternal Creations para o Minecraft Marketplace.",personalTitle:"Projetos pessoais",personalCopy:"Projetos independentes, experimentos e trabalhos autorais.",workLabel:"Trabalhos selecionados",workTitle:"Projetos",workCopy:"Produtos publicados e experiências que mostram meu trabalho com desenvolvimento e conteúdo interativo.",contactLabel:"Contato",contactTitle:"Tem uma ideia? Vamos construir algo excelente.",contactCopy:"Estou aberto a projetos de desenvolvimento web, bots para Discord, automações e integrações com inteligência artificial."},en:{skip:"Skip to content",navExpertise:"Expertise",navExperience:"Experience",navWork:"Work",navContact:"Contact",eyebrow:"Digital experience developer",role:"Minecraft Bedrock, Gameplay Systems & Interactive Experiences.",lead:"Developer focused on Minecraft Marketplace products, Script API and gameplay mechanics, with additional experience in web, Discord bots and AI integrations.",seeWork:"See my work →",talk:"Let's talk",available:"Available for freelance, contract and studio opportunities.",expertiseLabel:"What I do",expertiseTitle:"Expertise",expertiseCopy:"Results-driven development combining code, design and integrations to deliver complete solutions.",webTitle:"Professional websites",webCopy:"Responsive, fast and accessible interfaces built with advanced HTML and close attention to every detail.",discordTitle:"Discord bots",discordCopy:"Custom bots for communities, automation, moderation and connections with external services.",aiTitle:"Artificial intelligence APIs",aiCopy:"AI model integrations for products and workflows that create intelligent, useful experiences.",gamesTitle:"Minecraft Bedrock",gamesCopy:"Minecraft Marketplace systems using Script API, gameplay mechanics, items, entities and interactive content.",experienceLabel:"Professional background",experienceTitle:"Experience",experienceCopy:"Hands-on experience delivering commercial content and independent projects for Minecraft Bedrock.",eternalDescription:"Worked on commercial Bedrock Marketplace projects, gameplay systems, Script API features, items, entities, combat mechanics, debugging and production pipelines.",independentPeriod:"Independent projects",independentRole:"Independent Developer",independentDescription:"Created and published original maps, resource packs and experiments, handling concept, development, visual direction, testing and release.",commercialTitle:"Commercial Work",commercialCopy:"Projects developed as part of the Eternal Creations team for Minecraft Marketplace.",personalTitle:"Personal Projects",personalCopy:"Independent projects, experiments and original work.",workLabel:"Selected work",workTitle:"Projects",workCopy:"Published products and experiences that showcase my development and interactive content work.",contactLabel:"Contact",contactTitle:"Have an idea? Let's build something great.",contactCopy:"I'm open to web development, Discord bot, automation and artificial intelligence integration projects."}};
-    let lang=localStorage.getItem("portfolio-lang")||(navigator.language.startsWith("pt")?"pt":"en");
-    const renderProjects=()=>{const groups={commercial:document.querySelector("#commercial-cards"),personal:document.querySelector("#personal-cards")};Object.values(groups).forEach(group=>group.innerHTML="");(window.POSTS||[]).forEach(project=>{const article=document.createElement("article");article.className="project";const links=[...(project.links||[]),...(project.videos||[])];const roleLabel=lang==="pt"?"Minha contribuição":"My role";article.innerHTML=`<div class="project-media"><img src="${project.img}" alt="${project.title[lang]}" loading="lazy"></div><div class="project-body"><h3>${project.title[lang]}</h3><p>${project.desc[lang]}</p><p class="project-role"><strong>${roleLabel}:</strong> ${project.role?.[lang]||""}</p><div class="project-links">${links.map(link=>`<a href="${link.href}" target="_blank" rel="noopener noreferrer">${link.label[lang]} ↗</a>`).join("")}</div></div>`;(groups[project.category]||groups.personal).append(article);});};
-    const setLanguage=value=>{lang=value;document.documentElement.lang=value==="pt"?"pt-BR":"en";document.querySelectorAll("[data-i18n]").forEach(el=>el.textContent=strings[value][el.dataset.i18n]);document.querySelector("#lang").value=value;localStorage.setItem("portfolio-lang",value);renderProjects();};
-    document.querySelector("#lang").addEventListener("change",event=>setLanguage(event.target.value));document.querySelector("#year").textContent=new Date().getFullYear();setLanguage(lang);
+    const strings = { pt: { skip: "Pular para o conteúdo", navExpertise: "Especialidades", navExperience: "Experiência", navWork: "Projetos", navContact: "Contato", eyebrow: "Desenvolvedor de experiências digitais", role: "Minecraft Bedrock, sistemas de gameplay e experiências interativas.", lead: "Desenvolvedor focado em produtos para Minecraft Marketplace, Script API e mecânicas de gameplay, com experiência complementar em web, bots para Discord e integrações com IA.", seeWork: "Ver projetos →", talk: "Vamos conversar", available: "Disponível para oportunidades freelance, contrato e studios.", expertiseLabel: "O que eu faço", expertiseTitle: "Especialidades", expertiseCopy: "Desenvolvimento orientado a resultados, combinando código, design e integrações para criar soluções completas.", webTitle: "Sites profissionais", webCopy: "Interfaces responsivas, rápidas e acessíveis, com HTML avançado e atenção a cada detalhe da experiência.", discordTitle: "Bots para Discord", discordCopy: "Bots personalizados para comunidades, automações, moderação e conexão com serviços externos.", aiTitle: "APIs de inteligência artificial", aiCopy: "Integração de modelos de IA em produtos e fluxos de trabalho para criar experiências inteligentes e úteis.", gamesTitle: "Minecraft Bedrock", gamesCopy: "Sistemas para Minecraft Marketplace com Script API, mecânicas de gameplay, itens, entidades e conteúdo interativo.", experienceLabel: "Trajetória profissional", experienceTitle: "Experiência", experienceCopy: "Experiência prática entregando conteúdo comercial e projetos independentes para Minecraft Bedrock.", eternalDescription: "Trabalho em projetos comerciais para o Bedrock Marketplace, desenvolvendo sistemas de gameplay, recursos com Script API, itens, entidades, mecânicas de combate, debugging e pipelines de produção.", independentPeriod: "Projetos independentes", independentRole: "Desenvolvedor independente", independentDescription: "Criação e publicação de mapas, resource packs e experimentos próprios, cuidando da ideia, desenvolvimento, direção visual, testes e lançamento.", commercialTitle: "Trabalhos comerciais", commercialCopy: "Projetos desenvolvidos como parte da equipe da Eternal Creations para o Minecraft Marketplace.", personalTitle: "Projetos pessoais", personalCopy: "Projetos independentes, experimentos e trabalhos autorais.", workLabel: "Trabalhos selecionados", workTitle: "Projetos", workCopy: "Produtos publicados e experiências que mostram meu trabalho com desenvolvimento e conteúdo interativo.", contactLabel: "Contato", contactTitle: "Tem uma ideia? Vamos construir algo excelente.", contactCopy: "Estou aberto a projetos de desenvolvimento web, bots para Discord, automações e integrações com inteligência artificial." }, en: { skip: "Skip to content", navExpertise: "Expertise", navExperience: "Experience", navWork: "Work", navContact: "Contact", eyebrow: "Digital experience developer", role: "Minecraft Bedrock, Gameplay Systems & Interactive Experiences.", lead: "Developer focused on Minecraft Marketplace products, Script API and gameplay mechanics, with additional experience in web, Discord bots and AI integrations.", seeWork: "See my work →", talk: "Let's talk", available: "Available for freelance, contract and studio opportunities.", expertiseLabel: "What I do", expertiseTitle: "Expertise", expertiseCopy: "Results-driven development combining code, design and integrations to deliver complete solutions.", webTitle: "Professional websites", webCopy: "Responsive, fast and accessible interfaces built with advanced HTML and close attention to every detail.", discordTitle: "Discord bots", discordCopy: "Custom bots for communities, automation, moderation and connections with external services.", aiTitle: "Artificial intelligence APIs", aiCopy: "AI model integrations for products and workflows that create intelligent, useful experiences.", gamesTitle: "Minecraft Bedrock", gamesCopy: "Minecraft Marketplace systems using Script API, gameplay mechanics, items, entities and interactive content.", experienceLabel: "Professional background", experienceTitle: "Experience", experienceCopy: "Hands-on experience delivering commercial content and independent projects for Minecraft Bedrock.", eternalDescription: "Worked on commercial Bedrock Marketplace projects, gameplay systems, Script API features, items, entities, combat mechanics, debugging and production pipelines.", independentPeriod: "Independent projects", independentRole: "Independent Developer", independentDescription: "Created and published original maps, resource packs and experiments, handling concept, development, visual direction, testing and release.", commercialTitle: "Commercial Work", commercialCopy: "Projects developed as part of the Eternal Creations team for Minecraft Marketplace.", personalTitle: "Personal Projects", personalCopy: "Independent projects, experiments and original work.", workLabel: "Selected work", workTitle: "Projects", workCopy: "Published products and experiences that showcase my development and interactive content work.", contactLabel: "Contact", contactTitle: "Have an idea? Let's build something great.", contactCopy: "I'm open to web development, Discord bot, automation and artificial intelligence integration projects." } };
+    let lang = localStorage.getItem("portfolio-lang") || (navigator.language.startsWith("pt") ? "pt" : "en");
+    const renderProjects = () => { const groups = { commercial: document.querySelector("#commercial-cards"), personal: document.querySelector("#personal-cards") }; Object.values(groups).forEach(group => group.innerHTML = ""); (window.POSTS || []).forEach(project => { const article = document.createElement("article"); article.className = "project"; const links = [...(project.links || []), ...(project.videos || [])]; const roleLabel = lang === "pt" ? "Minha contribuição" : "My role"; article.innerHTML = `<div class="project-media"><img src="${project.img}" alt="${project.title[lang]}" loading="lazy"></div><div class="project-body"><h3>${project.title[lang]}</h3><p>${project.desc[lang]}</p><p class="project-role"><strong>${roleLabel}:</strong> ${project.role?.[lang] || ""}</p><div class="project-links">${links.map(link => `<a href="${link.href}" target="_blank" rel="noopener noreferrer">${link.label[lang]} ↗</a>`).join("")}</div></div>`; (groups[project.category] || groups.personal).append(article); }); };
+    const setLanguage = value => { lang = value; document.documentElement.lang = value === "pt" ? "pt-BR" : "en"; document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = strings[value][el.dataset.i18n]); document.querySelector("#lang").value = value; localStorage.setItem("portfolio-lang", value); renderProjects(); };
+    document.querySelector("#lang").addEventListener("change", event => setLanguage(event.target.value)); document.querySelector("#year").textContent = new Date().getFullYear(); setLanguage(lang);
   </script>
 </body>
+
 </html>
