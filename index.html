@@ -1,2192 +1,742 @@
-<!DOCTYPE html>
-<html lang="pt">
+<!doctype html>
+<html lang="pt-BR">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Spike Hub</title>
-  <meta name="description" content="Welcome to my HUB" />
-  <link rel="icon" type="image/png" href="assets/icons/spike-hub-tab-icon.png" />
-
-  <!-- CARREGAMENTO DA FONTE PERSONALIZADA -->
-  <link rel="stylesheet" href="assets/fonts/custom-font.css" id="custom-font-css">
-  <style id="dynamic-font-style"></style>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+    content="Portfólio de Master Spike — desenvolvimento web, automações, bots para Discord e integrações com inteligência artificial.">
+  <meta name="theme-color" content="#090b10">
+  <title>Master Spike — Desenvolvedor</title>
+  <link rel="icon" type="image/png" href="assets/icons/spike-hub-tab-icon.png">
   <style>
     :root {
-      --sound-bar-height: 64px;
-      /* ajuste se sua barra for maior */
-      --bg: #0b0b0c;
-      --card: #141416;
-      --text: #e5e7eb;
-      --muted: #9aa0a6;
-      --border: #26272b;
-      --accent: #fac460;
-      --accent-glow: rgba(250, 96, 96, 0.3);
-      --bg-opacity: 1;
-      --bg-blur: 2px;
-      --gradient: linear-gradient(45deg, #512700, #ff9100);
-      /* VARIÁVEL PARA FONTE - será sobrescrita pelo JavaScript */
-      --font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      --bg: #090b10;
+      --surface: #10141d;
+      --surface-2: #171c27;
+      --text: #f4f6fb;
+      --muted: #9ca6b8;
+      --line: #252c3a;
+      --accent: #ffb648;
+      --accent-2: #ff7a45;
+      --max: 1180px;
     }
 
-    @media (prefers-color-scheme: light) {
-      :root {
-        --bg: #fafafa;
-        --card: #fff;
-        --text: #111827;
-        --muted: #536471;
-        --border: #e5e7eb;
-        --accent: #eb7e25;
-        --accent-glow: rgba(235, 166, 37, 0.2);
-        --gradient: linear-gradient(45deg, #eb9c25, #ed9c3a, #db8727);
-        --font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      }
-    }
-
-    /* ANIMAÇÕES */
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes float {
-
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-
-      50% {
-        transform: translateY(-10px);
-      }
-    }
-
-    @keyframes glow {
-
-      0%,
-      100% {
-        box-shadow: 0 0 20px var(--accent-glow);
-      }
-
-      50% {
-        box-shadow: 0 0 30px var(--accent-glow);
-      }
-    }
-
-    @keyframes slideInRight {
-      from {
-        opacity: 0;
-        transform: translateX(30px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    @keyframes pulse {
-      0% {
-        transform: scale(1);
-      }
-
-      50% {
-        transform: scale(1.05);
-      }
-
-      100% {
-        transform: scale(1);
-      }
-    }
-
-    @keyframes gradientShift {
-      0% {
-        background-position: 0% 50%;
-      }
-
-      50% {
-        background-position: 100% 50%;
-      }
-
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-
-    /* NOVOS ESTILOS */
     * {
       box-sizing: border-box;
-      font-family: inherit;
     }
 
-    html,
-    body {
-      height: 100%;
+    html {
       scroll-behavior: smooth;
     }
 
     body {
       margin: 0;
-      font-family: var(--font-family);
       color: var(--text);
       background: var(--bg);
-      min-height: 100dvh;
-      overflow-x: hidden;
-      opacity: 0;
-      animation: fadeIn 0.8s ease-out forwards;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      line-height: 1.6;
     }
 
-    /* Background layers - SISTEMA SIMPLIFICADO */
-    .bg-layer {
+    body::before {
+      content: "";
       position: fixed;
       inset: 0;
-      opacity: 0;
-      filter: blur(var(--bg-blur)) brightness(0.7);
-      transition: opacity 1s ease, filter 1.2s ease;
-      z-index: 0;
-      overflow: hidden;
-      pointer-events: none;
-    }
-
-    /* Estilo para vídeo de background */
-    .bg-video {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      min-width: 100%;
-      min-height: 100%;
-      width: auto;
-      height: auto;
-      transform: translate(-50%, -50%);
-      object-fit: cover;
-    }
-
-    /* Para imagens de background */
-    .bg-image {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    /* Ajustes para exibir background correto */
-    body[data-view="main"] #bg-main {
-      opacity: var(--bg-opacity);
-    }
-
-    body[data-view="about"] #bg-about {
-      opacity: var(--bg-opacity);
-    }
-
-    body[data-view="portfolio"] #bg-portfolio {
-      opacity: var(--bg-opacity);
-    }
-
-    /* CONTROLE DE VOLUME - NOVO */
-    .volume-container {
-      position: sticky;
-      bottom: 16px;
-
-      display: flex;
-      justify-content: flex-end;
-
-      margin-top: 24px;
-      z-index: 5;
-      /* abaixo de modais, acima do fundo */
-    }
-
-
-
-    .volume-control {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(20, 20, 22, 0.9);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--border);
-      border-radius: 25px;
-      padding: 8px 15px;
-      transition: all 0.3s ease;
-      transform: translateX(calc(100% - 44px));
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .volume-control:hover {
-      transform: translateX(0);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-    }
-
-    .volume-control.expanded {
-      transform: translateX(0);
-    }
-
-    .volume-btn {
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 2rem;
-      cursor: pointer;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: all 0.2s ease;
-    }
-
-    .volume-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: scale(1.1);
-    }
-
-    .volume-btn.muted {
-      opacity: 0.5;
-    }
-
-    .volume-slider-container {
-      width: 0;
-      opacity: 0;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .volume-control:hover .volume-slider-container,
-    .volume-control.expanded .volume-slider-container {
-      width: 120px;
-      opacity: 1;
-    }
-
-    .volume-slider {
-      width: 100%;
-      height: 4px;
-      -webkit-appearance: none;
-      appearance: none;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 2px;
-      outline: none;
-      cursor: pointer;
-    }
-
-    .volume-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-      border: 2px solid var(--card);
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    }
-
-    .volume-slider::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-      border: 2px solid var(--card);
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    }
-
-    .volume-slider::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
-    }
-
-    .volume-percentage {
-      font-size: 2rem;
-      color: var(--muted);
-      min-width: 30px;
-      text-align: center;
-      font-weight: bold;
-      font-family: inherit;
-    }
-
-    /* Botão de ativação de áudio - aparece quando o áudio está bloqueado */
-    .audio-permission {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      z-index: 1000;
-      background: rgba(20, 20, 22, 0.9);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--border);
-      border-radius: 25px;
-      padding: 12px 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      animation: fadeIn 0.5s ease;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-      font-family: inherit;
-    }
-
-    .audio-permission.hidden {
-      display: none;
-    }
-
-    .audio-permission-btn {
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 8px 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: inherit;
-    }
-
-    .audio-permission-btn:hover {
-      background: var(--accent);
-      opacity: 0.9;
-      transform: translateY(-2px);
-    }
-
-    /* Shell com gradiente animado */
-    .shell {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 24px;
-      position: relative;
-      z-index: 2;
-      animation: fadeIn 0.8s ease-out 0.3s both;
-    }
-
-    /* Topbar melhorada */
-    .topbar {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 20px;
-      animation: slideInRight 0.6s ease-out 0.4s both;
-    }
-
-    .lang {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 6px 10px;
-      background: rgba(20, 20, 22, 0.8);
-      backdrop-filter: blur(10px);
-      color: var(--text);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      font-family: inherit;
-    }
-
-    .lang::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: var(--gradient);
-      opacity: 0.1;
-      transition: left 0.3s ease;
-    }
-
-    .lang:hover::before {
-      left: 0;
-    }
-
-    .lang:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-
-    .lang select {
-      appearance: none;
-      background: transparent;
-      border: none;
-      color: inherit;
-      font: inherit;
-      cursor: pointer;
-      position: relative;
-      z-index: 1;
-      font-family: inherit;
-    }
-
-    /* Card principal, cor de fundo principal */
-    .card {
-      background: linear-gradient(145deg,
-          rgba(113, 81, 0, 0.855),
-          rgba(49, 0, 0, 0.822));
-      border: 1px solid rgb(0, 0, 0);
-      border-radius: 28px;
-      padding: 32px;
-      box-shadow:
-        0 200px 400px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      z-index: 1;
-      backdrop-filter: blur(100px);
-      transform-style: preserve-3d;
-      perspective: 1000px;
-      animation: fadeIn 0.8s ease-out 0.5s both;
-    }
-
-    .card:hover {
-      transform: translateY(-8px) rotateX(2deg);
-      box-shadow:
-        0 30px 60px rgba(0, 0, 0, 0.4),
-        0 0 40px var(--accent-glow),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    }
-
-    /* Grid principal */
-    .main-grid {
-      display: grid;
-      gap: 24px;
-      grid-template-columns: 160px 1fr;
-      align-items: center;
-    }
-
-    @media (max-width: 780px) {
-      .main-grid {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-
-
-      .volume-slider-container {
-        width: 100px;
-        opacity: 1;
-      }
-
-      .volume-container {
-        justify-content: center;
-      }
-
-      .volume-control {
-        transform: none !important;
-      }
-
-    }
-
-    /* Avatar com efeito flutuante */
-    .avatar {
-      width: 160px;
-      height: 160px;
-      border-radius: 22px;
-      overflow: hidden;
-      border: 2px solid transparent;
-      background: linear-gradient(45deg, var(--accent), #f6b85c) border-box;
-      box-shadow:
-        0 15px 35px rgba(0, 0, 0, 0.3),
-        0 0 20px var(--accent-glow);
-      margin: auto;
-      transition: all 0.4s ease;
-      position: relative;
-      animation: float 6s ease-in-out infinite;
-    }
-
-    .avatar:hover {
-      animation: pulse 1s ease, float 6s ease-in-out infinite;
-      box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.4),
-        0 0 30px var(--accent-glow);
-      transform: scale(1.05);
-    }
-
-    .avatar::after {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      background: var(--gradient);
-      background-size: 300% 300%;
-      border-radius: 24px;
       z-index: -1;
-      opacity: 0.5;
-      animation: gradientShift 3s ease infinite;
+      pointer-events: none;
+      background: radial-gradient(circle at 75% 0, rgba(255, 182, 72, .12), transparent 28rem), radial-gradient(circle at 5% 35%, rgba(255, 122, 69, .07), transparent 24rem);
     }
 
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.4s ease;
+    a {
+      color: inherit;
     }
 
-    .avatar:hover img {
-      transform: scale(1.1);
+    button,
+    select {
+      font: inherit;
     }
 
-    /* Textos com cor sólida */
-    .nickname,
-    .realname {
-      font-size: 3rem;
-      font-weight: 900;
-      letter-spacing: 0.2px;
-      color: #ffffff;
-      margin: 0;
-      line-height: 1.2;
-      font-family: inherit;
+    .container {
+      width: min(calc(100% - 40px), var(--max));
+      margin: auto;
     }
 
-    .realname {
-      display: none;
+    .skip {
+      position: fixed;
+      left: 1rem;
+      top: -5rem;
+      z-index: 20;
+      padding: .75rem 1rem;
+      background: var(--text);
+      color: var(--bg);
+      border-radius: .5rem;
     }
 
-    .headline {
-      color: var(--muted);
-      margin-top: 8px;
-      font-size: 2rem;
-      font-weight: 500;
-      opacity: 0;
-      animation: fadeIn 0.6s ease-out 0.8s forwards;
-      display: none;
-      font-family: inherit;
+    .skip:focus {
+      top: 1rem;
     }
 
-    .about-text {
-      line-height: 1.8;
-      font-size: 1.5rem;
-      margin-top: 16px;
-      opacity: 0;
-      animation: fadeIn 0.6s ease-out 1s forwards;
-      display: none;
-      font-family: inherit;
-    }
-
-    .about-text p {
-      margin: 12px 0;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeIn 0.6s ease-out forwards;
-      font-family: inherit;
-    }
-
-    .about-text p:nth-child(1) {
-      animation-delay: 1s;
-    }
-
-    .about-text p:nth-child(2) {
-      animation-delay: 1.2s;
-    }
-
-    .about-text p:nth-child(3) {
-      animation-delay: 1.4s;
-    }
-
-    .about-text p:nth-child(4) {
-      animation-delay: 1.6s;
-    }
-
-    .about-text p:nth-child(5) {
-      animation-delay: 1.8s;
-    }
-
-    /* Botões principais */
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 20px;
-      animation: fadeIn 0.6s ease-out 0.6s both;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      border: 1px solid var(--border);
-      padding: 12px 20px;
-      border-radius: 50px;
-      background: linear-gradient(135deg,
-          rgba(255, 255, 255, 0.05),
-          rgba(255, 255, 255, 0.02));
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 1.5rem;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-      backdrop-filter: blur(10px);
-      font-family: inherit;
-    }
-
-    .pill::before {
-      content: '';
-      position: absolute;
+    header {
+      position: sticky;
       top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: var(--gradient);
-      opacity: 0.1;
-      transition: left 0.4s ease;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255, 255, 255, .07);
+      background: rgba(9, 11, 16, .84);
+      backdrop-filter: blur(18px);
     }
 
-    .pill:hover::before {
-      left: 0;
-    }
-
-    .pill:hover {
-      transform: translateY(-3px) scale(1.05);
-      border-color: var(--accent);
-      box-shadow:
-        0 10px 20px rgba(0, 0, 0, 0.2),
-        0 0 20px var(--accent-glow);
-    }
-
-    .pill:active {
-      transform: translateY(-1px) scale(1.02);
-    }
-
-    /* Links grid */
-    .links {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-      margin-top: 20px;
-      animation: fadeIn 0.6s ease-out 0.7s both;
-    }
-
-    .btn {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 12px;
-      text-decoration: none;
-      color: var(--text);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 16px;
-      border-radius: 16px;
-      font-weight: 700;
-      background: linear-gradient(135deg,
-          rgba(255, 255, 255, 0.05),
-          rgba(255, 255, 255, 0.01));
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-      backdrop-filter: blur(10px);
-      font-family: inherit;
-      font-size: 1.3rem;
-    }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--gradient);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .btn:hover::before {
-      opacity: 0.1;
-    }
-
-    .btn:hover {
-      transform: translateY(-4px);
-      border-color: var(--accent);
-      box-shadow:
-        0 15px 30px rgba(0, 0, 0, 0.25),
-        0 0 25px var(--accent-glow);
-    }
-
-    .btn b {
-      position: relative;
-      z-index: 1;
-      font-family: inherit;
-    }
-
-    .btn .icon {
-      font-size: 2rem;
-      position: relative;
-      z-index: 1;
-      transition: transform 0.3s ease;
-    }
-
-    .btn:hover .icon {
-      transform: scale(1.2) rotate(5deg);
-    }
-
-    /* NEW RULE: SVG icons sizing */
-    .btn .icon svg {
-      width: 2rem;
-      height: 2rem;
-      display: block;
-    }
-
-    /* BADGES SECTION */
-    .badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 20px;
-      animation: fadeIn 0.6s ease-out 0.6s both;
-    }
-
-    .badge {
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: linear-gradient(135deg,
-          rgba(255, 255, 255, 0.05),
-          rgba(255, 255, 255, 0.01));
-      backdrop-filter: blur(10px);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-      color: #fff;
-      /* <- ADICIONA ISSO */
-
-
-    }
-
-    .badge::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: var(--gradient);
-      opacity: 0.1;
-      transition: left 0.4s ease;
-    }
-
-    .badge:hover::before {
-      left: 0;
-    }
-
-    .badge:hover {
-      transform: translateY(-3px) scale(1.05);
-      border-color: var(--accent);
-      box-shadow:
-        0 10px 20px rgba(0, 0, 0, 0.2),
-        0 0 20px var(--accent-glow);
-    }
-
-    .badge svg {
-      width: 1.5rem;
-      height: 1.5rem;
-      display: block;
-    }
-
-    /* Faz TODO SVG usar a cor do elemento pai (currentColor) */
-    .badge svg,
-    .btn .icon svg,
-    .contact-list .icon svg {
-      fill: currentColor;
-    }
-
-    /* Se algum SVG for de stroke (linhas), também garante a cor */
-    .badge svg,
-    .btn .icon svg,
-    .contact-list .icon svg {
-      stroke: currentColor;
-    }
-
-
-
-    /* Footer */
-    footer {
-      margin-top: 24px;
-      color: var(--muted);
-      font-size: 1rem;
-      text-align: center;
-      opacity: 0;
-      animation: fadeIn 0.6s ease-out 1s forwards;
-      padding-top: 16px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      font-family: inherit;
-    }
-
-    /* Seções */
-    #section-portfolio {
-      display: none;
-    }
-
-    body[data-view="portfolio"] #section-main {
-      display: none;
-    }
-
-    body[data-view="portfolio"] #section-portfolio {
-      display: block;
-    }
-
-    body[data-view="about"] .nickname {
-      display: none;
-    }
-
-    body[data-view="about"] .realname {
-      display: block;
-    }
-
-    body[data-view="about"] .headline {
-      display: block;
-    }
-
-    body[data-view="about"] .about-text {
-      display: block;
-    }
-
-    body[data-view="about"] .links {
-      display: none;
-    }
-
-    body[data-view="about"] .avatar {
-      animation: float 6s ease-in-out infinite, glow 3s ease-in-out infinite;
-    }
-
-    /* Portfolio */
-    .portfolio-header {
+    nav {
+      min-height: 74px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 24px;
+    }
+
+    .brand {
+      text-decoration: none;
+      font-weight: 850;
+      letter-spacing: -.03em;
+      font-size: 1.16rem;
+    }
+
+    .brand span {
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .93rem;
+      font-weight: 650;
+      transition: .2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a:focus-visible {
+      color: var(--text);
+    }
+
+    #lang {
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 8px 10px;
+    }
+
+    section {
+      padding: 96px 0;
+    }
+
+    .hero {
+      min-height: calc(100vh - 74px);
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      align-items: center;
+      gap: 70px;
+      padding-top: 64px;
+    }
+
+    .eyebrow {
+      margin: 0 0 18px;
+      color: var(--accent);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 820px;
+      font-size: clamp(3.2rem, 7vw, 6.8rem);
+      line-height: .95;
+      letter-spacing: -.07em;
+    }
+
+    h1 span {
+      display: block;
+      color: var(--muted);
+      font-size: .53em;
+      letter-spacing: -.045em;
+      margin-top: 20px;
+    }
+
+    .lead {
+      max-width: 690px;
+      margin: 28px 0 0;
+      color: #bdc5d3;
+      font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+    }
+
+    .actions {
+      display: flex;
       flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 34px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 48px;
+      padding: 0 20px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 750;
+      transition: transform .2s, border-color .2s, background .2s;
+    }
+
+    .button.primary {
+      color: #17100a;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      border-color: #556078;
+    }
+
+    .profile {
+      justify-self: end;
+      width: min(100%, 340px);
+    }
+
+    .portrait {
+      aspect-ratio: 1;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--surface);
+      box-shadow: 0 25px 80px rgba(0, 0, 0, .45);
+    }
+
+    .portrait img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .availability {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #62d891;
+      box-shadow: 0 0 0 5px rgba(98, 216, 145, .1);
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 1;
+      letter-spacing: -.05em;
+    }
+
+    .section-copy {
+      max-width: 520px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .expertise-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .expertise {
+      padding: 30px;
+      min-height: 230px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(145deg, var(--surface-2), var(--surface));
+    }
+
+    .number {
+      color: var(--accent);
+      font: 700 .78rem/1 monospace;
+    }
+
+    .expertise h3 {
+      margin: 34px 0 10px;
+      font-size: 1.35rem;
+      letter-spacing: -.025em;
+    }
+
+    .expertise p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 22px;
+    }
+
+    .tag {
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: #c9d0dc;
+      font-size: .78rem;
+      background: #0c0f15;
+    }
+
+    .experience {
+      border-top: 1px solid var(--line);
+    }
+
+    .timeline {
+      border-top: 1px solid var(--line);
+    }
+
+    .experience-row {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 48px;
+      padding: 34px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .experience-period {
+      color: var(--accent);
+      font: 700 .83rem/1.5 monospace;
+    }
+
+    .experience-row h3 {
+      margin: 0 0 5px;
+      font-size: 1.4rem;
+      letter-spacing: -.03em;
+    }
+
+    .experience-role {
+      margin: 0 0 12px;
+      color: #cbd2de;
+      font-weight: 700;
+    }
+
+    .experience-description {
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .work {
+      border-top: 1px solid var(--line);
+    }
+
+    .project-group+.project-group {
+      margin-top: 76px;
+    }
+
+    .group-head {
       margin-bottom: 24px;
     }
 
-    .portfolio-title {
-      font-size: 5rem;
-      font-weight: 900;
-      letter-spacing: 0.2px;
-      color: #ffffff;
-      font-family: inherit;
+    .group-head h3 {
+      margin: 0 0 7px;
+      font-size: 1.7rem;
+      letter-spacing: -.035em;
+    }
+
+    .group-head p {
+      margin: 0;
+      color: var(--muted);
     }
 
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
     }
 
-    .p-card {
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
+    .project {
       overflow: hidden;
-      background: linear-gradient(135deg,
-          rgba(255, 255, 255, 0.05),
-          rgba(255, 255, 255, 0.01));
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      backdrop-filter: blur(10px);
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeIn 0.6s ease-out forwards;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
     }
 
-    .p-card:nth-child(1) {
-      animation-delay: 0.1s;
+    .project-media {
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      background: #080a0e;
     }
 
-    .p-card:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-
-    .p-card:nth-child(3) {
-      animation-delay: 0.3s;
-    }
-
-    .p-card:nth-child(4) {
-      animation-delay: 0.4s;
-    }
-
-    .p-card:nth-child(5) {
-      animation-delay: 0.5s;
-    }
-
-    .p-card:hover {
-      transform: translateY(-8px) scale(1.02);
-      border-color: var(--accent);
-      box-shadow:
-        0 25px 50px rgba(0, 0, 0, 0.3),
-        0 0 30px var(--accent-glow);
-    }
-
-    .p-media {
+    .project-media img {
       width: 100%;
-      height: 200px;
-      object-fit: cover;
+      height: 100%;
       display: block;
-      background: #111;
-      transition: transform 0.4s ease;
+      object-fit: cover;
+      transition: transform .45s;
     }
 
-    .p-media.video-thumbnail {
-      position: relative;
+    .project:hover img {
+      transform: scale(1.035);
     }
 
-    .p-media.video-thumbnail::after {
-      content: '▶';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 3rem;
-      color: white;
-      text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-      opacity: 0.8;
-      transition: opacity 0.3s ease;
+    .project-body {
+      padding: 25px;
     }
 
-    .p-card:hover .p-media {
-      transform: scale(1.05);
+    .project h3 {
+      margin: 0 0 9px;
+      font-size: 1.35rem;
     }
 
-    .p-card:hover .p-media.video-thumbnail::after {
-      opacity: 1;
-    }
-
-    .p-body {
-      padding: 20px;
-    }
-
-    .p-title {
-      font-weight: 800;
-      margin: 0 0 10px;
-      font-size: 2rem;
-      color: var(--text);
-      font-family: inherit;
-    }
-
-    .p-desc {
+    .project p {
+      min-height: 3.2em;
+      margin: 0;
       color: var(--muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-      margin-bottom: 15px;
-      font-family: inherit;
     }
 
-    .p-links {
+    .project-role {
+      min-height: 0 !important;
+      margin-top: 18px !important;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      color: #cbd2de !important;
+    }
+
+    .project-role strong {
+      color: var(--text);
+    }
+
+    .project-links {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 15px;
+      gap: 16px;
+      margin-top: 21px;
     }
 
-    .chip {
-      border: 1px solid var(--border);
-      border-radius: 50px;
-      padding: 8px 16px;
+    .project-links a {
+      color: var(--accent);
+      font-size: .88rem;
+      font-weight: 750;
       text-decoration: none;
-      color: var(--text);
-      font-weight: 700;
-      font-size: 0.9rem;
-      transition: all 0.3s ease;
-      background: rgba(255, 255, 255, 0.05);
-      font-family: inherit;
     }
 
-    .chip:hover {
-      border-color: var(--accent);
-      background: var(--accent-glow);
-      transform: translateY(-2px);
+    .project-links a:hover {
+      text-decoration: underline;
     }
 
-    /* Modal de Contato */
-    .modal-backdrop[hidden] {
-      display: none !important;
+    .contact {
+      padding-bottom: 70px;
     }
 
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(10px);
+    .contact-panel {
+      padding: clamp(30px, 6vw, 70px);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(120deg, #171b24, #10131a);
+    }
+
+    .contact-panel h2 {
+      max-width: 760px;
+    }
+
+    .contact-panel p {
+      max-width: 650px;
+      margin: 20px 0 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    footer {
+      padding: 28px 0;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+
+    .footer-inner {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      opacity: 0;
-      animation: fadeIn 0.3s ease-out forwards;
+      justify-content: space-between;
+      gap: 20px;
+      font-size: .88rem;
     }
 
-    .modal {
-      position: relative;
-      width: min(520px, 100%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(20, 20, 22, 0.95);
-      border-radius: 24px;
-      box-shadow:
-        0 30px 60px rgba(0, 0, 0, 0.5),
-        0 0 40px var(--accent-glow);
-      padding: 24px;
-      animation: pop 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      backdrop-filter: blur(20px);
-    }
-
-    @keyframes pop {
-      from {
-        transform: scale(0.9);
-        opacity: 0;
-      }
-
-      to {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
-    .modal h3 {
-      margin: 0 0 20px;
-      font-size: 1.5rem;
-      font-weight: 900;
-      color: var(--text);
-      font-family: inherit;
-    }
-
-    .contact-list {
-      display: grid;
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    .contact-list a {
+    .footer-links {
       display: flex;
-      align-items: center;
-      gap: 12px;
+      gap: 18px;
+    }
+
+    .footer-links a {
       text-decoration: none;
-      color: var(--text);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 16px;
-      border-radius: 16px;
-      font-weight: 700;
-      background: linear-gradient(135deg,
-          rgba(255, 255, 255, 0.05),
-          rgba(255, 255, 255, 0.01));
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      font-family: inherit;
     }
 
-    .contact-list a::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: var(--gradient);
-      opacity: 0.1;
-      transition: left 0.3s ease;
-    }
-
-    .contact-list a:hover::before {
-      left: 0;
-    }
-
-    .contact-list a:hover {
-      border-color: var(--accent);
-      transform: translateX(5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      width: 40px;
-      height: 40px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text);
-      cursor: pointer;
-      font-size: 20px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      font-family: inherit;
-    }
-
-    .modal-close:hover {
-      border-color: var(--accent);
-      background: var(--accent-glow);
-      transform: rotate(90deg);
-    }
-
-    /* Loader inicial */
-    .loader {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      opacity: 1;
-      transition: opacity 0.5s ease;
-    }
-
-    .loader.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .loader-spinner {
-      width: 50px;
-      height: 50px;
-      border: 3px solid transparent;
-      border-top: 3px solid var(--accent);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
+    @media (max-width:800px) {
+      .nav-links>a {
+        display: none;
       }
 
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* Responsividade */
-    @media (max-width: 768px) {
-      .shell {
-        padding: 16px;
-      }
-
-      .card {
-        padding: 24px;
-        border-radius: 24px;
-      }
-
-      .nickname,
-      .realname {
-        font-size: 1.8rem;
-      }
-
-      .btn {
-        padding: 14px;
-      }
-
-      .links {
+      .hero {
         grid-template-columns: 1fr;
+        gap: 44px;
+        padding: 72px 0;
       }
 
+      .profile {
+        justify-self: start;
+        width: 240px;
+      }
+
+      .section-head {
+        display: block;
+      }
+
+      .section-copy {
+        margin-top: 18px;
+      }
+
+      .expertise-grid,
       .cards {
         grid-template-columns: 1fr;
       }
 
-      .audio-permission {
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 80px;
-        max-width: 90%;
+      .experience-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      section {
+        padding: 72px 0;
       }
     }
 
-    @media (max-width: 480px) {
-      .portfolio-header {
+    @media (max-width:480px) {
+      .container {
+        width: min(calc(100% - 28px), var(--max));
+      }
+
+      .profile {
+        width: 190px;
+      }
+
+      .footer-inner {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
       }
 
-      .btn-row {
-        justify-content: center;
+      h1 {
+        font-size: 3.35rem;
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      html {
+        scroll-behavior: auto;
       }
 
-      .pill {
-        width: 100%;
-        justify-content: center;
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
       }
     }
   </style>
 </head>
 
-<body data-view="main">
-  <!-- Loader -->
-  <div class="loader" id="loader">
-    <div class="loader-spinner"></div>
-  </div>
-
-  <!-- Botão para permitir áudio (aparece quando necessário) -->
-  <div class="audio-permission hidden" id="audioPermission">
-    <span>🎵 Clique para habilitar o áudio do vídeo</span>
-    <button class="audio-permission-btn" id="enableAudioBtn">Ativar Áudio</button>
-  </div>
-
-
-
-  <!-- BACKGROUNDS - CONFIGURÁVEIS -->
-  <div id="bg-main" class="bg-layer" aria-hidden="true"></div>
-  <div id="bg-about" class="bg-layer" aria-hidden="true"></div>
-  <div id="bg-portfolio" class="bg-layer" aria-hidden="true"></div>
-
-  <div class="shell">
-    <div class="topbar">
-      <label class="lang">
-        <select id="lang">
-          <option value="auto">🌐 Auto</option>
-          <option value="en">🇺🇸 English</option>
-          <option value="pt">🇧🇷 Português</option>
+<body>
+  <a class="skip" href="#main" data-i18n="skip">Pular para o conteúdo</a>
+  <header>
+    <nav class="container" aria-label="Navegação principal">
+      <a class="brand" href="#main">Spike<span> .</span></a>
+      <div class="nav-links">
+        <a href="#especialidades" data-i18n="navExpertise">Especialidades</a>
+        <a href="#experiencia" data-i18n="navExperience">Experiência</a>
+        <a href="#projetos" data-i18n="navWork">Projetos</a>
+        <a href="#contato" data-i18n="navContact">Contato</a>
+        <select id="lang" aria-label="Idioma">
+          <option value="pt">PT</option>
+          <option value="en">EN</option>
         </select>
-      </label>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <div class="container hero">
+      <div>
+        <p class="eyebrow" data-i18n="eyebrow">Desenvolvedor de experiências digitais</p>
+        <h1>Master Spike<span data-i18n="role">Minecraft Bedrock, sistemas de gameplay e experiências
+            interativas.</span></h1>
+        <p class="lead" data-i18n="lead">Desenvolvedor focado em produtos para Minecraft Marketplace, Script API e
+          mecânicas de gameplay, com experiência complementar em web, bots para Discord e integrações com IA.</p>
+        <div class="actions">
+          <a class="button primary" href="#projetos" data-i18n="seeWork">Ver projetos →</a>
+          <a class="button" href="https://discord.com/users/597912419796516873" data-i18n="talk">Vamos conversar</a>
+        </div>
+      </div>
+      <aside class="profile" aria-label="Perfil de Master Spike">
+        <div class="portrait"><img src="assets/images/me-main3.webp" alt="Ilustração de perfil de Master Spike"></div>
+        <div class="availability"><span class="dot"></span><span data-i18n="available">Disponível para oportunidades
+            freelance, contrato e studios.</span></div>
+      </aside>
     </div>
 
-    <!-- HOME / ABOUT -->
-    <section class="card" id="section-main">
-      <div class="main-grid">
-        <div class="avatar">
-          <img id="avatar" src="assets/images/me-main.jpeg" alt="Minha foto" />
-        </div>
-
+    <section id="especialidades" class="container">
+      <div class="section-head">
         <div>
-          <div class="nickname" id="nick">MasterSpike</div>
-          <div class="realname" id="real-name">Samuel Victor</div>
-          <div class="headline" id="headline">GameDev / Programador / Desenvolvedor</div>
-          <div class="about-text" id="about-text"></div>
-
-          <!-- Skills/Badges Section -->
-          <div class="badges" id="badges">
-            <span class="badge" title="JavaScript">
-              <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <title>JavaScript</title>
-                <path
-                  d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z" />
-              </svg>
-            </span>
-            <span class="badge" title="TypeScript">
-              <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <title>TypeScript</title>
-                <path
-                  d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z" />
-              </svg>
-            </span>
-            <span class="badge" title="Python">
-              <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <title>Python</title>
-                <path
-                  d="M14.25.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05-.05-1.23.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.24-.01h.16l.06.01h8.16v-.83H6.18l-.01-2.75-.02-.37.05-.34.11-.31.17-.28.25-.26.31-.23.38-.2.44-.18.51-.15.58-.12.64-.1.71-.06.77-.04.84-.02 1.27.05zm-6.3 1.98l-.23.33-.08.41.08.41.23.34.33.22.41.09.41-.09.33-.22.23-.34.08-.41-.08-.41-.23-.33-.33-.22-.41-.09-.41.09zm13.09 3.95l.28.06.32.12.35.18.36.27.36.35.35.47.32.59.28.73.21.88.14 1.04.05 1.23-.06 1.23-.16 1.04-.24.86-.32.71-.36.57-.4.45-.42.33-.42.24-.4.16-.36.09-.32.05-.24.02-.16-.01h-8.22v.82h5.84l.01 2.76.02.36-.05.34-.11.31-.17.29-.25.25-.31.24-.38.2-.44.17-.51.15-.58.13-.64.09-.71.07-.77.04-.84.01-1.27-.04-1.07-.14-.9-.2-.73-.25-.59-.3-.45-.33-.34-.34-.25-.34-.16-.33-.1-.3-.04-.25-.02-.2.01-.13v-5.34l.05-.64.13-.54.21-.46.26-.38.3-.32.33-.24.35-.2.35-.14.33-.1.3-.06.26-.04.21-.02.13-.01h5.84l.69-.05.59-.14.5-.21.41-.28.33-.32.27-.35.2-.36.15-.36.1-.35.07-.32.04-.28.02-.21V6.07h2.09l.14.01zm-6.47 14.25l-.23.33-.08.41.08.41.23.33.33.23.41.08.41-.08.33-.23.23-.33.08-.41-.08-.41-.23-.33-.33-.23-.41-.08-.41.08z" />
-              </svg>
-            </span>
-            <span class="badge" title="JSON">
-              <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <title>JSON</title>
-                <path
-                  d="M12.043 23.968c.479-.004.953-.029 1.426-.094a11.805 11.805 0 003.146-.863 12.404 12.404 0 003.793-2.542 11.977 11.977 0 002.44-3.427 11.794 11.794 0 001.02-3.476c.149-1.16.135-2.346-.045-3.499a11.96 11.96 0 00-.793-2.788 11.197 11.197 0 00-.854-1.617c-1.168-1.837-2.861-3.314-4.81-4.3a12.835 12.835 0 00-2.172-.87h-.005c.119.063.24.132.345.201.12.074.239.146.351.225a8.93 8.93 0 011.559 1.33c1.063 1.145 1.797 2.548 2.218 4.041.284.982.434 1.998.495 3.017.044.743.044 1.491-.047 2.229-.149 1.27-.554 2.51-1.228 3.596a7.475 7.475 0 01-1.903 2.084c-1.244.928-2.877 1.482-4.436 1.114a3.916 3.916 0 01-.748-.258 4.692 4.692 0 01-.779-.45 6.08 6.08 0 01-1.244-1.105 6.507 6.507 0 01-1.049-1.747 7.366 7.366 0 01-.494-2.54c-.03-1.273.225-2.553.854-3.67a6.43 6.43 0 011.663-1.918c.225-.178.464-.333.704-.479l.016-.007a5.121 5.121 0 00-1.441-.12 4.963 4.963 0 00-1.228.24c-.359.12-.704.27-1.019.45a6.146 6.146 0 00-.733.494c-.211.18-.42.36-.615.555-1.123 1.153-1.768 2.682-2.022 4.256-.15.973-.15 1.96-.091 2.95.105 1.395.391 2.787.945 4.062a8.518 8.518 0 001.348 2.173 8.14 8.14 0 003.132 2.23 7.934 7.934 0 002.113.54c.074.015.149.015.209.015zm-2.934-.398a4.102 4.102 0 01-.45-.228 8.5 8.5 0 01-2.038-1.534c-1.094-1.137-1.827-2.566-2.247-4.08a15.184 15.184 0 01-.495-3.172 12.14 12.14 0 01.046-2.082c.135-1.257.495-2.501 1.124-3.58a6.889 6.889 0 011.783-2.053 6.23 6.23 0 011.633-.9 5.363 5.363 0 013.522-.045c.029 0 .029 0 .045.03.015.015.045.015.06.03.045.016.104.045.165.074.239.12.479.271.704.42a6.294 6.294 0 012.097 2.502c.42.914.615 1.934.631 2.938.014 1.079-.18 2.157-.645 3.146a6.42 6.42 0 01-2.638 2.832c.09.03.18.045.271.075.225.044.449.074.688.074 1.468.045 2.892-.66 3.94-1.647.195-.18.375-.375.54-.585.225-.27.435-.54.614-.823.239-.375.435-.75.614-1.154a8.112 8.112 0 00.509-1.664c.196-1.004.211-2.022.149-3.026-.135-2.022-.673-4.045-1.842-5.724a9.054 9.054 0 00-.555-.719 9.868 9.868 0 00-1.063-1.034 8.477 8.477 0 00-1.363-.915 9.927 9.927 0 00-1.692-.598l-.3-.06c-.209-.03-.42-.044-.634-.06a8.453 8.453 0 00-1.015.016c-.704.045-1.412.16-2.112.337C5.799 1.227 2.863 3.566 1.3 6.67A11.834 11.834 0 00.238 9.801a11.81 11.81 0 00-.104 3.775c.12 1.02.374 2.023.778 2.977.227.57.511 1.124.825 1.648 1.094 1.783 2.683 3.236 4.51 4.24.688.39 1.408.69 2.157.944.226.074.45.15.689.21z" />
-              </svg>
-            </span>
-            <span class="badge" title="HTML5">
-              <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <title>HTML5</title>
-                <path
-                  d="M1.5 0h21l-1.91 21.563L11.977 24l-8.564-2.438L1.5 0zm7.031 9.75l-.232-2.718 10.059.003.23-2.622L5.412 4.41l.698 8.01h9.126l-.326 3.426-2.91.804-2.955-.81-.188-2.11H6.248l.33 4.171L12 19.351l5.379-1.443.744-8.157H8.531z" />
-              </svg>
-            </span>
-            
-            <span class="badge" title="CSS3">
-              <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <title>CSS</title>
-                <path
-                  d="M0 0v20.16A3.84 3.84 0 0 0 3.84 24h16.32A3.84 3.84 0 0 0 24 20.16V3.84A3.84 3.84 0 0 0 20.16 0Zm14.256 13.08c1.56 0 2.28 1.08 2.304 2.64h-1.608c.024-.288-.048-.6-.144-.84-.096-.192-.288-.264-.552-.264-.456 0-.696.264-.696.84-.024.576.288.888.768 1.08.72.288 1.608.744 1.92 1.296q.432.648.432 1.656c0 1.608-.912 2.592-2.496 2.592-1.656 0-2.4-1.032-2.424-2.688h1.68c0 .792.264 1.176.792 1.176.264 0 .456-.072.552-.24.192-.312.24-1.176-.048-1.512-.312-.408-.912-.6-1.32-.816q-.828-.396-1.224-.936c-.24-.36-.36-.888-.36-1.536 0-1.44.936-2.472 2.424-2.448m5.4 0c1.584 0 2.304 1.08 2.328 2.64h-1.608c0-.288-.048-.6-.168-.84-.096-.192-.264-.264-.528-.264-.48 0-.72.264-.72.84s.288.888.792 1.08c.696.288 1.608.744 1.92 1.296.264.432.408.984.408 1.656.024 1.608-.888 2.592-2.472 2.592-1.68 0-2.424-1.056-2.448-2.688h1.68c0 .744.264 1.176.792 1.176.264 0 .456-.072.552-.24.216-.312.264-1.176-.048-1.512-.288-.408-.888-.6-1.32-.816-.552-.264-.96-.576-1.2-.936s-.36-.888-.36-1.536c-.024-1.44.912-2.472 2.4-2.448m-11.031.018c.711-.006 1.419.198 1.839.63.432.432.672 1.128.648 1.992H9.336c.024-.456-.096-.792-.432-.96-.312-.144-.768-.048-.888.24-.12.264-.192.576-.168.864v3.504c0 .744.264 1.128.768 1.128a.65.65 0 0 0 .552-.264c.168-.24.192-.552.168-.84h1.776c.096 1.632-.984 2.712-2.568 2.688-1.536 0-2.496-.864-2.472-2.472v-4.032c0-.816.24-1.44.696-1.848.432-.408 1.146-.624 1.857-.63" />
-              </svg>
-            </span>
-
-
-          </div>
-
-
-          <div class="btn-row">
-            <button id="toggle-about" class="pill">🧑‍💼 Sobre mim</button>
-            <button id="toggle-portfolio" class="pill">🗂️ Portfólio</button>
-            <a href="pages/project-ghost/ghost.html" class="pill" target="_blank" rel="noopener noreferrer">👻 Project
-              Ghost</a>
-          </div>
-
-          <div class="links" id="links">
-            <button class="btn" id="open-contact">
-              <span class="icon">
-                <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>Gmail</title>
-                  <path
-                    d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z" />
-                </svg>
-              </span>
-              <b id="contact-btn-label">Contato</b>
-            </button>
-            <a class="btn" href="https://github.com/MasterSpikeDev" target="_blank" rel="noopener">
-              <span class="icon">
-                <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>GitHub</title>
-                  <path
-                    d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-                </svg>
-              </span>
-              <b>GitHub</b>
-            </a>
-            <a class="btn" href="https://www.linkedin.com/in/samuel-victor-b08725289" target="_blank" rel="noopener">
-              <span class="icon">
-                <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>LinkedIn</title>
-                  <path
-                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                </svg>
-              </span>
-              <b>LinkedIn</b>
-            </a>
-            <a class="btn" href="https://open.spotify.com/user/mkz6ndemx7l8xetpqhldt7dkq?si=786c58533c7d4d6e"
-              target="_blank" rel="noopener">
-              <span class="icon">
-                <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>Spotify</title>
-                  <path
-                    d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
-                </svg>
-              </span>
-              <b>Spotify</b>
-            </a>
-            <a class="btn" href="https://steamcommunity.com/profiles/76561199493045133/" target="_blank" rel="noopener">
-              <span class="icon">
-                <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>Steam</title>
-                  <path
-                    d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.253 0-2.265-1.014-2.265-2.265z" />
-                </svg>
-              </span>
-              <b>Steam</b>
-            </a>
-            <a class="btn" href="https://www.tiktok.com/@masterspikee" target="_blank" rel="noopener">
-              <span class="icon">
-                <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>TikTok</title>
-                  <path
-                    d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
-                </svg>
-              </span>
-              <b>TikTok</b>
-            </a>
-            <a class="btn" href="https://x.com/MasterSpikeDev" target="_blank" rel="noopener">
-              <span class="icon">
-                <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>X</title>
-                  <path
-                    d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
-                </svg>
-              </span>
-              <b>Twitter</b>
-            </a>
-            <a class="btn" href="https://www.twitch.tv/masterspikedev" target="_blank" rel="noopener">
-              <span class="icon">
-                <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>Twitch</title>
-                  <path
-                    d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z" />
-                </svg>
-              </span>
-              <b>Twitch</b>
-            </a>
-          </div>
+          <p class="eyebrow" data-i18n="expertiseLabel">O que eu faço</p>
+          <h2 data-i18n="expertiseTitle">Especialidades</h2>
         </div>
+        <p class="section-copy" data-i18n="expertiseCopy">Desenvolvimento orientado a resultados, combinando código,
+          design e integrações para criar soluções completas.</p>
       </div>
-
-      <footer>© <span id="year"></span> <span id="foot-nick">@MasterSpike</span></footer>
+      <div class="expertise-grid">
+        <article class="expertise"><span class="number">01</span>
+          <h3 data-i18n="gamesTitle">Minecraft Bedrock</h3>
+          <p data-i18n="gamesCopy">Sistemas para Minecraft Marketplace com Script API, mecânicas de gameplay, itens,
+            entidades e conteúdo interativo.</p>
+          <div class="stack"><span class="tag">Bedrock</span><span class="tag">Script API</span><span class="tag">Game
+              Design</span><span class="tag">Marketplace</span></div>
+        </article>
+        <article class="expertise"><span class="number">02</span>
+          <h3 data-i18n="webTitle">Sites profissionais</h3>
+          <p data-i18n="webCopy">Interfaces responsivas, rápidas e acessíveis, com HTML avançado e atenção a cada
+            detalhe da experiência.</p>
+          <div class="stack"><span class="tag">HTML5</span><span class="tag">CSS3</span><span
+              class="tag">JavaScript</span><span class="tag">TypeScript</span></div>
+        </article>
+        <article class="expertise"><span class="number">03</span>
+          <h3 data-i18n="discordTitle">Bots para Discord</h3>
+          <p data-i18n="discordCopy">Bots personalizados para comunidades, automações, moderação e conexão com serviços
+            externos.</p>
+          <div class="stack"><span class="tag">Discord API</span><span class="tag">Node.js</span><span
+              class="tag">Python</span><span class="tag">Automação</span></div>
+        </article>
+        <article class="expertise"><span class="number">04</span>
+          <h3 data-i18n="aiTitle">APIs de inteligência artificial</h3>
+          <p data-i18n="aiCopy">Integração de modelos de IA em produtos e fluxos de trabalho para criar experiências
+            inteligentes e úteis.</p>
+          <div class="stack"><span class="tag">AI APIs</span><span class="tag">REST</span><span
+              class="tag">JSON</span><span class="tag">Integrações</span></div>
+        </article>
+      </div>
     </section>
 
-    <!-- PORTFÓLIO -->
-    <section class="card" id="section-portfolio">
-      <div class="portfolio-header">
-        <div class="portfolio-title" id="portfolio-title">Portfólio</div>
-        <div style="display:flex; gap:8px;">
-          <button id="back-home" class="pill">← Voltar</button>
+    <section id="experiencia" class="experience">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow" data-i18n="experienceLabel">Trajetória profissional</p>
+            <h2 data-i18n="experienceTitle">Experiência</h2>
+          </div>
+          <p class="section-copy" data-i18n="experienceCopy">Experiência prática entregando conteúdo comercial e
+            projetos independentes para Minecraft Bedrock.</p>
         </div>
-      </div>
-
-      <div id="portfolio-cards" class="cards"></div>
-
-      <footer style="margin-top:12px;">© <span id="year2"></span> <span id="foot-nick2">@MasterSpike</span></footer>
-    </section>
-  </div>
-
-  <!-- Popup de Contato -->
-  <div id="contact-modal" class="modal-backdrop" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
-      <button class="modal-close" id="close-contact" aria-label="Fechar">×</button>
-      <h3 id="contact-title">Contato</h3>
-      <div class="contact-list">
-        <a id="copy-email" href="#" data-handle="spikestudios8@gmail.com">
-          <span class="icon">
-            <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <title>Gmail</title>
-              <path
-                d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z" />
-            </svg>
-          </span>
-          <span>Email: spikestudios8@gmail.com</span>
-        </a>
-        <a id="copy-email2" href="#" data-handle="svf18062006@gmail.com">
-          <span class="icon">
-            <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <title>Gmail</title>
-              <path
-                d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z" />
-            </svg>
-          </span>
-          <span>Email: svf18062006@gmail.com</span>
-        </a>
-        <a id="copy-discord" href="#" data-handle="masterspike">
-          <span class="icon">
-            <svg fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <title>Discord</title>
-              <path
-                d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
-            </svg>
-          </span>
-          <span>Discord: @masterspike</span>
-        </a>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- Controle de Volume -->
-  <div class="volume-container">
-    <div class="volume-control" id="volumeControl">
-      <button class="volume-btn" id="volumeBtn">🔊</button>
-      <div class="volume-slider-container">
-        <input type="range" min="0" max="1" step="0.01" value="0.5" class="volume-slider" id="volumeSlider">
-      </div>
-      <div class="volume-percentage" id="volumePercentage">50%</div>
-    </div>
-  </div>
-
-  <script src="./posts.js"></script>
-
-  <script>
-    'use strict';
-
-    // ============================================
-    // SISTEMA DE FONTES PERSONALIZADAS
-    // ============================================
-    const FONT_CONFIG =
-    {
-      "fontFamily": "'MinhaFonteCustom', sans-serif",
-    }
-
-    // Função para carregar configuração de fontes
-    async function loadFontConfig() {
-      try {
-        const response = await fetch('assets/fonts/fonts.json');
-        if (response.ok) {
-          const config = await response.json();
-          Object.assign(FONT_CONFIG, config);
-          console.log('Configuração de fontes carregada:', FONT_CONFIG);
-        }
-      } catch (error) {
-        console.log('Usando configuração padrão de fontes');
-      }
-
-      applyFontConfig();
-    }
-
-    function applyFontConfig() {
-      // estilo dinâmico (caso você injete @font-face via JS)
-      let fontStyle = document.getElementById('dynamic-font-style');
-      if (!fontStyle) {
-        fontStyle = document.createElement('style');
-        fontStyle.id = 'dynamic-font-style';
-        document.head.appendChild(fontStyle);
-      }
-
-      fontStyle.textContent = FONT_CONFIG.fontImport || '';
-
-      // variável CSS global
-      document.documentElement.style.setProperty(
-        '--font-family',
-        FONT_CONFIG.fontFamily || 'sans-serif'
-      );
-
-      // NÃO remove o CSS local
-      const customCssLink = document.getElementById('custom-font-css');
-      if (customCssLink && FONT_CONFIG.customCss) {
-        customCssLink.href = FONT_CONFIG.customCss;
-      }
-    }
-
-
-    // ============================================
-    // CÓDIGO EXISTENTE
-    // ============================================
-
-    const getPosts = () => (Array.isArray(window.POSTS) ? window.POSTS : null);
-
-    const STR = {
-      pt: {
-        toAbout: "🧑‍💼 Sobre mim", toMain: "← Voltar", toPortfolio: "🗂️ Portfólio",
-        portfolioTitle: "Portfólio", back: "← Voltar",
-        nick: "Master Spike", realName: "Samuel Victor",
-        headline: "GameDev / Programador / Desenvolvedor",
-        contactBtn: "Contato", contactTitle: "Contato", close: "Fechar",
-        aboutText: [
-          "Sou Samuel Victor. Apaixonado por Jogos, e game dev, atualmente cursando Analise e Desenvolvimento de Sistemas.",
-          "A música é trilha sonora do meu dia, especialmente rock alternativo e jazz. Estudei música por dois anos e toco alguns instrumentos, então sou do tipo que repara nos detalhes que quase ninguém nota.",
-          "Atualmente trabalho criando conteúdo para o 'Minecraft Marketplace' para a empresa 'Eternal Creations', e tenho como meta continuar expandindo minha presença criativa, colaborando em projetos que unam tecnologia, design, e diversão.",
-          "Estudando para criação de sistemas, apps web, e futuramente jogos.",
-          "Um dos meus hobbies é escrever histórias, atualmente com projeto sem fins lucrativos, Project Ghost.",
-        ]
-      },
-      en: {
-        toAbout: "🧑‍💼 About Me", toMain: "← Back", toPortfolio: "🗂️ Portfolio",
-        portfolioTitle: "Portfolio", back: "← Back",
-        nick: "Master Spike", realName: "Samuel Victor",
-        headline: "GameDev / Programmer / Developer",
-        contactBtn: "Contact", contactTitle: "Contact", close: "Close",
-        aboutText: [
-          "I'm Samuel Victor. Passionate about games and game development, currently studying Systems Analysis and Development.",
-          "Music is the soundtrack of my day, especially alternative rock and jazz. I studied music for two years and play a few instruments, so I'm the kind of person who notices details that almost no one else does.",
-          "I currently work creating content for the 'Minecraft Marketplace' for the company 'Eternal Creations', and my goal is to continue expanding my creative presence, collaborating on projects that combine technology, design, and fun.",
-          "Studying systems development, web apps, and in the future, games.",
-          "One of my hobbies is writing stories, currently working on a non-profit project called Project Ghost."
-        ]
-      }
-    };
-
-    const IMGS = { main: "assets/images/me-main3.png", about: "assets/images/me-about3.png" };
-
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    const isDataSaverEnabled = Boolean(connection && connection.saveData);
-    const isLowEndDevice = typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 4;
-    const useLightBackgroundMode = prefersReducedMotion || isDataSaverEnabled || isLowEndDevice;
-
-    const $ = (q, r = document) => r.querySelector(q);
-    const $$ = (q, r = document) => [...r.querySelectorAll(q)];
-
-    // ============================================
-    // CONFIGURAÇÃO DOS BACKGROUNDS - AJUSTE AQUI!
-    // ============================================
-
-    const BACKGROUNDS = {
-      main: {
-        type: useLightBackgroundMode ? 'image' : 'video', // 'image' ou 'video'
-        src: 'assets/background/bg-main.png', // Para imagens
-        videoSrc: 'assets/background/videos/natori.serenade.mp4' // Para vídeos
-      },
-      about: {
-        type: 'image', // 'image' ou 'video'
-        src: 'assets/background/bg-about.png',
-        videoSrc: 'assets/background/videos/natori.serenade.mp4' // Mesmo vídeo que main
-      },
-      portfolio: {
-        type: 'image', // 'image' ou 'video'
-        src: 'assets/background/bg-portfolio.png',
-        videoSrc: 'assets/background/videos/natori.serenade.mp4' // Vídeo diferente
-      }
-    };
-
-    // Sistema de gerenciamento de vídeos
-    const videoManager = {
-      videos: {}, // Armazena estados dos vídeos
-      currentVideo: null,
-      currentView: null,
-      isAudioEnabled: false,
-      volume: 0.5,
-
-      init() {
-        // Carrega volume salvo
-        const savedVolume = localStorage.getItem('background-volume');
-        if (savedVolume) {
-          this.volume = parseFloat(savedVolume);
-        }
-      },
-
-      // Verifica se dois vídeos são o mesmo
-      isSameVideo(src1, src2) {
-        return src1 === src2;
-      },
-
-      // Obtém ou cria um elemento de vídeo
-      getOrCreateVideo(view, bgElement, bgConfig) {
-        const videoId = `video-${view}`;
-
-        // Se já existe, retorna o existente
-        if (this.videos[videoId]) {
-          return this.videos[videoId].element;
-        }
-
-        // Cria novo vídeo
-        const video = document.createElement('video');
-        video.id = videoId;
-        video.className = 'bg-video';
-        video.loop = true;
-        video.muted = true;
-        video.autoplay = true;
-        video.playsInline = true;
-        video.preload = 'none';
-        video.disablePictureInPicture = true;
-        video.setAttribute('playsinline', '');
-        video.setAttribute('preload', 'none');
-        video.volume = this.volume;
-        video.poster = bgConfig.src || '';
-        video.setAttribute('data-view', view);
-        video.setAttribute('data-src', bgConfig.videoSrc);
-        video.appendChild(document.createTextNode('Seu navegador não suporta vídeos HTML5.'));
-
-        bgElement.appendChild(video);
-
-        // Salva no gerenciador
-        this.videos[videoId] = {
-          element: video,
-          src: bgConfig.videoSrc,
-          currentTime: 0,
-          isPlaying: false,
-          isLoaded: false
-        };
-
-        // Adiciona event listeners para salvar estado
-        video.addEventListener('timeupdate', () => {
-          if (this.videos[videoId]) {
-            this.videos[videoId].currentTime = video.currentTime;
-          }
-        });
-
-        video.addEventListener('play', () => {
-          if (this.videos[videoId]) {
-            this.videos[videoId].isPlaying = true;
-          }
-        });
-
-        video.addEventListener('pause', () => {
-          if (this.videos[videoId]) {
-            this.videos[videoId].isPlaying = false;
-          }
-        });
-
-        return video;
-      },
-
-
-      ensureVideoSource(videoData, preloadMode = 'metadata') {
-        if (!videoData || !videoData.element || videoData.isLoaded) return;
-
-        const source = document.createElement('source');
-        source.src = videoData.src;
-        source.type = 'video/mp4';
-        videoData.element.preload = preloadMode;
-        videoData.element.setAttribute('preload', preloadMode);
-        videoData.element.appendChild(source);
-        videoData.element.load();
-        videoData.isLoaded = true;
-      },
-
-      // Pausa todos os vídeos exceto o especificado
-      pauseAllVideos(exceptView = null) {
-        Object.keys(this.videos).forEach(videoId => {
-          const videoData = this.videos[videoId];
-          const view = videoId.replace('video-', '');
-
-          if (exceptView && view === exceptView) return;
-
-          if (videoData && videoData.element) {
-            videoData.element.pause();
-            videoData.isPlaying = false;
-          }
-        });
-      },
-
-      // Gerencia a transição entre views
-      switchView(fromView, toView) {
-        const fromVideo = this.videos[`video-${fromView}`];
-        const toVideo = this.videos[`video-${toView}`];
-
-        // Se estamos saindo de uma view com vídeo
-        if (fromVideo && fromVideo.element) {
-          // Salva o tempo atual
-          fromVideo.currentTime = fromVideo.element.currentTime;
-          fromVideo.isPlaying = false;
-        }
-
-        // Se estamos indo para uma view com vídeo
-        if (toVideo && toVideo.element) {
-          this.ensureVideoSource(toVideo, 'auto');
-
-          // Verifica se é o mesmo vídeo que estava tocando
-          const isSameVideo = fromVideo &&
-            this.isSameVideo(fromVideo.src, toVideo.src);
-
-          if (isSameVideo) {
-            // É o mesmo vídeo, apenas continua
-            this.currentVideo = toVideo.element;
-            this.currentView = toView;
-
-            // Tenta tocar
-            const playPromise = toVideo.element.play();
-            if (playPromise !== undefined) {
-              playPromise.catch(error => {
-                console.log(`Autoplay bloqueado para ${toView}:`, error);
-              });
-            }
-          } else {
-            // É um vídeo diferente
-            if (fromVideo && fromVideo.element) {
-              fromVideo.element.pause();
-            }
-
-            // Restaura o tempo do novo vídeo
-            toVideo.element.currentTime = toVideo.currentTime;
-            this.currentVideo = toVideo.element;
-            this.currentView = toView;
-
-            // Tenta tocar
-            const playPromise = toVideo.element.play();
-            if (playPromise !== undefined) {
-              playPromise.catch(error => {
-                console.log(`Autoplay bloqueado para ${toView}:`, error);
-              });
-            }
-          }
-
-          // Aplica configurações de áudio
-          if (this.isAudioEnabled) {
-            toVideo.element.muted = false;
-            toVideo.element.volume = this.volume;
-          } else {
-            toVideo.element.muted = true;
-          }
-        }
-
-        // Pausa todos os outros vídeos
-        this.pauseAllVideos(toView);
-      },
-
-      // Habilita áudio
-      enableAudio() {
-        this.isAudioEnabled = true;
-        if (this.currentVideo) {
-          this.currentVideo.muted = false;
-          this.currentVideo.volume = this.volume;
-        }
-        updateVolumeIcon();
-      },
-
-      // Atualiza volume
-      setVolume(value) {
-        this.volume = value;
-        if (this.currentVideo && this.isAudioEnabled) {
-          this.currentVideo.volume = value;
-        }
-        localStorage.setItem('background-volume', value.toString());
-        updateVolumeIcon();
-      },
-
-      // Alterna mudo
-      toggleMute() {
-        if (!this.isAudioEnabled) {
-          this.enableAudio();
-          return;
-        }
-
-        if (this.volume > 0) {
-          localStorage.setItem('last-volume', this.volume.toString());
-          this.setVolume(0);
-        } else {
-          const lastVolume = localStorage.getItem('last-volume');
-          this.setVolume(lastVolume ? parseFloat(lastVolume) : 0.5);
-        }
-      }
-    };
-
-    // Inicializa o gerenciador de vídeos
-    videoManager.init();
-
-    function detectLang() {
-      const pref = localStorage.getItem('lang-pref');
-      if (pref && pref !== 'auto') return pref;
-      const nav = (navigator.language || 'en').toLowerCase();
-      return nav.startsWith('pt') ? 'pt' : 'en';
-    }
-
-    function setLang(lang) {
-      const s = STR[lang] || STR.pt;
-      const view = document.body.getAttribute('data-view');
-      $('#toggle-about').textContent = (view === 'about') ? s.toMain : s.toAbout;
-      $('#toggle-portfolio').textContent = (view === 'portfolio') ? s.toMain : s.toPortfolio;
-      $('#back-home').textContent = s.back;
-
-      $('#nick').textContent = s.nick;
-      $('#real-name').textContent = s.realName;
-      $('#headline').textContent = s.headline;
-
-      const about = $('#about-text');
-      about.innerHTML = (Array.isArray(s.aboutText) ? s.aboutText : [s.aboutText]).map(p => `<p>${p}</p>`).join("");
-
-      $('#portfolio-title').textContent = s.portfolioTitle;
-      $('#foot-nick').textContent = s.nick;
-      $('#foot-nick2').textContent = s.nick;
-
-      $('#contact-btn-label').textContent = s.contactBtn;
-      $('#contact-title').textContent = s.contactTitle;
-      $('#close-contact')?.setAttribute('aria-label', s.close);
-    }
-
-    function renderPosts(lang) {
-      const wrap = $('#portfolio-cards');
-      wrap.innerHTML = "";
-
-      const POSTS = getPosts();
-      if (!POSTS) {
-        wrap.innerHTML = `<div class="p-desc" style="opacity:.8">${lang === 'pt' ? 'Carregando posts…' : 'Loading posts…'}</div>`;
-        const handler = () => { window.removeEventListener('posts-ready', handler); renderPosts(lang); };
-        window.addEventListener('posts-ready', handler);
-        return;
-      }
-      if (POSTS.length === 0) {
-        wrap.innerHTML = `<div class="p-desc" style="opacity:.8">${lang === 'pt' ? 'Nenhum post encontrado.' : 'No posts found.'}</div>`;
-        return;
-      }
-
-      POSTS.forEach((p, i) => {
-        const card = document.createElement('article');
-        card.className = 'p-card';
-        card.style.animationDelay = `${(i + 1) * 0.1}s`;
-
-        // Verifica se é vídeo pela extensão
-        const isVideo = p.img && (p.img.endsWith('.mp4') || p.img.endsWith('.webm') || p.img.endsWith('.ogv'));
-        const mediaClass = isVideo ? 'p-media video-thumbnail' : 'p-media';
-
-        card.innerHTML = `
-          ${isVideo ?
-            `<video class="${mediaClass}" poster="${p.thumbnail || ''}" controls>
-              <source src="${p.img}" type="video/mp4">
-              Seu navegador não suporta vídeos.
-            </video>` :
-            `<img class="${mediaClass}" src="${p.img}" alt="${(p.title?.[lang] || 'Post')}" loading="lazy">`
-          }
-          <div class="p-body">
-            <h4 class="p-title">${p.title?.[lang] || ''}</h4>
-            <div class="p-desc">${p.desc?.[lang] || ''}</div>
-            <div class="p-links">
-              ${(p.links || []).map(l => `<a class="chip" target="_blank" rel="noopener" href="${l.href}">🔗 ${l.label?.[lang] || 'Link'}</a>`).join('')}
-              ${(p.videos || []).map(v => `<a class="chip" target="_blank" rel="noopener" href="${v.href}">🎬 ${v.label?.[lang] || 'Vídeo'}</a>`).join('')}
+        <div class="timeline">
+          <article class="experience-row">
+            <div class="experience-period">2024 — 2026</div>
+            <div>
+              <h3>Eternal Creations</h3>
+              <p class="experience-role">Minecraft Marketplace Developer</p>
+              <p class="experience-description" data-i18n="eternalDescription">Trabalho em projetos comerciais para o
+                Bedrock Marketplace, desenvolvendo sistemas de gameplay, recursos com Script API, itens, entidades,
+                mecânicas de combate, debugging e pipelines de produção.</p>
             </div>
-          </div>`;
-        wrap.appendChild(card);
-      });
-    }
+          </article>
+          <article class="experience-row">
+            <div class="experience-period" data-i18n="independentPeriod">Projetos independentes</div>
+            <div>
+              <h3>Spike Studios</h3>
+              <p class="experience-role" data-i18n="independentRole">Desenvolvedor independente</p>
+              <p class="experience-description" data-i18n="independentDescription">Criação e publicação de mapas,
+                resource packs e experimentos próprios, cuidando da ideia, desenvolvimento, direção visual, testes e
+                lançamento.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
 
-    // Função para configurar background
-    function setupBackground(view) {
-      const bgElement = $(`#bg-${view}`);
-      if (!bgElement) return;
+    <section id="projetos" class="work">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow" data-i18n="workLabel">Trabalhos selecionados</p>
+            <h2 data-i18n="workTitle">Projetos</h2>
+          </div>
+          <p class="section-copy" data-i18n="workCopy">Produtos publicados e experiências que mostram meu trabalho com
+            desenvolvimento e conteúdo interativo.</p>
+        </div>
+        <div class="project-group">
+          <div class="group-head">
+            <h3 data-i18n="commercialTitle">Trabalhos comerciais</h3>
+            <p data-i18n="commercialCopy">Projetos desenvolvidos como parte da equipe da Eternal Creations para o
+              Minecraft Marketplace.</p>
+          </div>
+          <div id="commercial-cards" class="cards"></div>
+        </div>
+        <div class="project-group">
+          <div class="group-head">
+            <h3 data-i18n="personalTitle">Projetos pessoais</h3>
+            <p data-i18n="personalCopy">Projetos independentes, experimentos e trabalhos autorais.</p>
+          </div>
+          <div id="personal-cards" class="cards"></div>
+        </div>
+      </div>
+    </section>
 
-      const bgConfig = BACKGROUNDS[view];
-
-      // Limpa conteúdo anterior (exceto vídeos gerenciados)
-      const existingVideo = bgElement.querySelector('video[data-view]');
-      if (!existingVideo) {
-        bgElement.innerHTML = '';
-      }
-
-      if (bgConfig.type === 'video' && bgConfig.videoSrc) {
-        // Usa o gerenciador de vídeos para obter ou criar o vídeo
-        const video = videoManager.getOrCreateVideo(view, bgElement, bgConfig);
-        const isActiveView = document.body.getAttribute('data-view') === view;
-
-        // Só inicia download/tocagem quando a view está ativa
-        if (!isActiveView) {
-          return;
-        }
-
-        const videoData = videoManager.videos[`video-${view}`];
-        videoManager.ensureVideoSource(videoData, 'auto');
-
-        // Tenta tocar o vídeo (mutado inicialmente)
-        const playPromise = video.play();
-
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            console.log(`Vídeo para ${view} carregado`);
-
-            // Verifica se já temos permissão de áudio
-            if (videoManager.isAudioEnabled) {
-              video.muted = false;
-              video.volume = videoManager.volume;
-            }
-          }).catch(error => {
-            console.log('Autoplay bloqueado:', error);
-            // Mostra botão para ativar áudio
-            showAudioPermission();
-          });
-        }
-      } else if (bgConfig.src) {
-        const img = document.createElement('img');
-        img.className = 'bg-image';
-        img.src = bgConfig.src;
-        img.alt = '';
-        bgElement.appendChild(img);
-      }
-    }
-
-    // Mostra botão de permissão de áudio
-    function showAudioPermission() {
-      const permissionElement = $('#audioPermission');
-      if (permissionElement) {
-        permissionElement.classList.remove('hidden');
-      }
-    }
-
-    // Esconde botão de permissão de áudio
-    function hideAudioPermission() {
-      const permissionElement = $('#audioPermission');
-      if (permissionElement) {
-        permissionElement.classList.add('hidden');
-      }
-    }
-
-    // Atualiza o ícone do volume
-    function updateVolumeIcon() {
-      const volumeBtn = $('#volumeBtn');
-      if (!volumeBtn) return;
-
-      if (!videoManager.isAudioEnabled || videoManager.volume === 0) {
-        volumeBtn.textContent = '🔇';
-        volumeBtn.classList.add('muted');
-      } else if (videoManager.volume < 0.5) {
-        volumeBtn.textContent = '🔉';
-        volumeBtn.classList.remove('muted');
-      } else {
-        volumeBtn.textContent = '🔊';
-        volumeBtn.classList.remove('muted');
-      }
-
-      // Atualiza a porcentagem
-      const volumePercentage = $('#volumePercentage');
-      if (volumePercentage) {
-        volumePercentage.textContent = `${Math.round(videoManager.volume * 100)}%`;
-      }
-    }
-
-    // Configura controle de volume
-    function setupVolumeControl() {
-      const volumeBtn = $('#volumeBtn');
-      const volumeSlider = $('#volumeSlider');
-      const volumeControl = $('#volumeControl');
-      const enableAudioBtn = $('#enableAudioBtn');
-
-      // Configura volume inicial
-      volumeSlider.value = videoManager.volume;
-
-      // Atualiza ícone inicial
-      updateVolumeIcon();
-
-      // Evento do slider de volume
-      volumeSlider.addEventListener('input', (e) => {
-        videoManager.setVolume(parseFloat(e.target.value));
-      });
-
-      // Evento do botão de mudo
-      volumeBtn.addEventListener('click', () => {
-        videoManager.toggleMute();
-      });
-
-      // Evento do botão de habilitar áudio
-      if (enableAudioBtn) {
-        enableAudioBtn.addEventListener('click', () => {
-          videoManager.enableAudio();
-          hideAudioPermission();
-        });
-      }
-
-      // Expande controle ao passar mouse
-      volumeControl.addEventListener('mouseenter', () => {
-        volumeControl.classList.add('expanded');
-      });
-
-      volumeControl.addEventListener('mouseleave', () => {
-        volumeControl.classList.remove('expanded');
-      });
-
-      // Expande ao focar no slider
-      volumeSlider.addEventListener('focus', () => {
-        volumeControl.classList.add('expanded');
-      });
-
-      volumeSlider.addEventListener('blur', () => {
-        volumeControl.classList.remove('expanded');
-      });
-    }
-
-    function go(view) {
-      const oldView = document.body.getAttribute('data-view');
-
-      // Gerencia transição de vídeos
-      videoManager.switchView(oldView, view);
-
-      // Atualiza a view no body
-      document.body.setAttribute('data-view', view);
-
-      const langPref = localStorage.getItem('lang-pref') || 'auto';
-      const lang = (langPref === 'auto') ? detectLang() : langPref;
-
-      $('#avatar').src = (view === 'about') ? IMGS.about : IMGS.main;
-
-      setLang(lang);
-      if (view === 'portfolio') renderPosts(lang);
-
-      // Configura o background para a view atual (se ainda não foi configurado)
-      setupBackground(view);
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    /* =========================
-       INIT / EVENTOS
-    ========================== */
-    document.addEventListener('DOMContentLoaded', () => {
-      // Carrega configuração de fontes
-      loadFontConfig();
-
-      setTimeout(() => {
-        $('#loader').classList.add('hidden');
-        setTimeout(() => {
-          $('#loader').style.display = 'none';
-        }, 500);
-      }, 800);
-    });
-
-    const year = new Date().getFullYear();
-    $('#year').textContent = year;
-    $('#year2').textContent = year;
-
-    const initialLang = detectLang();
-    $('#lang').value = localStorage.getItem('lang-pref') || 'auto';
-    setLang(initialLang);
-
-    // Configura controle de volume
-    setupVolumeControl();
-
-    // Configura todos os backgrounds inicialmente
-    Object.keys(BACKGROUNDS).forEach(view => setupBackground(view));
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        videoManager.pauseAllVideos();
-        return;
-      }
-
-      const activeView = document.body.getAttribute('data-view');
-      if (activeView) {
-        videoManager.switchView(videoManager.currentView, activeView);
-      }
-    });
-
-    $('#lang').addEventListener('change', (e) => {
-      const v = e.target.value;
-      localStorage.setItem('lang-pref', v);
-      const lang = (v === 'auto') ? detectLang() : v;
-      setLang(lang);
-      if (document.body.getAttribute('data-view') === 'portfolio') renderPosts(lang);
-    });
-
-    $('#toggle-about').addEventListener('click', () => {
-      const view = document.body.getAttribute('data-view');
-      go(view === 'about' ? 'main' : 'about');
-    });
-
-    $('#toggle-portfolio').addEventListener('click', () => {
-      const view = document.body.getAttribute('data-view');
-      go(view === 'portfolio' ? 'main' : 'portfolio');
-    });
-
-    $('#back-home').addEventListener('click', () => go('main'));
-
-    /* ===== Contato ===== */
-    const contactModal = $('#contact-modal');
-    const openContactBtn = $('#open-contact');
-    const closeContactBtn = $('#close-contact');
-
-    function openContact() {
-      contactModal.hidden = false;
-      document.body.style.overflow = 'hidden';
-      closeContactBtn.focus();
-    }
-    function closeContact() {
-      contactModal.hidden = true;
-      document.body.style.overflow = '';
-      openContactBtn.focus();
-    }
-
-    openContactBtn.addEventListener('click', openContact);
-    closeContactBtn.addEventListener('click', closeContact);
-    contactModal.addEventListener('click', (e) => { if (e.target === contactModal) closeContact(); });
-    document.addEventListener('keydown', (e) => { if (!contactModal.hidden && e.key === 'Escape') closeContact(); });
-
-    /* ===== Copiar dados ===== */
-    function setupCopy(elementId, handle) {
-      const element = document.getElementById(elementId);
-      if (!element) return;
-
-      const getLang = () => {
-        const pref = localStorage.getItem('lang-pref') || 'auto';
-        return (pref === 'auto') ? detectLang() : pref;
-      };
-
-      element.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const span = element.querySelector('span:nth-child(2)');
-        const original = span.textContent;
-        try {
-          await navigator.clipboard.writeText(handle);
-          span.textContent = (getLang() === 'pt') ? 'Copiado!' : 'Copied!';
-          element.style.background = 'var(--accent-glow)';
-        } catch {
-          window.prompt(getLang() === 'pt' ? 'Copie o texto:' : 'Copy the text:', handle);
-        } finally {
-          setTimeout(() => {
-            span.textContent = original;
-            element.style.background = '';
-          }, 1400);
-        }
-      });
-    }
-
-    setupCopy('copy-email', 'spikestudios8@gmail.com');
-    setupCopy('copy-email2', 'svf18062006@gmail.com');
-    setupCopy('copy-discord', 'masterspike');
-
-    // Começa na HOME
-    go('main');
-
-    // Interação do usuário para desbloquear áudio
-    document.addEventListener('click', () => {
-      if (!videoManager.isAudioEnabled && videoManager.currentVideo) {
-        // Tenta habilitar áudio na primeira interação do usuário
-        videoManager.enableAudio();
-        hideAudioPermission();
-      }
-    });
+    <section id="contato" class="contact container">
+      <div class="contact-panel">
+        <p class="eyebrow" data-i18n="contactLabel">Contato</p>
+        <h2 data-i18n="contactTitle">Tem uma ideia? Vamos construir algo excelente.</h2>
+        <p data-i18n="contactCopy">Estou aberto a projetos de desenvolvimento web, bots para Discord, automações e
+          integrações com inteligência artificial.</p>
+        <div class="actions"><a class="button primary"
+            href="mailto:spikestudios8@gmail.com">spikestudios8@gmail.com</a><a class="button"
+            href="https://github.com/MasterSpikeDev" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a
+            class="button" href="https://www.linkedin.com/in/Spike-victor-b08725289" target="_blank"
+            rel="noopener noreferrer">LinkedIn ↗</a></div>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <div class="container footer-inner"><span>© <span id="year"></span> Master Spike.</span>
+      <div class="footer-links"><a href="https://github.com/MasterSpikeDev">GitHub</a><a
+          href="https://www.linkedin.com/in/Spike-victor-b08725289">LinkedIn</a></div>
+    </div>
+  </footer>
+  <script src="posts.js"></script>
+  <script>
+    const strings = { pt: { skip: "Pular para o conteúdo", navExpertise: "Especialidades", navExperience: "Experiência", navWork: "Projetos", navContact: "Contato", eyebrow: "Desenvolvedor de experiências digitais", role: "Minecraft Bedrock, sistemas de gameplay e experiências interativas.", lead: "Desenvolvedor focado em produtos para Minecraft Marketplace, Script API e mecânicas de gameplay, com experiência complementar em web, bots para Discord e integrações com IA.", seeWork: "Ver projetos →", talk: "Vamos conversar", available: "Disponível para oportunidades freelance, contrato e studios.", expertiseLabel: "O que eu faço", expertiseTitle: "Especialidades", expertiseCopy: "Desenvolvimento orientado a resultados, combinando código, design e integrações para criar soluções completas.", webTitle: "Sites profissionais", webCopy: "Interfaces responsivas, rápidas e acessíveis, com HTML avançado e atenção a cada detalhe da experiência.", discordTitle: "Bots para Discord", discordCopy: "Bots personalizados para comunidades, automações, moderação e conexão com serviços externos.", aiTitle: "APIs de inteligência artificial", aiCopy: "Integração de modelos de IA em produtos e fluxos de trabalho para criar experiências inteligentes e úteis.", gamesTitle: "Minecraft Bedrock", gamesCopy: "Sistemas para Minecraft Marketplace com Script API, mecânicas de gameplay, itens, entidades e conteúdo interativo.", experienceLabel: "Trajetória profissional", experienceTitle: "Experiência", experienceCopy: "Experiência prática entregando conteúdo comercial e projetos independentes para Minecraft Bedrock.", eternalDescription: "Trabalho em projetos comerciais para o Bedrock Marketplace, desenvolvendo sistemas de gameplay, recursos com Script API, itens, entidades, mecânicas de combate, debugging e pipelines de produção.", independentPeriod: "Projetos independentes", independentRole: "Desenvolvedor independente", independentDescription: "Criação e publicação de mapas, resource packs e experimentos próprios, cuidando da ideia, desenvolvimento, direção visual, testes e lançamento.", commercialTitle: "Trabalhos comerciais", commercialCopy: "Projetos desenvolvidos como parte da equipe da Eternal Creations para o Minecraft Marketplace.", personalTitle: "Projetos pessoais", personalCopy: "Projetos independentes, experimentos e trabalhos autorais.", workLabel: "Trabalhos selecionados", workTitle: "Projetos", workCopy: "Produtos publicados e experiências que mostram meu trabalho com desenvolvimento e conteúdo interativo.", contactLabel: "Contato", contactTitle: "Tem uma ideia? Vamos construir algo excelente.", contactCopy: "Estou aberto a projetos de desenvolvimento web, bots para Discord, automações e integrações com inteligência artificial." }, en: { skip: "Skip to content", navExpertise: "Expertise", navExperience: "Experience", navWork: "Work", navContact: "Contact", eyebrow: "Digital experience developer", role: "Minecraft Bedrock, Gameplay Systems & Interactive Experiences.", lead: "Developer focused on Minecraft Marketplace products, Script API and gameplay mechanics, with additional experience in web, Discord bots and AI integrations.", seeWork: "See my work →", talk: "Let's talk", available: "Available for freelance, contract and studio opportunities.", expertiseLabel: "What I do", expertiseTitle: "Expertise", expertiseCopy: "Results-driven development combining code, design and integrations to deliver complete solutions.", webTitle: "Professional websites", webCopy: "Responsive, fast and accessible interfaces built with advanced HTML and close attention to every detail.", discordTitle: "Discord bots", discordCopy: "Custom bots for communities, automation, moderation and connections with external services.", aiTitle: "Artificial intelligence APIs", aiCopy: "AI model integrations for products and workflows that create intelligent, useful experiences.", gamesTitle: "Minecraft Bedrock", gamesCopy: "Minecraft Marketplace systems using Script API, gameplay mechanics, items, entities and interactive content.", experienceLabel: "Professional background", experienceTitle: "Experience", experienceCopy: "Hands-on experience delivering commercial content and independent projects for Minecraft Bedrock.", eternalDescription: "Worked on commercial Bedrock Marketplace projects, gameplay systems, Script API features, items, entities, combat mechanics, debugging and production pipelines.", independentPeriod: "Independent projects", independentRole: "Independent Developer", independentDescription: "Created and published original maps, resource packs and experiments, handling concept, development, visual direction, testing and release.", commercialTitle: "Commercial Work", commercialCopy: "Projects developed as part of the Eternal Creations team for Minecraft Marketplace.", personalTitle: "Personal Projects", personalCopy: "Independent projects, experiments and original work.", workLabel: "Selected work", workTitle: "Projects", workCopy: "Published products and experiences that showcase my development and interactive content work.", contactLabel: "Contact", contactTitle: "Have an idea? Let's build something great.", contactCopy: "I'm open to web development, Discord bot, automation and artificial intelligence integration projects." } };
+    let lang = localStorage.getItem("portfolio-lang") || (navigator.language.startsWith("pt") ? "pt" : "en");
+    const renderProjects = () => { const groups = { commercial: document.querySelector("#commercial-cards"), personal: document.querySelector("#personal-cards") }; Object.values(groups).forEach(group => group.innerHTML = ""); (window.POSTS || []).forEach(project => { const article = document.createElement("article"); article.className = "project"; const links = [...(project.links || []), ...(project.videos || [])]; const roleLabel = lang === "pt" ? "Minha contribuição" : "My role"; article.innerHTML = `<div class="project-media"><img src="${project.img}" alt="${project.title[lang]}" loading="lazy"></div><div class="project-body"><h3>${project.title[lang]}</h3><p>${project.desc[lang]}</p><p class="project-role"><strong>${roleLabel}:</strong> ${project.role?.[lang] || ""}</p><div class="project-links">${links.map(link => `<a href="${link.href}" target="_blank" rel="noopener noreferrer">${link.label[lang]} ↗</a>`).join("")}</div></div>`; (groups[project.category] || groups.personal).append(article); }); };
+    const setLanguage = value => { lang = value; document.documentElement.lang = value === "pt" ? "pt-BR" : "en"; document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = strings[value][el.dataset.i18n]); document.querySelector("#lang").value = value; localStorage.setItem("portfolio-lang", value); renderProjects(); };
+    document.querySelector("#lang").addEventListener("change", event => setLanguage(event.target.value)); document.querySelector("#year").textContent = new Date().getFullYear(); setLanguage(lang);
   </script>
 </body>
 
