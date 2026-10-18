@@ -53,7 +53,7 @@ function renderChaptersForVolume(volumeNumber) {
         const btn = document.createElement('div');
         btn.className = `chapter-btn ${chapter.available ? '' : 'disabled'}`;
         btn.setAttribute('data-chapter', chapter.chapter);
-        btn.setAttribute('data-file', chapter.file);
+        if (chapter.file) btn.setAttribute('data-file', chapter.file);
         btn.innerHTML = `
             ${chapter.title}
             ${!chapter.available ? '<br><small>(Indisponível)</small>' : ''}
@@ -64,7 +64,7 @@ function renderChaptersForVolume(volumeNumber) {
                 document.querySelectorAll('.chapter-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 selectedChapter = chapter.chapter;
-                selectedFile = chapter.file;
+                selectedFile = chapter.file || null;
                 selectedChapterData = chapter;
                 updateReadButton();
             });
@@ -709,7 +709,7 @@ function renderChapters() {
     
     // Botão de leitura
     document.getElementById('confirm-read').addEventListener('click', function() {
-        if (selectedVolume && selectedChapter && selectedFile) {
+        if (selectedVolume && selectedChapter && hasAvailableReadMethod()) {
             openReadMethodModal();
         }
     });

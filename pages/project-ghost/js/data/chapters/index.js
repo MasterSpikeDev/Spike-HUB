@@ -1,5 +1,6 @@
 import { prologoChapter } from "./volume1/prologo.js";
 import { capitulo_1 } from "./volume1/capitulo_1.js";
+import { capitulo_2 } from "./volume1/capitulo_2.js";
 
 export const chaptersData = {
     totalVolumes: 3,
@@ -10,7 +11,8 @@ export const chaptersData = {
             available: true,
             chapters: [
                 prologoChapter,
-                capitulo_1
+                capitulo_1,
+                capitulo_2
             ]
         },
         {
